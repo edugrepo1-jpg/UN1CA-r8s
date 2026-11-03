@@ -275,3 +275,10 @@ done
 wait $(jobs -p) || exit 1
 
 LOG_STEP_OUT
+
+# Keep the r8s encoder timestamp valid across consecutive recordings.
+if [[ "$TARGET_CODENAME" == "r8s" ]]; then
+    python3 "$MODPATH/patch_recording_timestamp.py" \
+        "$WORK_DIR/vendor/lib/libstagefright_bufferqueue_helper_vendor.so" || \
+        ABORT "Could not apply the stock r8s recording timestamp correction"
+fi

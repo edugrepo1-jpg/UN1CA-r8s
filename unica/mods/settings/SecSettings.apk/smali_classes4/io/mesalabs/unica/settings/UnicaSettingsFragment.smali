@@ -295,7 +295,7 @@
 
     const-string v3, "com.artisan.updater"
 
-    const-string v4, "com.artisan.updater.SecSettingsActivity9"
+    const-string v4, "com.artisan.updater.MainActivity"
 
     invoke-direct {v2, v3, v4}, Landroid/content/ComponentName;-><init>(Ljava/lang/String;Ljava/lang/String;)V
 
@@ -323,52 +323,5 @@
     invoke-virtual {v0, p0}, Lcom/samsung/android/settings/widget/SecRelativeLinkView;->create(Ljava/lang/Object;)V
 
     :cond_1
-    const-string v0, "unica_logo"
-
-    invoke-virtual {p0, v0}, Lcom/android/settings/core/InstrumentedPreferenceFragment;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
-
-    move-result-object v0
-
-    instance-of v1, v0, Lcom/android/settingslib/widget/LayoutPreference;
-
-    if-eqz v1, :cond_2
-
-    check-cast v0, Lcom/android/settingslib/widget/LayoutPreference;
-
-    const-string v1, "id"
-
-    const-string v2, "logo_background_view"
-
-    invoke-static {v1, v2}, Lio/mesalabs/unica/utils/Utils;->getResourceId(Ljava/lang/String;Ljava/lang/String;)I
-
-    move-result v1
-
-    iget-object v0, v0, Lcom/android/settingslib/widget/LayoutPreference;->mRootView:Landroid/view/View;
-
-    invoke-virtual {v0, v1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
-
-    move-result-object v0
-
-    check-cast v0, Landroidx/appcompat/widget/AppCompatImageView;
-
-    if-eqz v0, :cond_2
-
-    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
-
-    move-result-object p0
-
-    invoke-static {p0}, Landroid/app/WallpaperManager;->getInstance(Landroid/content/Context;)Landroid/app/WallpaperManager;
-
-    move-result-object p0
-
-    const/4 v1, 0x1
-
-    invoke-virtual {p0, v1}, Landroid/app/WallpaperManager;->getDrawable(I)Landroid/graphics/drawable/Drawable;
-
-    move-result-object p0
-
-    invoke-virtual {v0, p0}, Landroidx/appcompat/widget/AppCompatImageView;->setImageDrawable(Landroid/graphics/drawable/Drawable;)V
-
-    :cond_2
     return-void
 .end method

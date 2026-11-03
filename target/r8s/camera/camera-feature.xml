@@ -199,7 +199,7 @@
 
     <!-- Multi-camera features -->
    <!--  <local name="BACK_WIDE_CAMERA_ID" value="2"/> -->
-  <!--   <local name="BACK_TELE_CAMERA_ID" value="52"/> -->
+  <local name="BACK_TELE_CAMERA_ID" value="50"/>
 
     <!-- Zoom features -->
     <local name="BACK_TELE_CAMERA_ZOOM_LEVEL" value="3.0"/>

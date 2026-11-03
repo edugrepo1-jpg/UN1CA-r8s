@@ -26,8 +26,6 @@ BUILD_ROM=false
 BUILD_ZIP=true
 BUILD_INCREMENTAL=false
 SKIP_DEBUG_INSTALL=false
-DEBUG=false
-BETA=false
 
 START_TIME="$(date +%s)"
 
@@ -36,7 +34,7 @@ TARGET_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$TARGET_FIRMWARE")_$(cut -d "/" 
 APK_CACHE_DIR="$OUT_DIR/target/$TARGET_CODENAME/apk_cache"
 APK_DECODE_CACHE_DIR="$OUT_DIR/target/$TARGET_CODENAME/apk_decode_cache"
 APK_BUILD_LIST="$OUT_DIR/target/$TARGET_CODENAME/tmp/apk-cache-build.list"
-APK_CACHE_FORMAT="unica-apk-cache-v2"
+APK_CACHE_FORMAT="unica-apk-cache-v3"
 INCREMENTAL_DIR="$OUT_DIR/target/$TARGET_CODENAME/incremental"
 INCREMENTAL_BASE="$INCREMENTAL_DIR/base-target-files.zip"
 INCREMENTAL_TARGET="$INCREMENTAL_DIR/target-files.zip"
@@ -48,7 +46,7 @@ GET_PATCHED_APK_HASH()
     local CERT_PREFIX="aosp"
 
     [ -d "$DECODED_PATH" ] || return 1
-    $ROM_IS_OFFICIAL && CERT_PREFIX="artisanrom"
+    $ROM_IS_OFFICIAL && CERT_PREFIX="unica"
 
     {
         printf '%s\n' "$APK_CACHE_FORMAT" "$RELATIVE_PATH"
@@ -97,11 +95,12 @@ RESTORE_APK_CACHE()
     local DECODED_PATH
     local RELATIVE_PATH
     local OUTPUT_FILE
+    local ARTIFACT_HASH CACHED_ARTIFACT_HASH
     local HIT_COUNT="0"
     local MISS_COUNT="0"
 
-    mkdir -p "$(dirname "$APK_BUILD_LIST")"
-    : > "$APK_BUILD_LIST"
+    mkdir -p "$(dirname "$APK_BUILD_LIST")" || return 1
+    : > "$APK_BUILD_LIST" || return 1
 
     while IFS= read -r -d '' f; do
         DECODED_PATH="$f"
@@ -110,13 +109,18 @@ RESTORE_APK_CACHE()
         CURRENT_HASH="$(GET_PATCHED_APK_HASH "$DECODED_PATH" "$RELATIVE_PATH")" || return 1
         CACHE_HASH="$(cat "$APK_CACHE_DIR/hashes/$RELATIVE_PATH" 2> /dev/null || true)"
 
-        if [ "$CACHE_HASH" = "$CURRENT_HASH" ] && \
-                [ -f "$APK_CACHE_DIR/files/$RELATIVE_PATH" ]; then
-            mkdir -p "$(dirname "$OUTPUT_FILE")"
-            cp -a --reflink=auto "$APK_CACHE_DIR/files/$RELATIVE_PATH" "$OUTPUT_FILE"
+        CACHED_ARTIFACT_HASH="$(cat "$APK_CACHE_DIR/artifact_hashes/$RELATIVE_PATH" 2> /dev/null || true)"
+        ARTIFACT_HASH=""
+        if [ "$CACHE_HASH" = "$CURRENT_HASH" ] && [ -s "$APK_CACHE_DIR/files/$RELATIVE_PATH" ]; then
+            ARTIFACT_HASH="$(sha256sum "$APK_CACHE_DIR/files/$RELATIVE_PATH")" || return 1
+            ARTIFACT_HASH="${ARTIFACT_HASH%% *}"
+        fi
+        if [ -n "$ARTIFACT_HASH" ] && [ "$ARTIFACT_HASH" = "$CACHED_ARTIFACT_HASH" ]; then
+            mkdir -p "$(dirname "$OUTPUT_FILE")" || return 1
+            cp -a --reflink=auto "$APK_CACHE_DIR/files/$RELATIVE_PATH" "$OUTPUT_FILE" || return 1
             HIT_COUNT=$((HIT_COUNT + 1))
         else
-            printf '%s\0' "$DECODED_PATH" >> "$APK_BUILD_LIST"
+            printf '%s\0' "$DECODED_PATH" >> "$APK_BUILD_LIST" || return 1
             MISS_COUNT=$((MISS_COUNT + 1))
         fi
     done < <(find "$APKTOOL_DIR" -type d \( -name "*.apk" -o -name "*.jar" \) -print0)
@@ -132,27 +136,47 @@ UPDATE_APK_CACHE()
     local FILE_HASH
     local RELATIVE_PATH
     local OUTPUT_FILE
+    local ARTIFACT_HASH CACHE_PREVIOUS
 
     [ -d "$APKTOOL_DIR" ] || return 0
     CACHE_TMP="$APK_CACHE_DIR.tmp.$$"
-    rm -rf "$CACHE_TMP"
-    mkdir -p "$CACHE_TMP/files" "$CACHE_TMP/hashes"
+    rm -rf "$CACHE_TMP" || return 1
+    mkdir -p "$CACHE_TMP/files" "$CACHE_TMP/hashes" "$CACHE_TMP/artifact_hashes" || return 1
 
     while IFS= read -r -d '' f; do
         DECODED_PATH="$f"
         RELATIVE_PATH="${f/$APKTOOL_DIR\//}"
         OUTPUT_FILE="$(GET_BUILT_APK_PATH "$RELATIVE_PATH")"
-        [ -f "$OUTPUT_FILE" ] || return 1
+        [ -s "$OUTPUT_FILE" ] || return 1
         FILE_HASH="$(GET_PATCHED_APK_HASH "$DECODED_PATH" "$RELATIVE_PATH")" || return 1
         mkdir -p "$CACHE_TMP/files/$(dirname "$RELATIVE_PATH")" \
-            "$CACHE_TMP/hashes/$(dirname "$RELATIVE_PATH")"
-        cp -a --reflink=auto "$OUTPUT_FILE" "$CACHE_TMP/files/$RELATIVE_PATH"
-        printf '%s' "$FILE_HASH" > "$CACHE_TMP/hashes/$RELATIVE_PATH"
+            "$CACHE_TMP/hashes/$(dirname "$RELATIVE_PATH")" \
+            "$CACHE_TMP/artifact_hashes/$(dirname "$RELATIVE_PATH")" || return 1
+        cp -a --reflink=auto "$OUTPUT_FILE" "$CACHE_TMP/files/$RELATIVE_PATH" || return 1
+        ARTIFACT_HASH="$(sha256sum "$CACHE_TMP/files/$RELATIVE_PATH")" || return 1
+        ARTIFACT_HASH="${ARTIFACT_HASH%% *}"
+        printf '%s' "$FILE_HASH" > "$CACHE_TMP/hashes/$RELATIVE_PATH" || return 1
+        printf '%s' "$ARTIFACT_HASH" > "$CACHE_TMP/artifact_hashes/$RELATIVE_PATH" || return 1
     done < <(find "$APKTOOL_DIR" -type d \( -name "*.apk" -o -name "*.jar" \) -print0)
 
-    printf '%s' "$APK_CACHE_FORMAT" > "$CACHE_TMP/.format"
-    rm -rf "$APK_CACHE_DIR"
-    mv "$CACHE_TMP" "$APK_CACHE_DIR"
+    printf '%s' "$APK_CACHE_FORMAT" > "$CACHE_TMP/.format" || return 1
+    CACHE_PREVIOUS="$APK_CACHE_DIR.previous.$$"
+    if [ -e "$CACHE_PREVIOUS" ]; then
+        LOGE "Previous APK cache transaction still exists: $CACHE_PREVIOUS"
+        return 1
+    fi
+    if [ -d "$APK_CACHE_DIR" ]; then
+        mv "$APK_CACHE_DIR" "$CACHE_PREVIOUS" || return 1
+    fi
+    if ! mv "$CACHE_TMP" "$APK_CACHE_DIR"; then
+        if [ -d "$CACHE_PREVIOUS" ]; then
+            mv "$CACHE_PREVIOUS" "$APK_CACHE_DIR" || LOGE "Could not restore previous APK cache"
+        fi
+        return 1
+    fi
+    if [ -d "$CACHE_PREVIOUS" ]; then
+        rm -rf "$CACHE_PREVIOUS" || return 1
+    fi
     LOG "- Updated per-file APK/JAR cache"
 }
 
@@ -212,10 +236,6 @@ PREPARE_SCRIPT()
             BUILD_ZIP=false
         elif [[ "$1" == "--incremental" ]] || [[ "$1" == "-i" ]]; then
             BUILD_INCREMENTAL=true
-        elif [[ "$1" == "--debug" ]] || [[ "$1" == "-d" ]]; then
-            DEBUG=true
-        elif [[ "$1" == "--beta" ]] || [[ "$1" == "-b" ]]; then
-            BETA=true
         else
             if [[ "$1" == "-"* ]]; then
                 LOGE "Unknown option: $1"
@@ -256,8 +276,6 @@ PRINT_USAGE()
     echo " -c, --use-apk-cache : Incrementally rebuild only changed APKs/JARs" >&2
     echo " -i, --incremental : Build a block-level update from the previous target-files snapshot" >&2
     echo " --no-rom-zip : Do not build ROM zip" >&2
-    echo " -d, --debug : Create a debug build" >&2
-    echo " -b, --beta : Create a beta build" >&2
 }
 # ]
 
@@ -341,6 +359,16 @@ if $BUILD_ROM; then
         LOG_STEP_IN true "Applying ROM mods"
         "$SRC_DIR/scripts/internal/apply_modules.sh" "$SRC_DIR/unica/mods" || exit 1
         LOG_STEP_OUT
+    fi
+
+    # Validate the final tree after every module, including ROM mods. The
+    # donor's permissions/configuration must not silently hide r8s hardware.
+    if [[ "$TARGET_CODENAME" == "r8s" && "$SOURCE_PLATFORM_SDK_VERSION" -ge 37 ]]; then
+        # Target vendor files follow platform WFD patches. Finalize the exact
+        # device-validated boot stack after all potential manifest overwrites.
+        python3 "$SRC_DIR/target/r8s/finalize_boot_graphics.py" "$WORK_DIR" || exit 1
+        python3 "$SRC_DIR/target/r8s/validate_hardware_inputs.py" \
+            "$FW_DIR/$TARGET_FIRMWARE_PATH" "$WORK_DIR" || exit 1
     fi
 
     if $USE_APK_CACHE; then
