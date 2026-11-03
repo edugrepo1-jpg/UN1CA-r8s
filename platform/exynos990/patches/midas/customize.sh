@@ -39,6 +39,8 @@ sed -i \
     "$WORK_DIR/vendor/etc/midas/midas_config.json"
 LOG_STEP_OUT
 
+python3 "$MODPATH/patch_midas_config.py" "$WORK_DIR/vendor/etc/midas/midas_config.json" || return 1
+
 LOG_STEP_IN "- Restoring source-firmware (S24+) Photo Remaster Service"
 DELETE_FROM_WORK_DIR "system" "system/priv-app/PhotoRemasterService/oat"
 ADD_TO_WORK_DIR "$MIDAS_SOURCE" "system" "system/priv-app/PhotoRemasterService/PhotoRemasterService.apk"
@@ -48,7 +50,7 @@ LOG_STEP_IN "- Restoring source-firmware (S24+) MIDAS libraries"
 ADD_TO_WORK_DIR "$MIDAS_SOURCE" "system" "system/lib64/libmidas_core.camera.samsung.so"
 ADD_TO_WORK_DIR "$MIDAS_SOURCE" "system" "system/lib64/libmidas_DNNInterface.camera.samsung.so"
 
-HEX_PATCH "$WORK_DIR/system/lib64/libmidas_DNNInterface.camera.samsung.so" \
+HEX_PATCH "$WORK_DIR/system/system/lib64/libmidas_DNNInterface.camera.samsung.so" \
     "7f0a00f97f4e00f97f1e00f97f2a00f97f3600f97f4200f97f7e02a9" \
     "7f7e01a97f4e00f97f1e00f97f2a00f97f3600f97f7e08a97f7e02a9"
 LOG_STEP_OUT

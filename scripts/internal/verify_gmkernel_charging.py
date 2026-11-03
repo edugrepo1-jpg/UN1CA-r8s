@@ -92,15 +92,23 @@ def inspect(root, require_cc=False):
         code = ('#include <assert.h>\n#include <stdbool.h>\n#include <stdio.h>\n' + cable_defines + '\n' + cable_enum + ';\n' +
                 '\n'.join(selected.values()) + '\nstruct sec_battery_info {bool charge_max_mode,charging_enabled,store_mode;int cable_type,siop_level;};\n' + helpers + r'''
 int main(void) { int cases=0;
-for(int mode=0;mode<2;mode++)for(int on=0;on<2;on++)for(int store=0;store<2;store++)
-for(int cable=0;cable<=SEC_BATTERY_CABLE_HV_WIRELESS_ETX;cable++)for(int raw=0;raw<=100;raw++) {
+for(int mode=0;mode<2;mode++) {
+for(int on=0;on<2;on++) {
+for(int store=0;store<2;store++) {
+for(int cable=0;cable<=SEC_BATTERY_CABLE_HV_WIRELESS_ETX;cable++) {
+for(int raw=0;raw<=100;raw++) {
 if(cable>=SEC_BATTERY_CABLE_MAX&&cable!=SEC_BATTERY_CABLE_HV_WIRELESS_ETX)continue;
 struct sec_battery_info b={mode,on,store,cable,raw};
 bool expected=mode&&on&&!store&&is_wired_type(cable);
 assert(sec_bat_charge_max_mode_active(&b)==expected);
 assert(sec_bat_effective_charge_siop(&b)==(expected?100:raw));
 assert(b.siop_level==raw);cases++;
-}printf("%d\n",cases);return 0;}
+}
+}
+}
+}
+}
+printf("%d\n",cases);return 0;}
 ''')
         with tempfile.TemporaryDirectory() as temp:
             source, binary = Path(temp) / 'contract.c', Path(temp) / 'contract'

@@ -1,0 +1,464 @@
+# r8s has one kernel producer; other devices retain the original Artisan module.
+if [[ "$TARGET_CODENAME" != "r8s" ]]; then
+    return 0
+fi
+
+# [
+EXTREMEKRNL_REPO="https://github.com/At30c/SSM_990v2BYEXTREME/"
+# r8s uses the user's full GMKernel source; all other targets retain Extreme.
+GMKERNEL_REPO="https://github.com/edugrepo1-jpg/android_kernel_samsung_exynos990.git"
+GMKERNEL_BRANCH="gmkernel-android17-r8s-20261101"
+GMKERNEL_SHA="2fba3af513f2b2e831cc4ddddc0b3a100ecd9f47"
+if [[ "$TARGET_CODENAME" == "r8s" ]]; then
+    EXTREMEKRNL_REPO="$GMKERNEL_REPO"
+fi
+
+KERNEL_MODEL="$TARGET_CODENAME"
+KERNEL_CACHE_VERSION="2"
+KERNEL_PATCH_DIR="$MODPATH/patches"
+
+GET_FILE_SHA256()
+(
+    set -o pipefail
+    sha256sum "$1" | cut -d " " -f 1
+)
+
+GET_KERNEL_PATCHSET_DIGEST()
+{
+    local PATCH
+    local PATCHES=("$KERNEL_PATCH_DIR"/*.patch)
+
+    if [ ! -e "${PATCHES[0]}" ]; then
+        printf 'none\n'
+        return 0
+    fi
+    for PATCH in "${PATCHES[@]}"; do
+        printf '%s  %s\n' "$(GET_FILE_SHA256 "$PATCH")" "$(basename "$PATCH")"
+    done | sha256sum | cut -d " " -f 1
+}
+
+GET_KERNEL_CACHE_KEY()
+{
+    # Include every input owned by this integration. In particular, the old
+    # key omitted the external patch set, so changing a patch could still
+    # select an image produced before that change.
+    {
+        printf 'cache-version=%s\n' "$KERNEL_CACHE_VERSION"
+        git -C "$KERNEL_TMP_DIR" rev-parse HEAD
+        git -C "$KERNEL_TMP_DIR" diff --no-ext-diff --binary
+        git -C "$KERNEL_TMP_DIR" diff --cached --no-ext-diff --binary
+        git -C "$KERNEL_TMP_DIR" submodule status --recursive
+        printf 'patchset=%s\n' "$(GET_KERNEL_PATCHSET_DIGEST)"
+        printf 'integration=%s\n' "$(GET_FILE_SHA256 "$MODPATH/customize.sh")"
+        if [[ "$TARGET_CODENAME" == "r8s" ]]; then
+            printf 'compiler-preparation=%s\n' "$(GET_FILE_SHA256 "$SRC_DIR/scripts/internal/prepare_gmkernel_toolchain.sh")"
+        fi
+        printf 'main: model=%s ksu=y recovery=n\n' "$KERNEL_MODEL"
+        if [[ "$TARGET_CODENAME" != "r8s" ]] && [[ "$TARGET_CODENAME" != "z3s" ]]; then
+            printf 'main: model=%s ksu=n recovery=n dt_overlay=y\n' "${TARGET_CODENAME}lte"
+        fi
+    } | sha256sum | cut -d " " -f 1
+}
+
+GET_CACHE_VALUE()
+{
+    local CACHE_FILE="$1"
+    local KEY="$2"
+
+    sed -n "s/^${KEY}=//p" "$CACHE_FILE" | head -n 1
+}
+
+GET_BOOT_KERNEL_SHA256()
+{
+    local BOOT_IMAGE="$1"
+    local KERNEL_SIZE
+    local MAGIC
+    local PAGE_SIZE
+    local BOOT_SIZE
+
+    MAGIC="$(dd if="$BOOT_IMAGE" bs=8 count=1 status=none 2>/dev/null)"
+    [ "$MAGIC" = "ANDROID!" ] || return 1
+
+    KERNEL_SIZE="$(od -An -tu4 -j8 -N4 "$BOOT_IMAGE" | tr -d ' ')"
+    PAGE_SIZE="$(od -An -tu4 -j36 -N4 "$BOOT_IMAGE" | tr -d ' ')"
+    [[ "$KERNEL_SIZE" =~ ^[0-9]+$ ]] || return 1
+    [[ "$PAGE_SIZE" =~ ^[0-9]+$ ]] || return 1
+    [ "$KERNEL_SIZE" -gt 0 ] || return 1
+    (( PAGE_SIZE >= 2048 && PAGE_SIZE <= 65536 && (PAGE_SIZE & (PAGE_SIZE - 1)) == 0 )) || return 1
+    BOOT_SIZE="$(stat -c%s "$BOOT_IMAGE")" || return 1
+    (( PAGE_SIZE + KERNEL_SIZE <= BOOT_SIZE )) || return 1
+
+    (set -o pipefail; dd if="$BOOT_IMAGE" bs=1M iflag=skip_bytes,count_bytes \
+        skip="$PAGE_SIZE" count="$KERNEL_SIZE" status=none 2>/dev/null |
+        sha256sum | cut -d " " -f 1)
+}
+
+VERIFY_BUILT_KERNEL_ARTIFACTS()
+{
+    local IMAGE="$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/Image"
+    local VMLINUX="$KERNEL_TMP_DIR/out/vmlinux"
+
+    [ -s "$IMAGE" ] || { ABORT "Kernel build did not produce a non-empty Image."; return 1; }
+    [ -s "$VMLINUX" ] || { ABORT "Kernel build did not produce a non-empty vmlinux."; return 1; }
+    if ! cmp -s "$IMAGE" "$KERNEL_TMP_DIR/out/arch/arm64/boot/Image"; then
+        ABORT "Packaged kernel Image does not match the Image from the current build tree."
+        return 1
+    fi
+
+    LOG "- Verified that the packaged Image belongs to the current kernel build tree."
+}
+
+CLEAN_KERNEL_BUILD_OUTPUTS()
+{
+    local KBUILD_OUT="$KERNEL_TMP_DIR/out"
+    local MODEL_OUT="$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL"
+    local LTE_MODEL_OUT="$KERNEL_TMP_DIR/build/out/${TARGET_CODENAME}lte"
+
+    # These paths are deliberately constrained to the cloned kernel tree.
+    # Never let an unset or malformed path turn this into a broad deletion.
+    case "$KBUILD_OUT" in
+        "$OUT_DIR"/kernel_tmp-*/out) ;;
+        *) ABORT "Refusing to clean unexpected kernel output path: $KBUILD_OUT"; return 1 ;;
+    esac
+    case "$MODEL_OUT" in
+        "$OUT_DIR"/kernel_tmp-*/build/out/*) ;;
+        *) ABORT "Refusing to clean unexpected packaged-kernel path: $MODEL_OUT"; return 1 ;;
+    esac
+
+    LOG "- Removing stale Kbuild and packaged-kernel outputs."
+    rm -rf -- "$KBUILD_OUT" "$MODEL_OUT"
+    if [[ "$TARGET_CODENAME" != "r8s" ]] && [[ "$TARGET_CODENAME" != "z3s" ]]; then
+        rm -rf -- "$LTE_MODEL_OUT"
+    fi
+    rm -f -- "$KERNEL_TMP_DIR/.unica-kernel-cache-${TARGET_CODENAME}"
+}
+
+KERNEL_CACHE_IS_VALID()
+{
+    local CACHE_FILE="$KERNEL_TMP_DIR/.unica-kernel-cache-${TARGET_CODENAME}"
+    local BOOT_IMAGE="$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/boot.img"
+    local DTBO_IMAGE="$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/dtbo.img"
+    local IMAGE="$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/Image"
+    local LTE_DTBO_IMAGE="$KERNEL_TMP_DIR/build/out/${TARGET_CODENAME}lte/dtbo.img"
+
+    [ -f "$CACHE_FILE" ] || return 1
+    [ "$(GET_CACHE_VALUE "$CACHE_FILE" version)" = "$KERNEL_CACHE_VERSION" ] || return 1
+    [ "$(GET_CACHE_VALUE "$CACHE_FILE" key)" = "$KERNEL_CACHE_KEY" ] || return 1
+    [ -s "$IMAGE" ] || return 1
+    [ -s "$BOOT_IMAGE" ] || return 1
+    [ -s "$DTBO_IMAGE" ] || return 1
+    [ "$(GET_FILE_SHA256 "$IMAGE")" = "$(GET_CACHE_VALUE "$CACHE_FILE" image_sha256)" ] || return 1
+    [ "$(GET_FILE_SHA256 "$BOOT_IMAGE")" = "$(GET_CACHE_VALUE "$CACHE_FILE" boot_sha256)" ] || return 1
+    [ "$(GET_FILE_SHA256 "$DTBO_IMAGE")" = "$(GET_CACHE_VALUE "$CACHE_FILE" dtbo_sha256)" ] || return 1
+    [ "$(GET_BOOT_KERNEL_SHA256 "$BOOT_IMAGE")" = "$(GET_FILE_SHA256 "$IMAGE")" ] || return 1
+
+    if [[ "$TARGET_CODENAME" != "r8s" ]] && [[ "$TARGET_CODENAME" != "z3s" ]]; then
+        [ -s "$LTE_DTBO_IMAGE" ] || return 1
+        [ "$(GET_FILE_SHA256 "$LTE_DTBO_IMAGE")" = "$(GET_CACHE_VALUE "$CACHE_FILE" lte_dtbo_sha256)" ] || return 1
+    fi
+
+    VERIFY_BUILT_KERNEL_ARTIFACTS || return 1
+    return 0
+}
+
+PREPARE_KERNEL_COMPILER()
+{
+    [[ "$TARGET_CODENAME" == "r8s" ]] || return 0
+    local COMPILER="$OUT_DIR/toolchains/clang_14"
+    local KERNEL_COMPILER="$KERNEL_TMP_DIR/toolchain/clang_14"
+    local BACKUP=""
+    bash "$SRC_DIR/scripts/internal/prepare_gmkernel_toolchain.sh" "$COMPILER" || return 1
+    mkdir -p "$KERNEL_TMP_DIR/toolchain" || return 1
+    if [[ "$(readlink -f "$KERNEL_COMPILER")" == "$(readlink -f "$COMPILER")" ]]; then
+        return 0
+    fi
+    if [ -e "$KERNEL_COMPILER" ] || [ -L "$KERNEL_COMPILER" ]; then
+        BACKUP="$(mktemp -d "$KERNEL_TMP_DIR/toolchain/.previous-clang.XXXXXXXX")" || return 1
+        mv -- "$KERNEL_COMPILER" "$BACKUP/clang_14" || return 1
+    fi
+    if ! ln -s "$COMPILER" "$KERNEL_COMPILER"; then
+        [ -z "$BACKUP" ] || mv -- "$BACKUP/clang_14" "$KERNEL_COMPILER"
+        return 1
+    fi
+}
+
+BUILD_KERNEL()
+{
+    local BOOT_IMAGE="$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/boot.img"
+    local BUILD_MARKER="$KERNEL_TMP_DIR/.unica-kernel-build-start-${TARGET_CODENAME}"
+    local DTBO_IMAGE="$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/dtbo.img"
+    local IMAGE="$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/Image"
+    local ARTIFACT
+    local PARENT
+    PARENT="$(pwd)"
+
+    PREPARE_KERNEL_COMPILER || return 1
+    CLEAN_KERNEL_BUILD_OUTPUTS || return 1
+    touch "$BUILD_MARKER" || return 1
+    cd "$KERNEL_TMP_DIR" || return 1
+
+    # Kernel builds are long-running and their output is needed to diagnose
+    # compiler failures. Do not hide it inside EVAL's command substitution.
+    LOG "- Building kernel for ${TARGET_CODENAME}"
+    mkdir -p "$OUT_DIR/target/$TARGET_CODENAME" || return 1
+    if ! (set -o pipefail; ./build.sh -m "$KERNEL_MODEL" -k y -r n 2>&1 |
+            tee "$OUT_DIR/target/$TARGET_CODENAME/gmkernel-build.log"); then
+        cd "$PARENT" || return 1
+        rm -f -- "$BUILD_MARKER"
+        return 1
+    fi
+
+    # Existence alone is insufficient: a failed build used to leave an older
+    # boot.img in this directory, which was then accepted and cached.
+    for ARTIFACT in "$IMAGE" "$BOOT_IMAGE" "$DTBO_IMAGE"; do
+        if [ ! -s "$ARTIFACT" ] || [ ! "$ARTIFACT" -nt "$BUILD_MARKER" ]; then
+            cd "$PARENT" || return 1
+            rm -f -- "$BUILD_MARKER"
+            LOGE "Kernel build did not freshly generate ${ARTIFACT//$KERNEL_TMP_DIR\//}."
+            return 1
+        fi
+    done
+
+    if [ "$(GET_BOOT_KERNEL_SHA256 "$BOOT_IMAGE")" != "$(GET_FILE_SHA256 "$IMAGE")" ]; then
+        cd "$PARENT" || return 1
+        rm -f -- "$BUILD_MARKER"
+        LOGE "boot.img does not contain the Image generated by this build."
+        return 1
+    fi
+    if ! VERIFY_BUILT_KERNEL_ARTIFACTS; then
+        cd "$PARENT" || return 1
+        rm -f -- "$BUILD_MARKER"
+        return 1
+    fi
+
+    # Fixup for LTE devices: build LTE variant without KernelSU, with DT overlay
+    if [[ "$TARGET_CODENAME" != "r8s" ]] && [[ "$TARGET_CODENAME" != "z3s" ]]; then
+        LOG "- Building kernel for ${TARGET_CODENAME}lte (DT overlay)"
+        if ! ./build.sh -m "${TARGET_CODENAME}lte" -k n -r n -d y; then
+            cd "$PARENT" || return 1
+            rm -f -- "$BUILD_MARKER"
+            return 1
+        fi
+        if [ ! -s "$KERNEL_TMP_DIR/build/out/${TARGET_CODENAME}lte/dtbo.img" ] ||
+                [ ! "$KERNEL_TMP_DIR/build/out/${TARGET_CODENAME}lte/dtbo.img" -nt "$BUILD_MARKER" ]; then
+            cd "$PARENT" || return 1
+            rm -f -- "$BUILD_MARKER"
+            LOGE "Kernel build did not freshly generate the LTE dtbo.img."
+            return 1
+        fi
+    fi
+
+    cd "$PARENT" || return 1
+    rm -f -- "$BUILD_MARKER"
+    return 0
+}
+
+INIT_KERNEL_SUBMODULES()
+{
+    # The kernel repository pins the tested KernelSU-Next legacy revision.
+    # Sync first so URL/branch changes from a kernel update are respected.
+    EVAL "git -C \"$KERNEL_TMP_DIR\" submodule sync --recursive" || return 1
+    EVAL "git -C \"$KERNEL_TMP_DIR\" submodule update --init --recursive" || return 1
+}
+
+
+APPLY_GMKERNEL_KSU_POLICY_FIX()
+{
+    local REPO="$KERNEL_TMP_DIR/KernelSU-Next"
+    local PATCH="$MODPATH/patches/0004-kernelsu-sepolicy-fix.patch"
+    if git -C "$REPO" apply --check "$PATCH" >/dev/null 2>&1; then
+        git -C "$REPO" apply "$PATCH" || return 1
+    elif git -C "$REPO" apply --reverse --check "$PATCH" >/dev/null 2>&1; then
+        LOG "- KernelSU SELinux locking/cache correction already applied"
+    else
+        ABORT "Pinned KernelSU does not match the reviewed SELinux correction"
+        return 1
+    fi
+}
+
+APPLY_KERNEL_PATCHES()
+{
+    if [[ "$TARGET_CODENAME" == "r8s" ]]; then
+        # GMKernel already carries the Android 17 cgroup and capability ABI.
+        # These Extreme-specific patches have different contexts; applying
+        # them twice fails and can corrupt the kernel source. Verify behavior.
+        if ! bash "$SRC_DIR/platform/exynos990/patches/extremekrnl/verify_gmkernel_android17.sh" "$KERNEL_TMP_DIR"; then
+            ABORT "GMKernel is missing Android 17 required cgroup or capability ABI"
+            return 1
+        fi
+        LOG "- GMKernel already contains the Android 17 kernel ABI backports"
+        python3 "$SRC_DIR/scripts/internal/verify_gmkernel_charging.py" \
+            "$KERNEL_TMP_DIR" --require-cc || {
+            ABORT "GMKernel charging startup or protection contract changed"
+            return 1
+        }
+        return 0
+    fi
+    local PATCH
+    local PATCHES=("$KERNEL_PATCH_DIR"/*.patch)
+
+    if [ ! -e "${PATCHES[0]}" ]; then
+        LOG "- No external kernel compatibility patches for this branch."
+        return 0
+    fi
+
+    for PATCH in "${PATCHES[@]}"; do
+        if git -C "$KERNEL_TMP_DIR" apply --check "$PATCH" > /dev/null 2>&1; then
+            LOG "- Applying kernel compatibility patch: $(basename "$PATCH")"
+            EVAL "git -C \"$KERNEL_TMP_DIR\" apply \"$PATCH\"" || return 1
+        elif git -C "$KERNEL_TMP_DIR" apply --reverse --check "$PATCH" > /dev/null 2>&1; then
+            LOG "- Kernel compatibility patch already applied: $(basename "$PATCH")"
+        else
+            ABORT "Could not apply kernel compatibility patch $(basename "$PATCH") to the ExtremeKRNL source."
+            return 1
+        fi
+    done
+}
+
+WRITE_KERNEL_CACHE_MANIFEST()
+{
+    local CACHE_FILE="$KERNEL_TMP_DIR/.unica-kernel-cache-${TARGET_CODENAME}"
+    local LTE_DTBO="$KERNEL_TMP_DIR/build/out/${TARGET_CODENAME}lte/dtbo.img"
+    local TEMP_FILE="${CACHE_FILE}.tmp"
+
+    {
+        printf 'version=%s\n' "$KERNEL_CACHE_VERSION"
+        printf 'key=%s\n' "$KERNEL_CACHE_KEY"
+        printf 'commit=%s\n' "$(git -C "$KERNEL_TMP_DIR" rev-parse HEAD)"
+        printf 'patchset=%s\n' "$(GET_KERNEL_PATCHSET_DIGEST)"
+        printf 'image_sha256=%s\n' \
+            "$(GET_FILE_SHA256 "$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/Image")"
+        printf 'boot_sha256=%s\n' \
+            "$(GET_FILE_SHA256 "$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/boot.img")"
+        printf 'dtbo_sha256=%s\n' \
+            "$(GET_FILE_SHA256 "$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/dtbo.img")"
+        if [[ "$TARGET_CODENAME" != "r8s" ]] && [[ "$TARGET_CODENAME" != "z3s" ]]; then
+            printf 'lte_dtbo_sha256=%s\n' "$(GET_FILE_SHA256 "$LTE_DTBO")"
+        fi
+    } > "$TEMP_FILE" || return 1
+
+    mv -f -- "$TEMP_FILE" "$CACHE_FILE"
+}
+
+SAFE_PULL_CHANGES()
+(
+    set -eo pipefail
+    if [[ "$TARGET_CODENAME" == "r8s" ]]; then
+        local REMOTE_SHA LOCAL_SHA ORIGIN
+        ORIGIN="$(git -C "$KERNEL_TMP_DIR" remote get-url origin)"
+        [[ "$ORIGIN" == "$GMKERNEL_REPO" ]] || { ABORT "Unexpected GMKernel remote: $ORIGIN"; return 1; }
+        REMOTE_SHA="$(git ls-remote "$GMKERNEL_REPO" "refs/heads/$GMKERNEL_BRANCH" | cut -f1)"
+        [[ "$REMOTE_SHA" == "$GMKERNEL_SHA" ]] || { ABORT "GMKernel branch changed: update exact commit pin after audit"; return 1; }
+        git -C "$KERNEL_TMP_DIR" fetch --no-tags origin "$GMKERNEL_BRANCH" || return 1
+        LOCAL_SHA="$(git -C "$KERNEL_TMP_DIR" rev-parse HEAD)"
+        [[ "$LOCAL_SHA" == "$GMKERNEL_SHA" ]] || { ABORT "Unexpected GMKernel HEAD: $LOCAL_SHA"; return 1; }
+        return 0
+    fi
+    local PARENT LOCAL REMOTE BASE
+    PARENT="$(pwd)"
+    cd "$KERNEL_TMP_DIR" || return 1
+    EVAL "git fetch origin" || return 1
+    LOCAL="$(git rev-parse @)"
+    REMOTE="$(git rev-parse origin/main)"
+    BASE="$(git merge-base @ origin/main)"
+    if [[ "$LOCAL" == "$REMOTE" ]]; then
+        LOG "- Existing Extreme source up to date."
+    elif [[ "$LOCAL" == "$BASE" ]]; then
+        EVAL "git pull --ff-only" || return 1
+    elif [[ "$REMOTE" != "$BASE" ]]; then
+        ABORT "Extreme source diverged; manual review required"
+        return 1
+    fi
+    cd "$PARENT" || return 1
+)
+
+REPLACE_KERNEL_BINARIES()
+{
+    local KERNEL_TMP_DIR="$OUT_DIR/kernel_tmp-$TARGET_PLATFORM"
+    local KERNEL_CACHE_KEY
+    local KERNEL_COMMIT
+    [[ ! -d "$KERNEL_TMP_DIR" ]] && mkdir -p "$KERNEL_TMP_DIR"
+
+    if [[ -d "$KERNEL_TMP_DIR/.git" ]]; then
+        LOG "- Existing git repo found, trying to pull latest changes"
+        if ! SAFE_PULL_CHANGES; then
+            ABORT "Could not pull latest Kernel changes. If you hold local changes, please rebase to the new base. If not, cleaning the kernel_tmp_dir should suffice."
+            return 1
+        fi
+    else
+        if [[ "$TARGET_CODENAME" == "r8s" ]]; then
+            LOG "- Cloning pinned GMKernel for Android 17"
+            EVAL "git clone --single-branch --branch \"$GMKERNEL_BRANCH\" \"$GMKERNEL_REPO\" \"$KERNEL_TMP_DIR\"" || return 1
+            [[ "$(git -C "$KERNEL_TMP_DIR" rev-parse HEAD)" == "$GMKERNEL_SHA" ]] ||
+                { ABORT "Newly cloned GMKernel does not match pinned SHA"; return 1; }
+        else
+            LOG "- Cloning ExtremeKernel"
+            EVAL "git clone \"$EXTREMEKRNL_REPO\" --single-branch \"$KERNEL_TMP_DIR\"" || return 1
+        fi
+    fi
+
+    INIT_KERNEL_SUBMODULES || return 1
+    APPLY_GMKERNEL_KSU_POLICY_FIX || return 1
+    APPLY_KERNEL_PATCHES || return 1
+
+    KERNEL_CACHE_KEY="$(GET_KERNEL_CACHE_KEY)" || { ABORT "Could not calculate the kernel cache key."; return 1; }
+    KERNEL_COMMIT="$(git -C "$KERNEL_TMP_DIR" rev-parse --short=12 HEAD)" || { ABORT "Could not determine the kernel commit."; return 1; }
+
+    if KERNEL_CACHE_IS_VALID; then
+        LOG "- Reusing checksum-verified kernel images from $KERNEL_COMMIT."
+    else
+        LOG "- Kernel cache is missing or outdated. Running the kernel build script."
+        if ! BUILD_KERNEL; then
+            ABORT "Kernel build failed; stale artifacts will not be reused."
+            return 1
+        fi
+
+        [ -s "$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/boot.img" ] || { ABORT "Kernel build did not produce boot.img."; return 1; }
+        [ -s "$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/dtbo.img" ] || { ABORT "Kernel build did not produce dtbo.img."; return 1; }
+
+        # Some kernel build scripts adjust their source tree while preparing
+        # KernelSU. Record the post-build state used to create these images.
+        KERNEL_CACHE_KEY="$(GET_KERNEL_CACHE_KEY)" || { ABORT "Could not update the kernel cache key."; return 1; }
+        WRITE_KERNEL_CACHE_MANIFEST || { ABORT "Could not write the verified kernel cache manifest."; return 1; }
+    fi
+
+    if [[ "$TARGET_CODENAME" == "r8s" ]]; then
+        local BOOT_BYTES DTBO_BYTES
+        BOOT_BYTES="$(stat -c%s "$KERNEL_TMP_DIR/build/out/r8s/boot.img")"
+        DTBO_BYTES="$(stat -c%s "$KERNEL_TMP_DIR/build/out/r8s/dtbo.img")"
+        (( BOOT_BYTES <= 61865984 )) || { ABORT "GMKernel boot.img is larger than the SM-G780F 59-MiB boot partition"; return 1; }
+        (( DTBO_BYTES <= TARGET_DTBO_PARTITION_SIZE )) || { ABORT "GMKernel dtbo.img exceeds the partition"; return 1; }
+        python3 "$SRC_DIR/target/r8s/validate_gmkernel_dtbo.py" \
+            "$KERNEL_TMP_DIR/build/out/r8s/dtbo.img" || { ABORT "Wrong GMKernel r8s DTBO selectors"; return 1; }
+    fi
+
+    rm -f "$WORK_DIR/kernel/boot.img" "$WORK_DIR/kernel/dtbo.img" \
+        "$WORK_DIR/kernel/dtbo_lte.img" || return 1
+    cp -a "$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/boot.img" \
+        "$WORK_DIR/kernel/boot.img" || return 1
+    cp -a "$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/dtbo.img" \
+        "$WORK_DIR/kernel/dtbo.img" || return 1
+
+    [ "$(GET_FILE_SHA256 "$WORK_DIR/kernel/boot.img")" = \
+        "$(GET_FILE_SHA256 "$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/boot.img")" ] ||
+        { ABORT "Copied boot.img failed checksum verification."; return 1; }
+    [ "$(GET_FILE_SHA256 "$WORK_DIR/kernel/dtbo.img")" = \
+        "$(GET_FILE_SHA256 "$KERNEL_TMP_DIR/build/out/$KERNEL_MODEL/dtbo.img")" ] ||
+        { ABORT "Copied dtbo.img failed checksum verification."; return 1; }
+
+    # Copy LTE dtbo artifact if available (not for r8s or z3s)
+    if [[ "$TARGET_CODENAME" != "r8s" ]] && [[ "$TARGET_CODENAME" != "z3s" ]]; then
+        local LTE_SRC="$KERNEL_TMP_DIR/build/out/${TARGET_CODENAME}lte/dtbo.img"
+        if [[ -f "$LTE_SRC" ]]; then
+            cp -a "$LTE_SRC" "$WORK_DIR/kernel/dtbo_lte.img" || return 1
+            [ "$(GET_FILE_SHA256 "$WORK_DIR/kernel/dtbo_lte.img")" = \
+                "$(GET_FILE_SHA256 "$LTE_SRC")" ] ||
+                { ABORT "Copied LTE dtbo.img failed checksum verification."; return 1; }
+        fi
+    fi
+
+    LOG "- Installed verified kernel artifacts for $KERNEL_COMMIT."
+}
+# ]
+
+REPLACE_KERNEL_BINARIES

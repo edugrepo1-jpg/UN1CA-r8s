@@ -1,0 +1,216 @@
+name: GMHUB r8s manual build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Only the r8s port is under development in this fork.
+        target: [r8s]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+
+      - name: Validate r8s port and pinned GM kernel
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
+          KERNEL_SOURCE=platform/exynos990/patches/extremekrnl/customize.sh
+          KERNEL_BRANCH=$(sed -n 's/^GMKERNEL_BRANCH="\([^"]*\)"/\1/p' "$KERNEL_SOURCE")
+          KERNEL_PIN=$(sed -n 's/^GMKERNEL_SHA="\([^"]*\)"/\1/p' "$KERNEL_SOURCE")
+          if [[ -z "$KERNEL_BRANCH" || ! "$KERNEL_PIN" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "::error::Invalid GM kernel source pin"
+            exit 1
+          fi
+          ACTUAL_KERNEL_HEAD=$(git ls-remote https://github.com/edugrepo1-jpg/android_kernel_samsung_exynos990.git "refs/heads/$KERNEL_BRANCH" | cut -f1)
+          if [[ "$ACTUAL_KERNEL_HEAD" != "$KERNEL_PIN" ]]; then
+            echo "::error::The GM kernel branch changed; review and pin the exact new revision before building"
+            exit 1
+          fi
+
+      - name: Free disk space (1/3)
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          sudo docker builder prune -a
+
+      - name: Free disk space (2/3)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+
+      - name: Free disk space (3/3)
+        uses: rokibhasansagar/slimhub_actions@main
+        with:
+          retain: 'compiler_cmake'
+
+      - name: Set up build environment
+        env:
+          PLATFORM_KEY_PK8_B64: ${{ secrets.PLATFORM_KEY_PK8 }}
+          PLATFORM_KEY_PEM_B64: ${{ secrets.PLATFORM_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$PLATFORM_KEY_PK8_B64" && -n "$PLATFORM_KEY_PEM_B64" ]]; then
+            echo "Custom platform credentials supplied; treating build as a separate unofficial port."
+          elif [[ -z "$PLATFORM_KEY_PK8_B64" && -z "$PLATFORM_KEY_PEM_B64" ]]; then
+            echo "No private signing secrets provided; using repository AOSP test keys for this UNOFFICIAL compile."
+          else
+            echo "::error::Only one platform signing secret is configured; supply both or neither."
+            exit 1
+          fi
+          sudo apt update
+          DEBIAN_FRONTEND=noninteractive sudo apt install -yq \
+            attr ccache clang ffmpeg libbrotli-dev libbz2-dev \
+            libgtest-dev libprotobuf-dev libunwind-dev libpcre2-dev \
+            libzstd-dev lld protobuf-compiler webp \
+            build-essential g++-aarch64-linux-gnu gcc-aarch64-linux-gnu \
+            python-is-python3 python3 wget curl \
+            bc bison 7zip brotli patchelf flex g++ git-lfs gperf imagemagick kmod \
+            lib32readline-dev lib32z1-dev liblz4-dev liblz4-tool libncurses-dev libssl-dev libxml2 libxml2-utils \
+            lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev \
+            f2fs-tools fuse3 libfuse3-dev
+
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          source "$HOME/.cargo/env"
+
+          rustc --version
+          cargo --version
+
+          wget https://raw.githubusercontent.com/kdrag0n/kramflash/refs/heads/master/mkbootimg.py && sudo ln -sf $(pwd)/mkbootimg.py /usr/bin/mkbootimg && chmod +x /usr/bin/mkbootimg
+
+          # F2FS extraction uses a real mount; userspace image builders cannot
+          # replace kernel mount support. Verify before any firmware download.
+          bash scripts/internal/prepare_ci_filesystems.sh
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ -n "$PLATFORM_KEY_PK8_B64" ]]; then
+            printf %s "$PLATFORM_KEY_PK8_B64" | base64 --decode > security/unica_platform.pk8
+            printf %s "$PLATFORM_KEY_PEM_B64" | base64 --decode > security/unica_platform.x509.pem
+            test -s security/unica_platform.pk8 && test -s security/unica_platform.x509.pem
+          else
+            test -s security/aosp_platform.pk8 && test -s security/aosp_platform.x509.pem
+          fi
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Cache exact GMKernel compiler
+        if: matrix.target == 'r8s'
+        uses: actions/cache@v4
+        with:
+          path: out/toolchains/clang_14
+          key: gmkernel-ubuntu24-clang-r450784d-dc339a8e5a421a55f458674981fdce18a451f298-v1
+
+      - name: Verify exact GMKernel compiler before firmware downloads
+        if: matrix.target == 'r8s'
+        run: bash scripts/internal/prepare_gmkernel_toolchain.sh "$GITHUB_WORKSPACE/out/toolchains/clang_14"
+
+      - name: Build dependencies
+        run: |
+          source ./buildenv.sh ${{ matrix.target }}
+          ./scripts/build_dependencies.sh
+
+      - name: Download stock firmwares
+        uses: nick-fields/retry@v4
+        with:
+          timeout_minutes: 60
+          max_attempts: 3
+          retry_on: error
+          command: source ./buildenv.sh ${{ matrix.target }} && ./scripts/download_fw.sh
+
+      - name: Extract stock firmwares
+        run: |
+          source ./buildenv.sh ${{ matrix.target }}
+          ./scripts/extract_fw.sh
+
+      - name: Add swap space
+        run: |
+          SWAP_FILE=$(swapon --show=NAME | tail -n 1)
+
+          if [ -n "$SWAP_FILE" ]; then
+            echo "Existing swap found: $SWAP_FILE"
+            sudo swapoff "$SWAP_FILE"
+            sudo rm -f "$SWAP_FILE"
+          else
+            SWAP_FILE="/swapfile"
+            echo "No existing swap found. Creating $SWAP_FILE"
+          fi
+
+          sudo fallocate -l 6G "$SWAP_FILE"
+          sudo chmod 600 "$SWAP_FILE"
+          sudo mkswap "$SWAP_FILE"
+          sudo swapon "$SWAP_FILE"
+
+          echo "Swap configured:"
+          free -h
+          swapon --show
+      
+      - name: Build ROM
+        run: |
+          source ./buildenv.sh ${{ matrix.target }}
+          ./scripts/make_rom.sh
+          
+      - name: Upload unofficial ROM ZIP and GMKernel images
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GMHUB-OneUI9-r8s-diagnostic-${{ github.run_number }}
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+          path: |
+            out/*.zip
+            out/target/r8s/work_dir/kernel/*.img
+            out/kernel_tmp-exynos990/build/out/r8s/boot.img
+            out/kernel_tmp-exynos990/build/out/r8s/dtbo.img
+
+      - name: Preserve r8s build logs when compilation fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GMHUB-OneUI9-r8s-failed-logs-${{ github.run_number }}
+          if-no-files-found: warn
+          retention-days: 7
+          # Retain exact donor contracts for a single-pass compatibility review.
+          path: |
+            out/target/r8s/*.log
+            out/*.log
+            out/target/r8s/tmp/*.log
+            out/gmhub-oneui9-pure-black-resources.txt
+            out/target/r8s/gmhub-oneui9-pure-black-resources.txt
+            out/gmhub-*.txt
+            out/target/r8s/apktool/**/apktool.yml
+            out/target/r8s/apktool/system/framework/services.jar/smali*/com/android/server/vibrator/*.smali
+            out/target/r8s/apktool/system/framework/services.jar/smali*/com/android/server/lights/*.smali
+            out/target/r8s/apktool/system/framework/services.jar/smali*/com/android/server/pm/DexOptHelper.smali
+            out/target/r8s/apktool/system/framework/services.jar/smali*/com/android/server/biometrics/SemBiometricFeature.smali
+            out/target/r8s/apktool/system/framework/framework.jar/smali*/com/samsung/android/bio/fingerprint/*.smali
+            out/target/r8s/apktool/system/framework/framework.jar/smali*/com/samsung/android/app/SemMultiWindowManager.smali
+            out/target/r8s/apktool/system_ext/priv-app/SystemUI/SystemUI.apk/smali*/com/android/systemui/util/DeviceType.smali
+            out/target/r8s/apktool/system_ext/priv-app/SystemUI/SystemUI.apk/smali*/com/android/systemui/qs/animator/QSAnimView*.smali
+            out/target/r8s/apktool/system/priv-app/SamsungCamera/SamsungCamera.apk/smali*/com/sec/android/app/camera/interfaces/*.smali
+            out/target/r8s/apktool/system/priv-app/SamsungCamera/SamsungCamera.apk/smali*/com/sec/android/app/camera/util/CameraResolution*.smali
+            out/target/r8s/apktool/system/priv-app/SamsungCamera/SamsungCamera.apk/smali*/com/sec/android/app/camera/engine/core/CapabilityProvider.smali
+            out/target/r8s/apktool/system/priv-app/SamsungCamera/SamsungCamera.apk/smali*/com/samsung/android/camera/core2/node/llhdr/**/*.smali
+            out/target/r8s/apktool/system/priv-app/SamsungCamera/SamsungCamera.apk/smali*/com/samsung/android/camera/core2/node/mfhdr/**/*.smali
+

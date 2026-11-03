@@ -1,3 +1,8 @@
+# GMKernel handles r8s in the dedicated integration module.
+if [[ "$TARGET_CODENAME" == "r8s" ]]; then
+    return 0
+fi
+
 # [
 EXTREMEKRNL_REPO="https://github.com/Android-Artisan/android_kernel_samsung_exynos990"
 

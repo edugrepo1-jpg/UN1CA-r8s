@@ -88,7 +88,7 @@ if command -v debugfs > /dev/null 2>&1; then
     WFD_I18N_READ() {
         debugfs -R "dump $1 $2" "$WFD_I18N_PAYLOAD" > /dev/null 2>&1
     }
-elif sudo -n mount -o ro "$WFD_I18N_PAYLOAD" "$WFD_I18N_TMP/mnt" 2> /dev/null; then
+elif RUN_AS_ROOT mount -o ro "$WFD_I18N_PAYLOAD" "$WFD_I18N_TMP/mnt" 2> /dev/null; then
     # e2fsprogs is not guaranteed on the build host, so fall back to mounting
     # the payload the way the tethering APEX patch already does.
     WFD_I18N_MOUNTED=true
@@ -96,7 +96,7 @@ elif sudo -n mount -o ro "$WFD_I18N_PAYLOAD" "$WFD_I18N_TMP/mnt" 2> /dev/null; t
         cp -a -f "$WFD_I18N_TMP/mnt$1" "$2"
     }
 else
-    ABORT "Neither debugfs nor a usable sudo mount is available to read the i18n APEX"
+    ABORT "Neither debugfs nor a usable RUN_AS_ROOT mount is available to read the i18n APEX"
     return 1
 fi
 
@@ -118,7 +118,7 @@ for WFD_I18N_LIB in $WFD_I18N_LIBS; do
 done
 
 if $WFD_I18N_MOUNTED; then
-    sudo umount "$WFD_I18N_TMP/mnt" || true
+    RUN_AS_ROOT umount "$WFD_I18N_TMP/mnt" || true
 fi
 rm -rf "$WFD_I18N_TMP"
 unset -f WFD_I18N_READ
@@ -568,6 +568,212 @@ else
     }
     rm -f "$WFD_VINTF_TMP"
     LOG "  - mapper 2.1 narrowed to ARM64, mapper 4.0 passthrough added for ARM32"
+fi
+
+# ---------------------------------------------------------------------------
+# android.hardware.graphics.allocator@4.0
+# ---------------------------------------------------------------------------
+# Gralloc4 is a pair: the mapper and the allocator must be the same version.
+# Registering only the mapper moved the failure one step down the stack rather
+# than removing it, which the previous build confirmed:
+#
+#   [HIDL_FETCH_IMapper] android.hardware.graphics.mapper@4.0: Loaded Mapper successfully.
+#   Gralloc4: allocator 4.x is not supported
+#   GraphicBufferAllocator: Failed to load matching allocator for mapper version 4
+#   Fatal signal 6 (SIGABRT) ... pid 25195 (remotedisplay)
+#
+# "allocator 4.x is not supported" reads like the harmless fallback notice that
+# the 64-bit side logs all day for the mapper, and it is worth being explicit
+# that it is not: that message only ever reports a failed lookup, and what makes
+# it fatal is the absence of any alternative. 64-bit has allocator 2.0 to fall
+# back to, so its identical-looking notice costs nothing. The 32-bit
+# remotedisplay has no fallback at all, and libui only accepts an allocator
+# matching the mapper version, hence the SIGABRT.
+#
+# Unlike the mapper, the allocator is not a passthrough. The S22 ships it as a
+# real hwbinder service, android.hardware.graphics.allocator@4.0-service-sgr,
+# running as vendor.gralloc-4-0. That is what makes it usable here despite the
+# arch split: the service is aarch64 while remotedisplay is 32-bit, but hwbinder
+# is IPC, so the 32-bit client binds the 64-bit service over binder and never
+# maps its code. The mapper could not be done this way, which is why it stayed a
+# passthrough and needed the 32-bit build of the implementation.
+#
+# The 2.0 declaration is left untouched. It carries no arch attribute, so it
+# keeps serving the 64-bit SurfaceFlinger exactly as before, and the two coexist
+# because they are different HAL versions.
+if [[ "$TARGET_CODENAME" == "r8s" ]]; then
+WFD_ALLOC_SERVICE="bin/hw/android.hardware.graphics.allocator@4.0-service-sgr"
+WFD_ALLOC_RC="etc/init/android.hardware.graphics.allocator@4.0-service-sgr.rc"
+WFD_ALLOC_DONOR="$SRC_DIR/prebuilts/samsung/r0sxxx/vendor"
+
+if [ ! -f "$WFD_ALLOC_DONOR/$WFD_ALLOC_SERVICE" ]; then
+    ABORT "Missing ARM64 allocator 4.0 donor service: vendor/$WFD_ALLOC_SERVICE"
+    return 1
+fi
+if ! LC_ALL=C readelf -h "$WFD_ALLOC_DONOR/$WFD_ALLOC_SERVICE" 2>/dev/null | grep -q 'ELF64'; then
+    ABORT "Allocator 4.0 donor service is not ELF64: $WFD_ALLOC_SERVICE"
+    return 1
+fi
+# How a HIDL implementation publishes itself depends on how it is consumed, and
+# getting this backwards is easy because the two mechanisms are different.
+#
+# The mapper is a passthrough: the 32-bit client dlopen's the library and calls
+# HIDL_FETCH_IMapper in it, so that symbol is the one worth checking there.
+#
+# The allocator is a real hwbinder service binary, so hwservicemanager never
+# loads it; it starts, and main() registers the interface itself through
+# IAllocator::registerAsService. Looking for HIDL_FETCH in it was simply the
+# wrong symbol, and it aborted the build against a perfectly good donor. Check
+# the method the service actually calls, plus the interface it registers, so a
+# donor that stopped registering still fails here.
+if ! strings "$WFD_ALLOC_DONOR/$WFD_ALLOC_SERVICE" 2>/dev/null | LC_ALL=C c++filt 2>/dev/null | \
+        grep -q 'IAllocator::registerAsService'; then
+    ABORT "Allocator 4.0 donor service does not register IAllocator::registerAsService"
+    return 1
+fi
+if ! strings "$WFD_ALLOC_DONOR/$WFD_ALLOC_SERVICE" 2>/dev/null | \
+        grep -q 'android.hardware.graphics.allocator@4.0.so'; then
+    ABORT "Allocator 4.0 donor service does not link the allocator 4.0 HIDL library"
+    return 1
+fi
+
+# The 64-bit libraries the service links against. /system/lib64 already carries
+# libbase, libcutils, liblog, libutils and the allocator 4.0 HIDL stub, so those
+# are not donated. The remaining four are absent from the target's vendor tree
+# even though its own allocator 2.0 service needs the same gralloc types, because
+# that service resolves them out of /system/lib64 through the default namespace.
+# A service registered with the vendor namespace cannot rely on that, so the
+# copies go to /vendor/lib64 where the namespace can actually see them.
+#
+# libion_exynos.so is not donated even though the service needs it. The target
+# already ships a 64-bit build in /vendor/lib64, so donating one would replace a
+# working library rather than fill a gap, and that library is shared with
+# gralloc.exynos990, libGLES_mali, libOpenCL, libgpudataproducer and the eden
+# runtime stub. The S22 build exports the same global set with the same soname
+# and every one of those consumers resolves against it, so the swap would very
+# likely link, but it would still be putting an Exynos 2400-era ION
+# implementation from different firmware underneath the GPU stack for no gain.
+# Leaving the target's own copy in place is strictly the lower-risk option.
+WFD_ALLOC_LIBS="
+lib64/libeis_utils.so
+lib64/libgralloctypes.so
+lib64/libhardware.so
+lib64/libhidlbase.so
+"
+for WFD_ALLOC_LIB in $WFD_ALLOC_LIBS; do
+    WFD_ALLOC_SRC="$WFD_ALLOC_DONOR/$WFD_ALLOC_LIB"
+    if [ ! -f "$WFD_ALLOC_SRC" ]; then
+        ABORT "Missing ARM64 allocator donor lib: vendor/$WFD_ALLOC_LIB"
+        return 1
+    fi
+    if ! LC_ALL=C readelf -h "$WFD_ALLOC_SRC" 2>/dev/null | grep -q 'ELF64'; then
+        ABORT "Allocator donor lib is not ELF64: $WFD_ALLOC_LIB"
+        return 1
+    fi
+    ADD_TO_WORK_DIR "r0sxxx" "vendor" "$WFD_ALLOC_LIB" \
+        0 2000 644 "u:object_r:same_process_hal_file:s0" || return 1
+done
+
+ADD_TO_WORK_DIR "r0sxxx" "vendor" "$WFD_ALLOC_SERVICE" \
+    0 2000 755 "u:object_r:hal_graphics_allocator_default_exec:s0" || return 1
+ADD_TO_WORK_DIR "r0sxxx" "vendor" "$WFD_ALLOC_RC" \
+    0 0 644 "u:object_r:vendor_file:s0" || return 1
+
+# A vendor service that cannot resolve one of its DT_NEEDED entries will not
+# start, and init will silently respawn it. Walk the service's own graph so the
+# build fails here instead of shipping a phone whose DeX never allocates.
+#
+# LC_ALL=C matters on the readelf side: the tool localises its output, and on
+# this build it prints "Biblioteca Compartilhada" rather than "Shared library",
+# which made the sed below match nothing and turned this loop into a no-op that
+# silently approved every donor.
+WFD_ALLOC_WORK="$WORK_DIR/vendor/$WFD_ALLOC_SERVICE"
+if [ ! -f "$WFD_ALLOC_WORK" ]; then
+    ABORT "Allocator 4.0 service was not staged into the work directory"
+    return 1
+fi
+WFD_ALLOC_NEEDED_LIST="$(LC_ALL=C readelf -d "$WFD_ALLOC_WORK" 2>/dev/null | \
+    LC_ALL=C sed -n 's/.*Shared library: \[\(.*\)\]/\1/p')"
+if [ -z "$WFD_ALLOC_NEEDED_LIST" ]; then
+    ABORT "Could not read DT_NEEDED from the allocator 4.0 service, refusing to skip the closure check"
+    return 1
+fi
+
+while read -r WFD_ALLOC_NEEDED; do
+    case "$WFD_ALLOC_NEEDED" in
+        libc.so|libdl.so|libdl_android.so|libm.so|libc++.so)
+            continue
+            ;;
+    esac
+    if [ -f "$WORK_DIR/vendor/lib64/$WFD_ALLOC_NEEDED" ] || \
+            [ -f "$WORK_DIR/system/system/lib64/$WFD_ALLOC_NEEDED" ]; then
+        continue
+    fi
+    ABORT "Allocator 4.0 service needs $WFD_ALLOC_NEEDED, which is in neither /vendor/lib64 nor /system/lib64"
+    return 1
+done <<EOF
+$WFD_ALLOC_NEEDED_LIST
+EOF
+
+# The service is a hwbinder HAL, so the declaration is transport-level and
+# carries no arch, exactly like the 2.0 entry it sits next to. Selecting the
+# 2.0 block by its own <name> keeps the rewrite from touching anything else in
+# the manifest.
+if ! grep -qF '<fqname>@4.0::IAllocator/default</fqname>' "$WFD_VINTF"; then
+    WFD_VINTF_ALLOC='    <hal format="hidl">
+        <name>android.hardware.graphics.allocator</name>
+        <transport>hwbinder</transport>
+        <version>4.0</version>
+        <interface>
+            <name>IAllocator</name>
+            <instance>default</instance>
+        </interface>
+        <fqname>@4.0::IAllocator/default</fqname>
+    </hal>'
+
+    WFD_VINTF_TMP="$WFD_VINTF.zzwfd.tmp"
+    awk -v add40="$WFD_VINTF_ALLOC" '
+        /<hal[ >]/ { inblock = 1; blk = $0 ORS; next }
+        inblock {
+            blk = blk $0 ORS
+            if ($0 ~ /<\/hal>/) {
+                if (blk ~ /<name>android\.hardware\.graphics\.allocator<\/name>/ &&
+                        blk !~ /@4\.0::IAllocator/) {
+                    printf "%s", blk
+                    printf "%s\n", add40
+                } else {
+                    printf "%s", blk
+                }
+                inblock = 0
+                blk = ""
+            }
+            next
+        }
+        { print }
+    ' "$WFD_VINTF" > "$WFD_VINTF_TMP" || {
+        ABORT "Failed to rewrite the allocator block in VINTF"
+        rm -f "$WFD_VINTF_TMP"
+        return 1
+    }
+
+    # The 2.0 entry must survive untouched for ARM64, and the new 4.0 entry
+    # must be the only allocator 4.0 in the file.
+    if [ "$(grep -cF '<fqname>@2.0::IAllocator/default</fqname>' "$WFD_VINTF_TMP")" != "1" ] || \
+            [ "$(grep -cF '<fqname>@4.0::IAllocator/default</fqname>' "$WFD_VINTF_TMP")" != "1" ]; then
+        ABORT "VINTF rewrite did not produce exactly one 2.0 and one 4.0 allocator entry"
+        rm -f "$WFD_VINTF_TMP"
+        return 1
+    fi
+
+    cat "$WFD_VINTF_TMP" > "$WFD_VINTF" || {
+        ABORT "Failed to install the rewritten allocator VINTF"
+        rm -f "$WFD_VINTF_TMP"
+        return 1
+    }
+    rm -f "$WFD_VINTF_TMP"
+    LOG "  - allocator 4.0 hwbinder service declared alongside the existing 2.0"
+fi
+
 fi
 
 # Reject incomplete or mixed-architecture dependency graphs during the build.
