@@ -1,4 +1,4 @@
-id=extremekrnl
-name=ExtremeKRNL Kernel support
-author=ExtremeXT
-description=Adds ExtremeKRNL in ROM.
+id=gmkernel_r8s
+name=GMKernel r8s Android 17 integration
+author=GMNevz, Android-Artisan, ExtremeXT, KernelSU-Next contributors
+description=Integrates the pinned GMKernel for SM-G780F, preserving checked charging, undervolt, boot and Android 17 compatibility contracts.
