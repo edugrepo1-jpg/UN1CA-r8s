@@ -1,0 +1,6 @@
+id=cgroup_legacy
+name=Source-compatible cgroup configuration for Exynos 990
+version=2.2
+versionCode=4
+author=miguelbarretoo
+description=Uses the S24+ compatible cgroup descriptors with the target's available legacy groups, preserves the source libcgrouprc/libchrome ABI, activates memory-v2 at boot, exposes cgroup.kill, and removes unrelated donor Chromium libraries.

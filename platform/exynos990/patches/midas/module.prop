@@ -1,0 +1,4 @@
+id=midas
+name=MIDAS Fix
+author=ExtremeXT
+description=Restores the source-firmware MIDAS stack with an Exynos 990 Lite model fallback.

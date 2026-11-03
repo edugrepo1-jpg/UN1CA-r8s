@@ -1,0 +1,6 @@
+id=dex_wired
+name=Exynos990 Wired Dex Fix
+version=v1.0
+versionCode=1
+author=HackMe
+description=Fixes UI stutter and graphical artifacts in Wired Dex.

@@ -1,0 +1,6 @@
+id=display_ddiscaler
+name=DDIScaler Boot resolution fix for Exynos990
+version=v1.0
+versionCode=1
+author=HackMe
+description=Fixes screen shrinking during boot by allowing early DDIScaler setup.
