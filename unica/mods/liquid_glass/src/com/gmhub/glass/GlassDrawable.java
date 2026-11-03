@@ -2,6 +2,7 @@ package com.gmhub.glass;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -27,6 +28,7 @@ import java.nio.charset.StandardCharsets;
  */
 public final class GlassDrawable extends BitmapDrawable {
     public static final String ENGINE_KEY = "gmhub_liquid_glass_engine";
+    public static final String PURE_BLACK_KEY = "gmhub_pure_black";
     private static final String TAG = "GMHubGlass";
     private static final int MAX_SHADER_BYTES = 128 * 1024;
     private static final int MAX_PIXELS = 4 * 1024 * 1024;
@@ -43,6 +45,7 @@ public final class GlassDrawable extends BitmapDrawable {
     private final RuntimeShader mapper;
     private final Paint glass = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint veil = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint black = new Paint();
     private final float density;
     private int width, height;
     private long nextPolicyCheck;
@@ -52,6 +55,11 @@ public final class GlassDrawable extends BitmapDrawable {
     public static BitmapDrawable wrap(Context c, Bitmap raw, BitmapDrawable original, String scene) {
         if (!"QUICK_PANEL".equals(scene) || original == null || Build.VERSION.SDK_INT < 33)
             return original;
+        // Solid black needs no shader, extra capture or bitmap allocation.
+        if (pureBlack(c)) {
+            try { return new GlassDrawable(c, raw, original, 0); }
+            catch (RuntimeException | LinkageError | OutOfMemoryError ex) { return original; }
+        }
         // Check capture dimensions before creating a shader/texture, not just
         // the output view in draw(). A small view can reference a huge capture.
         // Keeping Samsung's existing blurred drawable needs no new allocation.
@@ -89,6 +97,14 @@ public final class GlassDrawable extends BitmapDrawable {
         } catch (RuntimeException ex) { return false; }
     }
 
+    private static boolean pureBlack(Context c) {
+        try {
+            return (c.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                    == Configuration.UI_MODE_NIGHT_YES
+                && Settings.Global.getInt(c.getContentResolver(), PURE_BLACK_KEY, 0) == 1;
+        } catch (RuntimeException ex) { return false; }
+    }
+
     private static synchronized String source(Context c, int engine) {
         if (SOURCES[engine] != null) return SOURCES[engine];
         String[] names = {"", "qwea", "kyant", "color"};
@@ -115,6 +131,12 @@ public final class GlassDrawable extends BitmapDrawable {
         this.raw = raw;
         engine = e;
         density = c.getResources().getDisplayMetrics().density;
+        black.setColor(0xff000000);
+        if (e == 0) {
+            lens = null;
+            mapper = null;
+            return;
+        }
         lens = new RuntimeShader(source(c, e));
         mapper = e == 3 ? null : new RuntimeShader(MAPPER);
         Bitmap chosen = e == 3 ? raw : original.getBitmap();
@@ -170,7 +192,8 @@ public final class GlassDrawable extends BitmapDrawable {
             f("uDebugCoord", 0); f("uDebugHighlight", 0);
             f("uMaskRect", 0, 0, w, h); f("uMaskCornerRadius", 0);
             f("uMaskWeight", 1.3968f); f("uMaskOffset", 0, 0);
-            // These two legacy uniforms are optimized away by this upstream shader.
+            f("uMaskAlpha", 0); f("uMaskColor", 0, 0, 0, 1);
+            // Keep metaball and tilt effects disabled for the native QS backdrop.
             f("uMetaballEnable", 0); f("uBodyRect", 0, 0, 0, 0);
             f("uBall1", 0, 0, 0, 0); f("uBall2", 0, 0, 0, 0); f("uBall3", 0, 0, 0, 0);
             f("uMetaballParam", 0, 0, 0, 0); f("uTilt", 0, 0, 0, 0);
@@ -189,6 +212,15 @@ public final class GlassDrawable extends BitmapDrawable {
         Rect b = getBounds();
         if (b.isEmpty() || getAlpha() == 0) return;
         fallback.setBounds(b);
+        if (engine == 0) {
+            if (pureBlack(context)) {
+                black.setAlpha(getAlpha());
+                canvas.drawRect(b, black);
+            } else {
+                fallback.draw(canvas);
+            }
+            return;
+        }
         long now = SystemClock.uptimeMillis();
         // At most once per second WHILE drawn; no timer, observer or idle work.
         if (now >= nextPolicyCheck) {

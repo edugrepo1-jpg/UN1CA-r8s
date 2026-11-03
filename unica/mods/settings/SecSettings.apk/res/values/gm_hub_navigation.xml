@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_hub_appearance">Aparência</string>
+    <string name="gm_hub_display_performance">Tela e desempenho</string>
+    <string name="gm_hub_monitoring">Monitoramento</string>
+    <string name="gm_hub_system">Sistema e privacidade</string>
+    <string name="gm_hub_information">Sobre a ROM</string>
+    <string name="gm_hub_materials">Liquid Glass e Pure Black</string>
+    <string name="gm_hub_display_controls">Tela e aplicativos em cache</string>
+    <string name="gm_hub_memory_title">Memória RAM</string>
+    <string name="gm_hub_battery_title">Informações da bateria</string>
+</resources>
