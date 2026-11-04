@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_bluetooth_absolute_summary">Separa o volume do telefone e do acessório Bluetooth. Reconecte o acessório após alterar esta opção.</string>
+    <string name="gm_thermal_title">Temperaturas do hardware</string>
+    <string name="gm_thermal_summary">Leituras dos sensores, sem alterar limites</string>
+    <string name="gm_thermal_loading">Lendo sensores…</string>
+    <string name="gm_thermal_empty">Nenhum sensor térmico acessível. As temperaturas não são estimadas.</string>
+    <string name="gm_thermal_unavailable">Indisponível</string>
+    <string name="gm_thermal_read_only">Sensores informados pelo aparelho. As proteções térmicas são preservadas.</string>
+</resources>

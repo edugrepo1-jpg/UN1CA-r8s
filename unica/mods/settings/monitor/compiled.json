@@ -1,0 +1,19 @@
+{
+  "sdk_api": 37,
+  "min_api": 33,
+  "sources": {
+    "monitor/src/com/gmhub/monitor/ThermalPanel.java": "d4e912243653eeb7043f178ef2cd9ef459a543cd72a819bf5403964e12d93d64",
+    "monitor/src/com/gmhub/monitor/ThermalReader.java": "faae52f63e6d12b468b147e10a7ecfb8b347460c6c900e7866c322010972fb40"
+  },
+  "generated": {
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalPanel$$ExternalSyntheticLambda0.smali": "1231c4ed11b2ba8f85313b02a398740b93b91944e56a103389539dc195b49963",
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalPanel$$ExternalSyntheticLambda1.smali": "0e163a8cc12c7dd709df826edb54cd18e65bf570caed4f36eb7360732c027ea3",
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalPanel$$ExternalSyntheticLambda2.smali": "3bafd76e3b2dc7ef4fc0bee17c7b4da37313844a6a6c573f6cda173ea1d06134",
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalPanel.smali": "79a9878ce9ff60931c173b5f764850f697a57d400f205f48c2898628d08b77f7",
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalReader$$ExternalSyntheticLambda0.smali": "aa662d07ffa9a5bed9fea3691c28a757115b0e0c3124428935a390b0c45c43c5",
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalReader$$ExternalSyntheticLambda1.smali": "07457efd09817840909ade5a6d08dd368a3adfb138c4281db0fa53a3eed502de",
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalReader$$ExternalSyntheticLambda2.smali": "69845dac9a6ab16f1e369ee63526d68091207bb95a52555a77247ce4c9884f60",
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalReader$Reading.smali": "0c057ebcc538c49ae24b7afcab4522b27813f5491d5d501a3c2a840c3d25c433",
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalReader.smali": "fcc313d140dd542fcec2b4f608782c18bd83de360ed89a76a6c633d5e6555bb1"
+  }
+}

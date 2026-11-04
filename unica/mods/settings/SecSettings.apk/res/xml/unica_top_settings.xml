@@ -11,6 +11,7 @@
         <Preference android:icon="@drawable/ic_unica_settings_extra" android:title="@string/paradox_core_modes_title" android:key="gm_hub_core_modes" android:fragment="com.paradox.hub.ParadoxCoreModesFragment" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/gm_hub_monitoring">
+        <Preference android:icon="@drawable/ic_unica_settings_about" android:title="@string/gm_thermal_title" android:summary="@string/gm_thermal_summary" android:key="gm_hub_thermal" android:fragment="com.paradox.hub.ParadoxThermalFragment" />
         <Preference android:icon="@drawable/ic_unica_settings_spoof" android:title="@string/gm_hub_memory_title" android:key="gm_hub_memory" android:fragment="com.paradox.hub.ParadoxMemoryFragment" />
         <Preference android:icon="@drawable/ic_unica_settings_about" android:title="@string/gm_hub_battery_title" android:key="gm_hub_battery" android:fragment="com.paradox.hub.ParadoxBatteryFragment" />
     </PreferenceCategory>

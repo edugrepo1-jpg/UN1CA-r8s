@@ -811,10 +811,8 @@
     const/4 v3, 0x0
 
     :goto_1
-    const-string v4, "bluetooth_disable_absolute_volume"
-
-    invoke-static {v1, v4, v3}, Landroid/provider/Settings$Secure;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z
-
+    invoke-static {v2}, Lcom/paradox/hub/ParadoxBluetoothVolume;->setDisabled(Z)Z
+    move-result v6
     return v6
 
     :cond_3
@@ -1360,12 +1358,7 @@
 
     check-cast v1, Landroidx/preference/TwoStatePreference;
 
-    const-string v2, "bluetooth_disable_absolute_volume"
-
-    const/4 v3, 0x0
-
-    invoke-static {v0, v2, v3}, Landroid/provider/Settings$Secure;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
-
+    invoke-static {}, Lcom/paradox/hub/ParadoxBluetoothVolume;->isDisabled()Z
     move-result v2
 
     if-eqz v2, :cond_6

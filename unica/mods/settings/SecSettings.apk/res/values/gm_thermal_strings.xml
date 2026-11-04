@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_bluetooth_absolute_summary">Use separate phone and Bluetooth accessory volume. Reconnect the accessory after changing this option.</string>
+    <string name="gm_thermal_title">Hardware temperatures</string>
+    <string name="gm_thermal_summary">Read-only sensor temperatures</string>
+    <string name="gm_thermal_loading">Reading sensors…</string>
+    <string name="gm_thermal_empty">No readable thermal sensors. Measurements are not estimated.</string>
+    <string name="gm_thermal_unavailable">Unavailable</string>
+    <string name="gm_thermal_read_only">Sensors reported by the device. Thermal protection remains unchanged.</string>
+</resources>
