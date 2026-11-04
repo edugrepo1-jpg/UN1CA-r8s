@@ -60,7 +60,7 @@ public final class GridEditOverlay extends ViewGroup implements AutoCloseable {
                 ||!Float.isFinite(gap)||cellWidth<48*density||cellHeight<48*density
                 ||gap<0||gap>=Math.min(cellWidth,cellHeight)||page<0)
             throw new IllegalArgumentException("Invalid measured native QS grid");
-        if(this.originX!=left||this.originY!=top||this.cellWidth!=cellWidth||this.cellHeight!=cellHeight||this.page!=page)
+        if(this.originX!=left||this.originY!=top||this.cellWidth!=cellWidth||this.cellHeight!=cellHeight||this.gap!=gap||this.page!=page)
             cancelGesture();
         this.originX=left;this.originY=top;this.cellWidth=cellWidth;this.cellHeight=cellHeight;this.gap=gap;this.page=page;
         requestLayout();

@@ -125,9 +125,12 @@ public final class SamsungScene implements AutoCloseable {
         geometry = new NativeGeometry(this, store, columns, rows, screenFlag, deviceFlag);
         return geometry;
     }
-    boolean geometryAllowed() throws Exception {
+    boolean geometryOwned() throws Exception {
         if (Thread.currentThread()!=owner) throw new IllegalStateException("QS UI thread required");
-        return !closed && number(invoke(host,"getUserId"))==user && editAllowed();
+        return !closed && number(invoke(host,"getUserId"))==user;
+    }
+    boolean geometryAllowed() throws Exception {
+        return geometryOwned() && editAllowed();
     }
     public boolean edit() throws Exception {
         check();

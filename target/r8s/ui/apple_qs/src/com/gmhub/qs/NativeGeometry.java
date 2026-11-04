@@ -91,7 +91,8 @@ public final class NativeGeometry implements AutoCloseable {
      * stale state without publishing a partially edited grid. */
     public boolean preview(QsLayout.Snapshot snapshot) throws Exception {
         checkThread();
-        if(closed || !scene.geometryAllowed() || !owns())return false;
+        if(closed)return false;
+        if(!scene.geometryAllowed() || !owns()) { close(); return false; }
         if(snapshot==null || snapshot.board.columns!=columns || snapshot.board.rows!=rows
                 || snapshot.cards.size()!=original.size())return false;
         Set<String> keys=new HashSet<>(); boolean[][] occupied=new boolean[rows][columns];
@@ -121,7 +122,8 @@ public final class NativeGeometry implements AutoCloseable {
     }
     public boolean commit() throws Exception {
         checkThread();
-        if(closed || !scene.geometryAllowed() || !owns())return false;
+        if(closed)return false;
+        if(!scene.geometryAllowed() || !owns()) { close(); return false; }
         closed=true; return true;
     }
     @Override public void close() {
@@ -130,7 +132,9 @@ public final class NativeGeometry implements AutoCloseable {
         try {
             // A new orientation, user, controller or native gallery edit owns
             // its own grid; cancellation must never overwrite that state.
-            if(scene.geometryAllowed() && owns())update(original);
+            // Locking prevents NEW edits, but must still cancel this user's
+            // uncommitted preview. Ownership checks protect a new user/grid.
+            if(scene.geometryOwned() && owns())update(original);
         } catch(Exception ignored) {
             // Base remains owned by Samsung if it was already torn down.
         } finally { closed=true; }
