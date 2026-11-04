@@ -7,7 +7,11 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[4] / 'scripts/internal'))
+from sdk_smali import disassemble
 
 def compile_sources(root, sdk, java_home, apktool):
     exe='.exe' if os.name=='nt' else ''
@@ -26,8 +30,7 @@ def compile_sources(root, sdk, java_home, apktool):
         subprocess.run([java,'-cp',str(sdk/'build-tools/36.0.0/lib/d8.jar'),'com.android.tools.r8.D8',
                         '--release','--min-api','33','--lib',str(android),'--output',str(tmp),
                         *map(str,classes.rglob('*.class'))],check=True)
-        subprocess.run([java,'-cp',str(apktool),'com.android.tools.smali.baksmali.Main','disassemble',
-                        '--api','37','--use-locals','--output',str(tmp/'smali'),str(tmp/'classes.dex')],check=True)
+        disassemble(java, apktool, tmp/'classes.dex', tmp/'smali')
         generated=sorted((tmp/'smali').rglob('*.smali'))
         if not generated or any('com/gmhub/uv/' not in p.as_posix() for p in generated):
             raise ValueError('Unexpected generated classes')

@@ -11,7 +11,11 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'scripts/internal'))
+from sdk_smali import disassemble
 
 
 def compile_adapter(module, sdk, java_home, apktool, build_tools='36.0.0'):
@@ -36,9 +40,7 @@ def compile_adapter(module, sdk, java_home, apktool, build_tools='36.0.0'):
                         'com.android.tools.r8.D8', '--release', '--min-api', '33', '--lib', str(android),
                         '--output', str(tmp), *files], check=True)
         smali = tmp / 'smali'
-        subprocess.run([str(java), '-cp', str(apktool), 'com.android.tools.smali.baksmali.Main',
-                        'disassemble', '--api', '37', '--use-locals', '--output', str(smali),
-                        str(tmp / 'classes.dex')], check=True)
+        disassemble(java, apktool, tmp / 'classes.dex', smali)
         compiled = list(smali.rglob('*.smali'))
         if [f.relative_to(smali).as_posix() for f in compiled] != ['com/gmhub/glass/GlassDrawable.smali']:
             raise ValueError('Unexpected generated adapter classes')
