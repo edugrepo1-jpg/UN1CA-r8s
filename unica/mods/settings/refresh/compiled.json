@@ -1,0 +1,10 @@
+{
+  "sdk_api": 37,
+  "min_api": 33,
+  "sources": {
+    "refresh/src/com/gmhub/refresh/RefreshSettings.java": "77f4757664e9847636f190149073ae394459a640d093f01f72e08cc627c85bdf"
+  },
+  "generated": {
+    "SecSettings.apk/smali_classes4/com/gmhub/refresh/RefreshSettings.smali": "81e5a96f4c2559d8ce601ff26ac9f34dcaa32338945676b07650bed770a56220"
+  }
+}

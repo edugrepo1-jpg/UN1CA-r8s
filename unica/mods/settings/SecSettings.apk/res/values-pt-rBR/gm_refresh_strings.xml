@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_refresh_failed">Não foi possível confirmar a alteração da taxa. Os controles mostram o estado lido do sistema.</string>
+</resources>

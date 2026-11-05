@@ -1135,70 +1135,25 @@
 .end method
 
 .method public onPreferenceTreeClick(Landroidx/preference/Preference;)Z
-    .locals 5
-
+    .locals 3
     invoke-virtual {p1}, Landroidx/preference/Preference;->getKey()Ljava/lang/String;
-
     move-result-object v0
-
-    const-string/jumbo v1, "reset_refresh_rate"
-
+    const-string v1, "reset_refresh_rate"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
+    move-result v0
+    if-eqz v0, :other
+    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
+    move-result-object v0
+    invoke-static {v0}, Lcom/gmhub/refresh/RefreshSettings;->reset(Landroid/content/Context;)Z
     move-result v1
-
-    if-eqz v1, :cond_0
-
-    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
-
-    move-result-object v0
-
-    const-string/jumbo v1, "refresh_rate_mode"
-
-    const/4 v2, 0x1
-
-    invoke-static {v0, v1, v2}, Landroid/provider/Settings$Secure;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z
-
-    const-string v1, "min_refresh_rate"
-
-    const/high16 v2, 0x42700000    # 60.0f
-
-    invoke-static {v0, v1, v2}, Landroid/provider/Settings$System;->putFloat(Landroid/content/ContentResolver;Ljava/lang/String;F)Z
-
-    const-string v1, "peak_refresh_rate"
-
-    const/high16 v2, 0x42f00000    # 120.0f
-
-    invoke-static {v0, v1, v2}, Landroid/provider/Settings$System;->putFloat(Landroid/content/ContentResolver;Ljava/lang/String;F)Z
-
-    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
-
-    move-result-object v1
-
-    const-string v2, "paradox_toast_refresh"
-
-    invoke-static {v1, v2}, Lcom/paradox/hub/ParadoxCenterFragment;->getParadoxString(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
-
-    move-result-object v2
-
-    const/4 v3, 0x0
-
-    invoke-static {v1, v2, v3}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
-
-    move-result-object v1
-
-    invoke-virtual {v1}, Landroid/widget/Toast;->show()V
-
-    :cond_0
+    invoke-static {v0, v1}, Lcom/gmhub/refresh/RefreshSettings;->report(Landroid/content/Context;Z)V
+    invoke-virtual {p0}, Lcom/paradox/hub/ParadoxCenterFragment;->syncRefresh()V
+    const/4 v0, 0x1
+    return v0
+    :other
     invoke-super {p0, p1}, Lcom/android/settings/SettingsPreferenceFragment;->onPreferenceTreeClick(Landroidx/preference/Preference;)Z
-
-    move-result p1
-
-    return p1
+    move-result v0
+    return v0
 .end method
 
 .method public onResume()V
@@ -1235,58 +1190,7 @@
     invoke-virtual {v1, v2}, Landroidx/preference/ListPreference;->setValue(Ljava/lang/String;)V
 
     :cond_0
-    const-string v1, "min_refresh_rate"
-
-    invoke-virtual {p0, v1}, Landroidx/preference/PreferenceFragmentCompat;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
-
-    move-result-object v1
-
-    if-eqz v1, :cond_1
-
-    check-cast v1, Landroidx/preference/ListPreference;
-
-    const-string v2, "min_refresh_rate"
-
-    const/high16 v3, 0x42700000    # 60.0f
-
-    invoke-static {v0, v2, v3}, Landroid/provider/Settings$System;->getFloat(Landroid/content/ContentResolver;Ljava/lang/String;F)F
-
-    move-result v2
-
-    float-to-int v2, v2
-
-    invoke-static {v2}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
-
-    move-result-object v2
-
-    invoke-virtual {v1, v2}, Landroidx/preference/ListPreference;->setValue(Ljava/lang/String;)V
-
-    :cond_1
-    const-string v1, "max_refresh_rate"
-
-    invoke-virtual {p0, v1}, Landroidx/preference/PreferenceFragmentCompat;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
-
-    move-result-object v1
-
-    if-eqz v1, :cond_2
-
-    check-cast v1, Landroidx/preference/ListPreference;
-
-    const-string v2, "peak_refresh_rate"
-
-    const/high16 v3, 0x42f00000    # 120.0f
-
-    invoke-static {v0, v2, v3}, Landroid/provider/Settings$System;->getFloat(Landroid/content/ContentResolver;Ljava/lang/String;F)F
-
-    move-result v2
-
-    float-to-int v2, v2
-
-    invoke-static {v2}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
-
-    move-result-object v2
-
-    invoke-virtual {v1, v2}, Landroidx/preference/ListPreference;->setValue(Ljava/lang/String;)V
+    invoke-virtual {p0}, Lcom/paradox/hub/ParadoxCenterFragment;->syncRefresh()V
 
     :cond_2
     const-string v1, "cached_apps_freezer"
@@ -1461,4 +1365,27 @@
     move-exception v0
     const/4 v0, 0x0
     return v0
+.end method
+
+.method public syncRefresh()V
+    .locals 3
+    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
+    move-result-object v0
+    const-string v1, "min_refresh_rate"
+    invoke-virtual {p0, v1}, Landroidx/preference/PreferenceFragmentCompat;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
+    move-result-object v1
+    if-eqz v1, :maximum
+    check-cast v1, Landroidx/preference/ListPreference;
+    invoke-static {v1, v0}, Lcom/paradox/hub/ParadoxRefreshModes;->configure(Landroidx/preference/ListPreference;Landroid/content/Context;)V
+    invoke-static {v0, v1}, Lcom/paradox/hub/ParadoxRefreshModes;->sync(Landroid/content/Context;Landroidx/preference/ListPreference;)V
+    :maximum
+    const-string v1, "max_refresh_rate"
+    invoke-virtual {p0, v1}, Landroidx/preference/PreferenceFragmentCompat;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
+    move-result-object v1
+    if-eqz v1, :done
+    check-cast v1, Landroidx/preference/ListPreference;
+    invoke-static {v1, v0}, Lcom/paradox/hub/ParadoxRefreshModes;->configure(Landroidx/preference/ListPreference;Landroid/content/Context;)V
+    invoke-static {v0, v1}, Lcom/paradox/hub/ParadoxRefreshModes;->sync(Landroid/content/Context;Landroidx/preference/ListPreference;)V
+    :done
+    return-void
 .end method

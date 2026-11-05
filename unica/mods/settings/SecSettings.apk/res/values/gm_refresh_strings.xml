@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_refresh_failed">The refresh settings could not be confirmed. The controls show the state read back from the system.</string>
+</resources>

@@ -3,6 +3,7 @@ python3 "$MODPATH/undervolt/verify.py" || return 1
 python3 "$MODPATH/monitor/verify.py" || return 1
 python3 "$MODPATH/apps/verify.py" || return 1
 python3 "$MODPATH/profiles/verify.py" || return 1
+python3 "$MODPATH/refresh/verify.py" || return 1
 
 # Show battery regulatory info in Settings
 # Requires SEM_BATTERY_PROPERTY_IC_AUTHENTICATION_RESULT support

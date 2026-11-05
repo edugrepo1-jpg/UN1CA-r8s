@@ -39,6 +39,9 @@
     if-ne v7, v4, :next
     invoke-virtual {v6}, Landroid/view/Display$Mode;->getRefreshRate()F
     move-result v7
+    invoke-static {v7}, Ljava/lang/Float;->isFinite(F)Z
+    move-result v8
+    if-eqz v8, :next
     invoke-static {v7}, Ljava/lang/Math;->round(F)I
     move-result v7
     if-lez v7, :next
@@ -88,54 +91,34 @@
 # Reject values absent from the current panel and keep minimum <= maximum.
 # Provider values are the authority; do not save a second SharedPreferences copy.
 .method public static apply(Landroid/content/Context;Landroidx/preference/ListPreference;Landroidx/preference/ListPreference;Ljava/lang/String;)Z
-    .locals 7
-
-    invoke-virtual {p1, p3}, Landroidx/preference/ListPreference;->findIndexOfValue(Ljava/lang/String;)I
-    move-result v0
-    if-ltz v0, :reject
-    :try_start
-    invoke-static {p3}, Ljava/lang/Float;->parseFloat(Ljava/lang/String;)F
-    move-result v0
-    :try_end
-    .catch Ljava/lang/NumberFormatException; {:try_start .. :try_end} :reject_exception
-    invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
-    move-result-object v1
+    .locals 3
+    invoke-static {p1, p0}, Lcom/paradox/hub/ParadoxRefreshModes;->configure(Landroidx/preference/ListPreference;Landroid/content/Context;)V
     invoke-virtual {p1}, Landroidx/preference/Preference;->getKey()Ljava/lang/String;
-    move-result-object v2
-    const-string v3, "min_refresh_rate"
-    const-string v4, "peak_refresh_rate"
-    invoke-virtual {v3, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-    move-result v5
-    if-eqz v5, :maximum
-    invoke-static {v1, v4, v0}, Landroid/provider/Settings$System;->getFloat(Landroid/content/ContentResolver;Ljava/lang/String;F)F
-    move-result v6
-    cmpg-float v6, v0, v6
-    if-lez v6, :write
-    goto :adjust
-
-    :maximum
-    move-object v3, v4
-    const-string v4, "min_refresh_rate"
-    invoke-static {v1, v4, v0}, Landroid/provider/Settings$System;->getFloat(Landroid/content/ContentResolver;Ljava/lang/String;F)F
-    move-result v6
-    cmpl-float v6, v0, v6
-    if-gez v6, :write
-
-    :adjust
-    invoke-static {v1, v4, v0}, Landroid/provider/Settings$System;->putFloat(Landroid/content/ContentResolver;Ljava/lang/String;F)Z
-    move-result v6
-    if-eqz v6, :reject
-    if-eqz p2, :write
-    invoke-virtual {p2, p3}, Landroidx/preference/ListPreference;->setValue(Ljava/lang/String;)V
-
-    :write
-    invoke-static {v1, v3, v0}, Landroid/provider/Settings$System;->putFloat(Landroid/content/ContentResolver;Ljava/lang/String;F)Z
+    move-result-object v0
+    invoke-static {p0, v0, p3}, Lcom/gmhub/refresh/RefreshSettings;->applySingle(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)Z
     move-result v0
-    return v0
-
-    :reject_exception
-    move-exception v0
-    :reject
+    invoke-static {p0, p1}, Lcom/paradox/hub/ParadoxRefreshModes;->sync(Landroid/content/Context;Landroidx/preference/ListPreference;)V
+    if-eqz p2, :result
+    invoke-static {p2, p0}, Lcom/paradox/hub/ParadoxRefreshModes;->configure(Landroidx/preference/ListPreference;Landroid/content/Context;)V
+    invoke-static {p0, p2}, Lcom/paradox/hub/ParadoxRefreshModes;->sync(Landroid/content/Context;Landroidx/preference/ListPreference;)V
+    :result
+    if-nez v0, :done
+    invoke-static {p0, v0}, Lcom/gmhub/refresh/RefreshSettings;->report(Landroid/content/Context;Z)V
+    :done
+    # Values were set from provider readback; do not let ListPreference overwrite them.
     const/4 v0, 0x0
     return v0
+.end method
+
+.method public static sync(Landroid/content/Context;Landroidx/preference/ListPreference;)V
+    .locals 2
+    invoke-virtual {p1}, Landroidx/preference/Preference;->getKey()Ljava/lang/String;
+    move-result-object v0
+    const-string v1, "min_refresh_rate"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    invoke-static {p0, v0}, Lcom/gmhub/refresh/RefreshSettings;->value(Landroid/content/Context;Z)Ljava/lang/String;
+    move-result-object v0
+    invoke-virtual {p1, v0}, Landroidx/preference/ListPreference;->setValue(Ljava/lang/String;)V
+    return-void
 .end method
