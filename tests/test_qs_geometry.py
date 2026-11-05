@@ -29,9 +29,11 @@ public final class NativeGeometryContract {
     }
     public static class Item {
         boolean fixed;
+        public final String id="native-player-identity";
         public String getUniqueKey() { return "media"; }
         public String getType() { return "MediaPlayer"; }
         public boolean isResizeEnabled() { return !fixed; }
+        public boolean isRemovable() { return true; }
         public Constraints resizeConstraints(int columns,int rows,boolean screen,boolean device) {
             return new Constraints(screen,fixed);
         }
@@ -130,6 +132,53 @@ public final class NativeGeometryContract {
         void lock(){nativeScene.viewModel.keyguardStateController.unlocked=false;nativeScene.viewModel.keyguardStateController.visible=true;}
     }
     public static void main(String[] args) throws Exception {
+        // Capturing the native layout is read-only and does not "repair" a
+        // scene behind the renderer's back or emit a redundant StateFlow write.
+        Fixture captureFixture=new Fixture();int writes=captureFixture.store.updates;
+        NativeGeometry capture=captureFixture.edit();
+        QsLayout.Snapshot capturedLayout=capture.initialLayout();
+        check(capturedLayout!=null&&capturedLayout.find("media").width==2);
+        capture.close();check(captureFixture.store.updates==writes);
+        // Repeated offers of the same snapped geometry do not write another
+        // native flow value. An unrelated move retains the original media
+        // wrapper as well as the original player/model, not only an equal copy.
+        Fixture dedup=new Fixture();NativeGeometry still=dedup.edit();
+        writes=dedup.store.updates;
+        for(int i=0;i<100;i++)check(still.preview(dedup.unchanged()));
+        check(dedup.store.updates==writes);
+        check(still.preview(dedup.moved()));writes=dedup.store.updates;
+        Object samePlayerWrapper=dedup.store.items().get(0);
+        for(int i=0;i<100;i++)check(still.preview(dedup.moved()));
+        check(dedup.store.updates==writes&&dedup.store.items().get(0)==samePlayerWrapper);
+        still.close();check(dedup.store.items().get(0)==dedup.original);
+        Fixture pair=new Fixture();
+        Item quickTile=new Item(){
+            public String getUniqueKey(){return "wifi";}
+            public String getType(){return "QuickTile";}
+            public boolean isResizeEnabled(){return false;}
+        };
+        Slot wifi=new Slot(quickTile,1,1,3L<<32,0,0,0,null,null,null,false,false,false,false,null);
+        pair.store.updateQsPanelItems(Arrays.asList(pair.original,wifi));
+        NativeGeometry moveWifi=pair.edit();
+        QsLayout.Snapshot changedWifi=QsLayout.place(moveWifi.initialLayout(),"wifi",2,2,1,1,0,moveWifi.sizePolicy());
+        check(changedWifi!=null&&moveWifi.preview(changedWifi));
+        check(pair.store.items().get(0)==pair.original);
+        moveWifi.close();
+        Fixture empty=new Fixture();empty.store.updateQsPanelItems(Collections.emptyList());
+        NativeGeometry emptyEdit=empty.edit();
+        check(emptyEdit.initialLayout().cards.isEmpty());check(emptyEdit.preview(emptyEdit.initialLayout()));
+        emptyEdit.close();
+        QsLayout.Board exactBoard=new QsLayout.Board(4,4,1);
+        List<QsLayout.Card> exactCards=Arrays.asList(
+            new QsLayout.Card("media","media",QsLayout.Kind.MEDIA,0,0,2,2,0),
+            new QsLayout.Card("wifi","wifi",QsLayout.Kind.TILE,3,0,1,1,0));
+        QsLayout.Snapshot exact=QsLayout.exact(exactBoard,exactCards,QsLayout.DEFAULT_SIZES);
+        check(exact!=null&&exact.find("wifi").x==3);
+        QsLayout.Snapshot placed=QsLayout.place(exact,"media",1,0,3,4,0,QsLayout.DEFAULT_SIZES);
+        check(placed!=null&&placed.find("media").x==1&&placed.find("media").width==3);
+        check(placed.find("wifi").x==0);check(exact.find("wifi").x==3);
+        check(QsLayout.exact(exactBoard,Arrays.asList(exactCards.get(0),exactCards.get(1).at(0,0,0)),QsLayout.DEFAULT_SIZES)==null);
+        check(QsLayout.exact(exactBoard,Arrays.asList(exactCards.get(0).at(-1,0,0)),QsLayout.DEFAULT_SIZES)==null);
         // Closing the scene on lock restores only its uncommitted geometry.
         Fixture f=new Fixture(); NativeGeometry edit=f.edit();
         check(edit.preview(f.moved())); check(f.store.items().get(0)!=f.original);

@@ -67,8 +67,9 @@ public final class GridEditOverlay extends ViewGroup implements AutoCloseable {
                 ||!Float.isFinite(gap)||cellWidth<=gap||cellHeight<=gap
                 ||gap<0||gap>=Math.min(cellWidth,cellHeight)||page<0)
             throw new IllegalArgumentException("Invalid measured native QS grid");
-        if(this.originX!=left||this.originY!=top||this.cellWidth!=cellWidth||this.cellHeight!=cellHeight||this.gap!=gap||this.page!=page)
-            cancelGesture();
+        if(this.originX==left&&this.originY==top&&this.cellWidth==cellWidth&&this.cellHeight==cellHeight&&this.gap==gap&&this.page==page)
+            return;
+        cancelGesture();
         this.originX=left;this.originY=top;this.cellWidth=cellWidth;this.cellHeight=cellHeight;this.gap=gap;this.page=page;
         emptySlots.reset();
         requestLayout();
@@ -177,6 +178,7 @@ public final class GridEditOverlay extends ViewGroup implements AutoCloseable {
         // transaction to cancel. Do not close an unrelated accepted edit.
         if(begun)commands.end(true);
     }
+    public void cancelInteraction() { ui();cancelGesture();touchTarget=null; }
     private void getParentDisallow(boolean disallow) {
         if(getParent()!=null)getParent().requestDisallowInterceptTouchEvent(disallow);
     }

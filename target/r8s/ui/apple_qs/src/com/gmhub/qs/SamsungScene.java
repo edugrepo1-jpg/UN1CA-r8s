@@ -23,18 +23,21 @@ public final class SamsungScene implements AutoCloseable {
 
     public static final class Slot {
         public final Object nativeSlot, nativeItem;
-        public final String key, type;
+        public final String key, type, elementId;
         public final int x, y, width, height;
-        public final boolean resizable;
-        private Slot(Object slot) throws Exception {
+        public final boolean resizable, removable;
+        private Slot(Object slot, boolean placed) throws Exception {
             nativeSlot = slot;
             nativeItem = field(slot, "gridTileItem");
             key = (String) invoke(nativeItem, "getUniqueKey");
             type = (String) invoke(nativeItem, "getType");
+            elementId = (String) field(nativeItem, "id");
             x = number(invoke(slot, "getSpanX")); y = number(invoke(slot, "getSpanY"));
             width = number(invoke(slot, "getSpanWidth")); height = number(invoke(slot, "getSpanHeight"));
             resizable = Boolean.TRUE.equals(invoke(nativeItem, "isResizeEnabled"));
-            if (key == null || type == null || key.isEmpty() || x < 0 || y < 0 || width <= 0 || height <= 0)
+            removable = Boolean.TRUE.equals(invoke(nativeItem, "isRemovable"));
+            if (key == null || type == null || key.isEmpty() || elementId == null || elementId.isEmpty()
+                    || (placed && (x < 0 || y < 0)) || width <= 0 || height <= 0)
                 throw new IllegalArgumentException("Invalid Samsung grid slot");
         }
     }
@@ -100,12 +103,19 @@ public final class SamsungScene implements AutoCloseable {
         if (!(values instanceof Collection)) throw new IllegalArgumentException("Changed native gallery contract");
         return Collections.unmodifiableList(new ArrayList<>((Collection<?>) values));
     }
+    /** The native palette contains QSPanelItem previews, not bare GridTileItem
+     * objects. Keep the selected preview token and its original dimensions. */
+    public List<Slot> paletteSlots() throws Exception {
+        List<Slot> result = new ArrayList<>();
+        for (Object slot : palette()) result.add(new Slot(slot, false));
+        return Collections.unmodifiableList(result);
+    }
     public List<Slot> slots() throws Exception {
         check();
         Object values = invoke(field(store, "qsPanelItems"), "getValue");
         if (!(values instanceof Collection)) throw new IllegalArgumentException("Changed native panel item contract");
         List<Slot> result = new ArrayList<>();
-        for (Object slot : (Collection<?>) values) result.add(new Slot(slot));
+        for (Object slot : (Collection<?>) values) result.add(new Slot(slot, true));
         return Collections.unmodifiableList(result);
     }
     /** The caller supplies the exact native screen flags, not assumptions based

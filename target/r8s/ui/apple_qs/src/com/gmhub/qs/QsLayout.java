@@ -153,6 +153,26 @@ public final class QsLayout {
     public static Snapshot restore(Board board, List<Card> saved, SizePolicy sizes) {
         return pack(board, saved, null, sizes);
     }
+    /** Capture the live Samsung grid without silently repairing/repacking it.
+     * If the current scene cannot be represented, keep its native editor. */
+    public static Snapshot exact(Board board,List<Card> cards,SizePolicy sizes) {
+        if(board==null || sizes==null || !identityValid(cards))return null;
+        int[][] occupied=new int[board.pages][board.rows];
+        for(Card card:cards) {
+            if(!sizeFits(card,board,sizes) || !fits(card,card.x,card.y,card.page,board,occupied))return null;
+            mark(card,occupied);
+        }
+        return new Snapshot(board,cards);
+    }
+    /** One pack for a pointer event; changing both dimensions and position must
+     * not reflow neighboring controls twice through intermediate layouts. */
+    public static Snapshot place(Snapshot base,String key,int x,int y,int width,int height,int page,SizePolicy sizes) {
+        if(base==null || base.find(key)==null)return null;
+        List<Card> changed=new ArrayList<>(base.cards);
+        for(int i=0;i<changed.size();i++)if(changed.get(i).key.equals(key))
+            changed.set(i,changed.get(i).resize(width,height).at(x,y,page));
+        return pack(base.board,changed,key,sizes);
+    }
     public static Snapshot move(Snapshot base, String key, int x, int y, int page, SizePolicy sizes) {
         if (base == null || base.find(key) == null) return null;
         List<Card> changed = new ArrayList<>(base.cards);

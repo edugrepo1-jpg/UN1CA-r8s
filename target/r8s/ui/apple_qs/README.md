@@ -101,3 +101,55 @@ These changes prepare the editor's appearance and touch behavior. They do not
 install the full alternate panel; the status at the top of this file still
 applies. Visual identity, transitions, group navigation and the final gallery
 need verification in the completed SystemUI binding before claiming parity.
+
+## Native editor controller and researched implementation
+
+`NativeGridEditor` now connects the edit handles to `NativeGeometry`,
+`NativePanelActions` and the original `NativeEditorSave` coroutine. It takes the
+native measured cell pitch, viewport origin and screen flags; it does not infer
+them from display size. The final Compose scene must create it in `AndroidView`,
+update those measurements from the native grid and close it on permanent
+`onRelease`. Temporary detach cancels the pointer without destroying a reusable
+view. Rotation, another native edit, user changes and keyguard invalidate an
+owned geometry transaction before it can overwrite newer state.
+
+Adding uses the donor gallery's `canPlaceTopLeft-Bjo55l4` and
+`commitAddTile-3UiIcl8` with the ordinary-tap flags `false,false`. A preview is
+not inserted directly into StateFlow: the native factory supplies the working
+control/provider. Removal filters the original UUID and calls the native
+`eliminateEmptyLines`, honoring `isRemovable`. Unrelated native items and the
+media ViewModel retain identity. Stale gallery tokens, write-safe mode, ignored
+writes and partial mutations are not reported as successful edits.
+
+Geometry resolves its immutable donor fields/constructor once per transaction,
+reuses wrappers for unchanged controls and skips duplicate StateFlow writes for
+the same snapped geometry. Position and size change in one layout calculation;
+neighbors are derived from the gesture baseline rather than repeatedly repacked
+from the previous preview. These changes remove unnecessary work; they are not
+a measured device FPS improvement.
+
+Research was checked against pinned source, not feature lists:
+
+* LineageOS `lineage-24.0`, `696a5773fa284f53429dbb6c3e5dcc96bf5bd0b3`:
+  [edit state](https://github.com/LineageOS/android_frameworks_base/blob/696a5773fa284f53429dbb6c3e5dcc96bf5bd0b3/packages/SystemUI/src/com/android/systemui/qs/panels/ui/compose/EditTileListState.kt),
+  [edit actions](https://github.com/LineageOS/android_frameworks_base/blob/696a5773fa284f53429dbb6c3e5dcc96bf5bd0b3/packages/SystemUI/src/com/android/systemui/qs/panels/ui/viewmodel/EditModeViewModel.kt),
+  [single-user persistence](https://github.com/LineageOS/android_frameworks_base/blob/696a5773fa284f53429dbb6c3e5dcc96bf5bd0b3/packages/SystemUI/src/com/android/systemui/qs/pipeline/data/repository/UserTileSpecRepository.kt).
+  Adopt atomic native operations, stable identities and one writer per user.
+  Its AOSP interactor and repository cannot replace Samsung's Compose store.
+* crDroid `17.0`, `21a2fd02bba542df0438f2465bb288b42590714f`:
+  [grid selection](https://github.com/crdroidandroid/android_frameworks_base/blob/21a2fd02bba542df0438f2465bb288b42590714f/packages/SystemUI/src/com/android/systemui/qs/panels/data/repository/GridLayoutTypeRepository.kt).
+  A layout choice is separate from the control/provider lifecycle; it is not
+  three complete panels just because three glass shaders are available.
+* Axion SDK `60fa902f7ef2debd9c13cd21515951208c4c7390`:
+  [native media sizes](https://github.com/AxionAOSP/android_axion_sdk/blob/60fa902f7ef2debd9c13cd21515951208c4c7390/ax_systemui/src/com/android/systemui/qs/ax/ui/media/AxQsMediaGridLayout.kt).
+  Use measured span constraints. Do not import its redesigned player; retain
+  the One UI player and Samsung's exact `resizeConstraints` result.
+* [Android View interoperability](https://developer.android.com/develop/ui/compose/migrate/interoperability-apis/views-in-compose):
+  `AndroidView` factory/update/release own the edit overlay. A Compose root is
+  not a legacy ViewGroup to reparent, and a ViewOverlay is not a touch host.
+
+The remaining entry integration must supply the actual native scrolling/RTL
+coordinates, composition lifecycle, scene selection and gallery/header actions.
+Do not expose a Hub switch while it would select a controller that is not mounted.
+Separate orientation/style metadata must not overwrite the native One UI layout.
+The installation flag remains staged until those pieces are connected.
