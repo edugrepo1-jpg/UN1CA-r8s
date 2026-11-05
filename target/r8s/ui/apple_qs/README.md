@@ -19,9 +19,32 @@ An ignored update is an error. A failure after publishing rolls back only the
 editor's own state. Cancellation must not overwrite a rotated grid, another user
 or a concurrent native edit. Keyguard appearance cancels uncommitted geometry.
 
-`commit()` accepts in-memory geometry only. Durable layout writes belong to
-`EditorSession`/`LayoutPersistence` and still require the final panel binding;
-do not describe the geometry adapter alone as reboot persistence.
+`commit()` accepts in-memory geometry only. `NativeEditorSave` dispatches the
+original Samsung editor coroutine and observes its actual Job completion. It
+keeps the native ViewModel scope, converters, media item and repository; it does
+not invoke a suspend method manually or mistake leaving edit mode for a write.
+Write-safe mode, partial dispatch failure, stale-user callbacks and a rejected
+UI executor cannot be reported as successful persistence. Disposal detaches the
+completion observer, never cancels Samsung's scope/job. The final scene binding
+must close this adapter with its owner. `EditorSession`/`LayoutPersistence` remain
+available for alternate-profile metadata; they must not overwrite Samsung's
+native geometry store or act as a second writer for the same edit.
+
+Neither the geometry adapter nor a normally completed job alone demonstrates
+reboot persistence. The final panel/installer and physical cold-load check are
+still required.
+
+The native One UI 9 player is not redesigned or replaced. Its exact donor
+`MediaPlayer.resizeConstraints` permits 2x1 or 2x2 minimum spans (depending on
+the native screen flag) and up to 4x4; these are grid spans, not pixel dimensions.
+`NativeGeometry.sizePolicy()` freezes those real limits for layout calculations,
+including background reads, and `preview()` rechecks live limits before writing.
+An unsupported width/height is rejected instead of scaling or cropping media
+controls. Only geometry wrappers change; the original item, media ViewModel,
+artwork and native callbacks remain owned by Samsung. Geometry edits require
+the unlocked native editor to remain open. The renderer must preserve the same
+native item/Compose key and use its original content, not render a substitute
+player from these spans.
 
 The overlay supplies menu alternatives for dragging/resizing and uses
 48dp Android touch regions. Cancelling a pointer before a native transaction has

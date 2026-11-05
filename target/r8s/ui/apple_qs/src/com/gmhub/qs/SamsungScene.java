@@ -14,7 +14,7 @@ import java.util.List;
  */
 public final class SamsungScene implements AutoCloseable {
     private final Thread owner = Thread.currentThread();
-    private final Object model, adapter, host, store, grid, available;
+    private final Object model, adapter, host, store, grid, available, editModel;
     private final int user;
     private final SamsungTiles tiles;
     private final Method collapse, edit, power, settings, dragging;
@@ -60,6 +60,8 @@ public final class SamsungScene implements AutoCloseable {
         store = field(model, "$$delegate_2");
         grid = field(model, "$$delegate_1");
         field(grid, "currentGridSize");
+        editModel = field(model, "$$delegate_0");
+        field(editModel, "editMode");
         available = field(model, "$$delegate_3");
         user = number(invoke(host, "getUserId"));
         collapse = method(model, "collapse"); edit = method(model, "launchEditMode");
@@ -122,7 +124,7 @@ public final class SamsungScene implements AutoCloseable {
     }
     public NativeGeometry beginGeometry(int columns, int rows, boolean screenFlag, boolean deviceFlag) throws Exception {
         check();
-        if (!editAllowed()) throw new IllegalStateException("Unlock before editing QS");
+        if (!geometryAllowed()) throw new IllegalStateException("Open the unlocked native QS editor before editing geometry");
         if (geometry != null && geometry.isOpen()) throw new IllegalStateException("QS geometry is already being edited");
         geometry = new NativeGeometry(this, store, columns, rows, screenFlag, deviceFlag);
         return geometry;
@@ -137,8 +139,13 @@ public final class SamsungScene implements AutoCloseable {
         if (Thread.currentThread()!=owner) throw new IllegalStateException("QS UI thread required");
         return !closed && number(invoke(host,"getUserId"))==user;
     }
+    boolean geometryInProgress() {
+        if (Thread.currentThread()!=owner) throw new IllegalStateException("QS UI thread required");
+        return geometry != null && geometry.isOpen();
+    }
     boolean geometryAllowed() throws Exception {
-        return geometryOwned() && editAllowed();
+        return geometryOwned() && editAllowed()
+            && Boolean.TRUE.equals(invoke(field(editModel,"editMode"),"getValue"));
     }
     public boolean edit() throws Exception {
         check();

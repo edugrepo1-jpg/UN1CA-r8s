@@ -19,7 +19,23 @@ public final class NativeGeometry implements AutoCloseable {
     private final List<Object> original;
     private List<Object> published;
     private final Map<String, SamsungScene.Slot> slots = new LinkedHashMap<>();
+    private final QsLayout.SizePolicy sizePolicy;
     private boolean closed;
+
+    private static final class SizeRule {
+        final SamsungScene.Bounds bounds;
+        final int width, height;
+        final boolean resizable, media;
+        SizeRule(SamsungScene.Slot slot, SamsungScene.Bounds bounds) {
+            this.bounds=bounds; width=slot.width; height=slot.height;
+            resizable=slot.resizable; media="MediaPlayer".equals(slot.type);
+        }
+        boolean allows(QsLayout.Card card) {
+            return (!media || card.kind==QsLayout.Kind.MEDIA)
+                && (resizable ? bounds.allows(card.width,card.height)
+                    : card.width==width && card.height==height);
+        }
+    }
 
     NativeGeometry(SamsungScene scene, Object store, int columns, int rows,
                    boolean screenFlag, boolean deviceFlag) throws Exception {
@@ -33,13 +49,25 @@ public final class NativeGeometry implements AutoCloseable {
         original=items(); published=original;
         List< SamsungScene.Slot> visible=scene.slots();
         if (visible.size()!=original.size()) throw new IllegalStateException("Native grid is still changing");
+        Map<String,SizeRule> rules=new HashMap<>();
         for(int i=0;i<visible.size();i++) {
             SamsungScene.Slot slot=visible.get(i);
             if(slot.nativeSlot!=original.get(i) || slots.put(slot.key,slot)!=null)
                 throw new IllegalStateException("Unstable or duplicate native grid item");
             if(Boolean.TRUE.equals(field(slot.nativeSlot,"expanded")))
                 throw new IllegalStateException("Close the expanded native control before editing");
+            rules.put(slot.key,new SizeRule(slot,scene.bounds(slot,columns,rows,screenFlag,deviceFlag)));
         }
+        // Freeze only primitive size rules. A background layout load may use
+        // this policy without touching a Compose item, player or UI StateFlow.
+        // Preview still rechecks the live native bounds before publication.
+        Map<String,SizeRule> limits=Collections.unmodifiableMap(rules);
+        sizePolicy=(card,board)->{
+            if(card==null || board==null || board.columns!=columns || board.rows!=rows
+                    || board.pages!=1 || card.page!=0)return false;
+            SizeRule rule=limits.get(card.key);
+            return rule!=null && rule.allows(card);
+        };
     }
     private static Object field(Object o,String name) throws Exception {
         Field f=o.getClass().getField(name); f.setAccessible(true); return f.get(o);
@@ -111,6 +139,11 @@ public final class NativeGeometry implements AutoCloseable {
         if(Thread.currentThread()!=owner)throw new IllegalStateException("QS UI thread required");
     }
     public boolean isOpen() { checkThread(); return !closed; }
+    /** Pass these native limits to QsLayout.restore/move/resize, rather than
+     * assuming a generic media minimum. The donor permits a compact 2x1 player
+     * in one screen mode and 2x2 in the other, with a 4x4 maximum in both.
+     * This immutable policy contains no player/model references. */
+    public QsLayout.SizePolicy sizePolicy() { checkThread(); return sizePolicy; }
     /** Moves/resizes the complete visible grid in ONE native StateFlow update.
      * Rejects duplicates, overlaps, hidden pages, unsupported native sizes and
      * stale state without publishing a partially edited grid. */
@@ -128,7 +161,9 @@ public final class NativeGeometry implements AutoCloseable {
                     || card.width<1 || card.height<1 || card.width>columns || card.height>rows
                     || card.x>columns-card.width || card.y>rows-card.height)return false;
             if(!slot.resizable && (card.width!=slot.width || card.height!=slot.height))return false;
-            if(!scene.bounds(slot,columns,rows,screenFlag,deviceFlag).allows(card.width,card.height))return false;
+            // A fixed native control keeps its existing dimensions. Generic
+            // resize constraints must not invalidate an unresizable bar.
+            if(slot.resizable && !scene.bounds(slot,columns,rows,screenFlag,deviceFlag).allows(card.width,card.height))return false;
             for(int y=card.y;y<card.y+card.height;y++)for(int x=card.x;x<card.x+card.width;x++) {
                 if(occupied[y][x])return false; occupied[y][x]=true;
             }

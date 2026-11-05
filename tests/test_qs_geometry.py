@@ -28,15 +28,20 @@ public final class NativeGeometryContract {
         public Object getValue() { return value; }
     }
     public static class Item {
+        boolean fixed;
         public String getUniqueKey() { return "media"; }
         public String getType() { return "MediaPlayer"; }
-        public boolean isResizeEnabled() { return true; }
+        public boolean isResizeEnabled() { return !fixed; }
         public Constraints resizeConstraints(int columns,int rows,boolean screen,boolean device) {
-            return new Constraints();
+            return new Constraints(screen,fixed);
         }
     }
     public static class Constraints {
-        public long min=(1L<<32)|1, max=(8L<<32)|8;
+        public final long min,max;
+        Constraints(boolean compact,boolean fixed) {
+            min=fixed?(1L<<32)|1:(2L<<32)|(compact?1:2);
+            max=fixed?(1L<<32)|1:(4L<<32)|4;
+        }
     }
     public static class Slot {
         public final Item gridTileItem;
@@ -91,7 +96,9 @@ public final class NativeGeometryContract {
         public boolean isUnlocked(){return unlocked;} public boolean isVisible(){return visible;}
     }
     public static class Grid { public final Flow currentGridSize=new Flow(42L); }
+    public static class Edit { public final Flow editMode=new Flow(true); }
     public static class Model {
+        public final Edit $$delegate_0=new Edit();
         public final Grid $$delegate_1=new Grid();
         public final Host qsHost=new Host();
         public final Store $$delegate_2=new Store();
@@ -180,6 +187,51 @@ public final class NativeGeometryContract {
         f=new Fixture();edit=f.edit();f.store.throwAfterNext=true;
         try{edit.preview(f.moved());throw new AssertionError("late failure accepted");}
         catch(java.lang.reflect.InvocationTargetException expected){check(f.store.items().get(0)==f.original);}
+        check(edit.preview(f.moved()));edit.close();check(f.store.items().get(0)==f.original);
+        // Use the donor's actual media limits. The same original player/model,
+        // metadata and controls survive independent width/height changes.
+        for(boolean compact:new boolean[]{false,true}) {
+            f=new Fixture();edit=f.scene.beginGeometry(4,4,compact,false);
+            QsLayout.SizePolicy policy=edit.sizePolicy();
+            QsLayout.Snapshot base=QsLayout.restore(f.board,Collections.singletonList(
+                new QsLayout.Card("media","media",QsLayout.Kind.MEDIA,0,0,2,2,0)),policy);
+            for(int w=1;w<=5;w++)for(int h=1;h<=5;h++) {
+                QsLayout.Snapshot resized=QsLayout.resize(base,"media",w,h,policy);
+                boolean valid=w>=2&&w<=4&&h>=(compact?1:2)&&h<=4;
+                check((resized!=null)==valid);
+                if(!valid)continue;
+                check(edit.preview(resized));
+                Slot resizedSlot=(Slot)f.store.items().get(0);
+                check(resizedSlot.gridTileItem==f.player);
+                check(resizedSlot.getSpanWidth()==w&&resizedSlot.getSpanHeight()==h);
+                check(resizedSlot.translationOffset==f.original.translationOffset);
+                check(resizedSlot.extraHeight==5f&&resizedSlot.expandedHeight==7f);
+            }
+            // Frozen rules may validate persisted geometry off the UI thread;
+            // only publication touches the native flow on its owner thread.
+            final QsLayout.SizePolicy captured=policy;final boolean[] allowed={false};
+            Thread worker=new Thread(()->allowed[0]=captured.allows(
+                new QsLayout.Card("media","media",QsLayout.Kind.MEDIA,0,0,4,4,0),new QsLayout.Board(4,4,1)));
+            worker.start();worker.join();check(allowed[0]);
+            check(!policy.allows(new QsLayout.Card("foreign","media",QsLayout.Kind.MEDIA,0,0,2,2,0),f.board));
+            check(!policy.allows(base.find("media"),new QsLayout.Board(8,4,1)));
+            check(!policy.allows(base.find("media"),new QsLayout.Board(4,4,2)));
+            check(!policy.allows(new QsLayout.Card("media","media",QsLayout.Kind.TILE,0,0,2,2,0),f.board));
+            edit.close();check(f.store.items().get(0)==f.original);
+        }
+        // Leaving the native editor (including while native save is running)
+        // prevents an old handle from mutating the native player's geometry.
+        f=new Fixture();edit=f.edit();check(edit.preview(f.moved()));
+        f.nativeScene.viewModel.$$delegate_0.editMode.value=false;
+        check(!edit.preview(f.moved()));check(f.store.items().get(0)==f.original);
+        try{f.edit();throw new AssertionError("geometry started outside native edit mode");}
+        catch(IllegalStateException expected){check(f.store.items().get(0)==f.original);}
+        // A fixed native bar/control remains movable at its original size,
+        // even when generic resize bounds do not describe that fixed size.
+        f=new Fixture();f.player.fixed=true;edit=f.edit();
+        QsLayout.Snapshot fixedBase=QsLayout.restore(f.board,Collections.singletonList(
+            new QsLayout.Card("media","media",QsLayout.Kind.MEDIA,0,0,2,2,0)),edit.sizePolicy());
+        check(fixedBase!=null);check(QsLayout.resize(fixedBase,"media",3,2,edit.sizePolicy())==null);
         check(edit.preview(f.moved()));edit.close();check(f.store.items().get(0)==f.original);
         System.out.println(checks+" editor lifecycle checks passed");
     }

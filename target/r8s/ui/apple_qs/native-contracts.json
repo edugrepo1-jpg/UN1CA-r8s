@@ -16,7 +16,9 @@
         "$$delegate_2:Lcom/android/systemui/samsung/quicksetting/ui/panel/PanelItemStoreImpl;",
         "$$delegate_3:Lcom/android/systemui/samsung/quicksetting/ui/panel/AvailableGridTilesViewModelImpl;",
         "keyguardStateController:Lcom/android/systemui/statusbar/policy/KeyguardStateController;",
-        "$$delegate_1:Lcom/android/systemui/samsung/quicksetting/ui/panel/GridStoreImpl;"
+        "$$delegate_1:Lcom/android/systemui/samsung/quicksetting/ui/panel/GridStoreImpl;",
+        "$$delegate_0:Lcom/android/systemui/samsung/quicksetting/ui/panel/EditModeViewModelImpl;",
+        "saveEventCoordinator:Lcom/android/systemui/samsung/quicksetting/ui/panel/SaveEventCoordinatorImpl;"
       ],
       "methods": [
         "collapse()V",
@@ -163,6 +165,70 @@
     "com/android/systemui/samsung/quicksetting/ui/panel/GridStoreImpl": {
       "fields": [
         "currentGridSize:Lkotlinx/coroutines/flow/ReadonlyStateFlow;"
+      ],
+      "methods": []
+    },
+    "com/android/systemui/samsung/quicksetting/domain/model/items/MediaPlayer": {
+      "fields": [
+        "viewModel:Lcom/android/systemui/samsung/quicksetting/ui/media/QSMediaPlayerViewModel;"
+      ],
+      "methods": [
+        "resizeConstraints(IIZZ)Lcom/android/systemui/samsung/quicksetting/domain/model/SpanSizeConstraints;"
+      ]
+    },
+    "com/android/systemui/samsung/quicksetting/ui/panel/EditModeViewModelImpl": {
+      "fields": [
+        "editMode:Lkotlinx/coroutines/flow/ReadonlyStateFlow;"
+      ],
+      "methods": [
+        "toggleEditMode()V"
+      ]
+    },
+    "com/android/systemui/samsung/quicksetting/ui/panel/SaveEventCoordinatorImpl": {
+      "fields": [
+        "gridTileRepository:Lcom/android/systemui/samsung/quicksetting/domain/repository/GridTileRepository;"
+      ],
+      "methods": []
+    },
+    "com/android/systemui/samsung/quicksetting/data/repository/GridTileRepositoryImpl": {
+      "fields": [],
+      "methods": [
+        "isGridPrefsWriteSafeModeActive()Z"
+      ]
+    },
+    "com/android/systemui/samsung/quicksetting/ui/panel/QuickSettingSceneViewModel$commitDataChanged$1": {
+      "fields": [],
+      "methods": [
+        "<init>(Lcom/android/systemui/samsung/quicksetting/ui/panel/QuickSettingSceneViewModel;Lkotlin/coroutines/Continuation;)V"
+      ]
+    },
+    "androidx/lifecycle/ViewModelKt": {
+      "fields": [],
+      "methods": [
+        "getViewModelScope(Landroidx/lifecycle/ViewModel;)Landroidx/lifecycle/viewmodel/internal/CloseableCoroutineScope;"
+      ]
+    },
+    "kotlinx/coroutines/BuildersKt": {
+      "fields": [],
+      "methods": [
+        "launch$default(Lkotlinx/coroutines/CoroutineScope;Lkotlin/coroutines/CoroutineContext;Lkotlinx/coroutines/CoroutineStart;Lkotlin/jvm/functions/Function2;I)Lkotlinx/coroutines/Job;"
+      ]
+    },
+    "kotlinx/coroutines/Job": {
+      "fields": [],
+      "methods": [
+        "invokeOnCompletion(Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/DisposableHandle;"
+      ]
+    },
+    "kotlinx/coroutines/DisposableHandle": {
+      "fields": [],
+      "methods": [
+        "dispose()V"
+      ]
+    },
+    "kotlin/Unit": {
+      "fields": [
+        "INSTANCE:Lkotlin/Unit;"
       ],
       "methods": []
     }
