@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_pure_black_title">Pure Black no sistema</string>
+    <string name="gm_pure_black_summary">Aplica preto aos fundos e superfícies do tema do sistema e dos apps compatíveis. Ativa o modo escuro; ao desativar, restaura as alterações feitas por esta opção.</string>
+    <string name="gm_pure_black_failed">Não foi possível confirmar o tema. Abra esta página novamente para conferir a recuperação.</string>
+</resources>

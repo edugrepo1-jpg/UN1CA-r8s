@@ -101,7 +101,7 @@ public final class GlassDrawable extends BitmapDrawable {
         try {
             return (c.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
                     == Configuration.UI_MODE_NIGHT_YES
-                && Settings.Global.getInt(c.getContentResolver(), PURE_BLACK_KEY, 0) == 1;
+                && Settings.Secure.getInt(c.getContentResolver(), PURE_BLACK_KEY, 0) == 1;
         } catch (RuntimeException ex) { return false; }
     }
 

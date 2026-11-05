@@ -28,7 +28,7 @@ public final class ProfileEngine {
         public final boolean pending;
         public final Map<String, Entry> entries;
         public State(String mode, boolean pending, Map<String, Entry> entries) {
-            if (!Arrays.asList("stock", "smooth", "gaming", "battery").contains(mode))
+            if (!Arrays.asList("stock", "smooth", "gaming", "battery", "pure_black").contains(mode))
                 throw new IllegalArgumentException("Unknown profile");
             this.mode = mode; this.pending = pending;
             this.entries = Collections.unmodifiableMap(new LinkedHashMap<>(entries));
@@ -51,7 +51,7 @@ public final class ProfileEngine {
         return state.mode;
     }
     public synchronized void apply(String mode, Map<String, String> plan) throws Exception {
-        if (!Arrays.asList("smooth", "gaming", "battery").contains(mode) || plan.isEmpty())
+        if (!Arrays.asList("smooth", "gaming", "battery", "pure_black").contains(mode) || plan.isEmpty())
             throw new IllegalArgumentException("Invalid profile plan");
         State before = store.load();
         if (before.pending) throw new IllegalStateException("Restore the incomplete transaction first");

@@ -4,6 +4,7 @@ python3 "$MODPATH/monitor/verify.py" || return 1
 python3 "$MODPATH/apps/verify.py" || return 1
 python3 "$MODPATH/profiles/verify.py" || return 1
 python3 "$MODPATH/refresh/verify.py" || return 1
+python3 "$MODPATH/pureblack/verify.py" || return 1
 
 # Show battery regulatory info in Settings
 # Requires SEM_BATTERY_PROPERTY_IC_AUTHENTICATION_RESULT support
@@ -185,3 +186,12 @@ unset TOP_LEVEL_KEYS_FILE TOP_LEVEL_KEYS_LOCALS TOP_LEVEL_KEYS_ARRAY
 unset TOP_LEVEL_KEYS_LAST_REGISTER TOP_LEVEL_KEYS_NEW_REGISTER TOP_LEVEL_KEYS_NEW_LOCALS
 
 LOG_STEP_OUT
+
+# Pure Black is a native system theme, not a QS-only resource patch.
+if [[ "$TARGET_CODENAME" == "r8s" && "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]]; then
+    DECODE_APK "system_ext" "priv-app/SystemUI/SystemUI.apk"
+    python3 "$MODPATH/pureblack/install.py" "$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk" || \
+        ABORT "GM Hub native Pure Black theme integration failed"
+    SET_PROP "system" "ro.gmhub.pure_black.scope" "system_theme"
+    SET_PROP "system" "ro.gmhub.pure_black.available" "true"
+fi

@@ -51,9 +51,6 @@
     if-eqz v1, :glass_engine
     invoke-direct {p0, p2}, Lcom/paradox/hub/GlassSettingsFragment;->savePureBlack(Ljava/lang/Object;)Z
     move-result v0
-    if-eqz v0, :notify_failed
-    invoke-direct {p0}, Lcom/paradox/hub/GlassSettingsFragment;->syncPureBlack()V
-    const/4 v0, 0x0
     return v0
     :glass_engine
     const/4 v0, 0x0
@@ -183,71 +180,36 @@
 .end method
 
 .method private savePureBlack(Ljava/lang/Object;)Z
-    .locals 4
+    .locals 3
     const/4 v0, 0x0
     instance-of v1, p1, Ljava/lang/Boolean;
-    if-eqz v1, :done
-    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
-    move-result-object v1
     if-eqz v1, :done
     check-cast p1, Ljava/lang/Boolean;
     invoke-virtual {p1}, Ljava/lang/Boolean;->booleanValue()Z
     move-result v2
-    :try_start
-    invoke-virtual {v1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
+    move-result-object v0
+    if-eqz v0, :no_context
+    const-string v1, "gmhub_pure_black"
+    invoke-virtual {p0, v1}, Landroidx/preference/PreferenceFragmentCompat;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
     move-result-object v1
-    const-string p1, "gmhub_pure_black"
-    invoke-static {v1, p1, v2}, Landroid/provider/Settings$Global;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z
-    move-result v0
-    if-eqz v0, :try_end
-    const/4 v3, -0x1
-    invoke-static {v1, p1, v3}, Landroid/provider/Settings$Global;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
-    move-result v3
-    if-eq v3, v2, :try_end
-    const/4 v0, 0x0
-    :try_end
-    .catch Ljava/lang/RuntimeException; {:try_start .. :try_end} :failed
-    return v0
-    :failed
-    move-exception v1
+    invoke-static {v0, v1, v2}, Lcom/gmhub/theme/PureBlackControl;->change(Landroid/content/Context;Ljava/lang/Object;Z)V
+    :no_context
     const/4 v0, 0x0
     :done
     return v0
 .end method
 
 .method private syncPureBlack()V
-    .locals 4
+    .locals 2
     invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
     move-result-object v0
     if-eqz v0, :done
     const-string v1, "gmhub_pure_black"
     invoke-virtual {p0, v1}, Landroidx/preference/PreferenceFragmentCompat;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
     move-result-object v1
-    instance-of v2, v1, Landroidx/preference/SwitchPreferenceCompat;
-    if-eqz v2, :done
-    check-cast v1, Landroidx/preference/SwitchPreferenceCompat;
-    const-string v2, "ro.gmhub.pure_black.available"
-    const/4 v3, 0x0
-    invoke-static {v2, v3}, Landroid/os/SystemProperties;->getBoolean(Ljava/lang/String;Z)Z
-    move-result v2
-    invoke-virtual {v1, v2}, Landroidx/preference/Preference;->setEnabled(Z)V
-    :try_start
-    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
-    move-result-object v0
-    const-string v2, "gmhub_pure_black"
-    const/4 v3, 0x0
-    invoke-static {v0, v2, v3}, Landroid/provider/Settings$Global;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
-    move-result v0
-    const/4 v2, 0x1
-    if-ne v0, v2, :value_ready
-    const/4 v3, 0x1
-    :value_ready
-    invoke-virtual {v1, v3}, Landroidx/preference/TwoStatePreference;->setChecked(Z)V
-    :try_end
-    .catch Ljava/lang/RuntimeException; {:try_start .. :try_end} :failed
-    return-void
-    :failed
-    move-exception v0
+    if-eqz v1, :done
+    invoke-static {v0, v1}, Lcom/gmhub/theme/PureBlackControl;->sync(Landroid/content/Context;Ljava/lang/Object;)V
     :done
     return-void
 .end method

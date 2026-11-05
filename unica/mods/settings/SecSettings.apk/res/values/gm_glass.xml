@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="gm_pure_black_title">Pure Black</string>
-    <string name="gm_pure_black_summary">Fundo preto no QS em modo escuro. Desative para voltar ao material escolhido. Aplicado ao abrir novamente o painel.</string>
+    <string name="gm_pure_black_summary">Aplica preto aos fundos e superfícies do tema do sistema e dos apps compatíveis. Ativa o modo escuro; ao desativar, restaura as alterações feitas por esta opção.</string>
     <string name="gm_glass_title">Liquid Glass</string>
     <string name="gm_glass_home_summary">QWEA, Kyant Backdrop e ColorOS: escolha o motor de vidro</string>
     <string name="gm_glass_engine_title">Motor de vidro</string>
@@ -29,4 +29,5 @@
     <string-array name="gm_glass_engine_values">
         <item>0</item><item>1</item><item>2</item><item>3</item>
     </string-array>
+    <string name="gm_pure_black_failed">Não foi possível confirmar o tema. Abra esta página novamente para conferir a recuperação.</string>
 </resources>

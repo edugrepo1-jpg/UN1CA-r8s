@@ -1,0 +1,19 @@
+{
+  "sdk_api": 37,
+  "min_api": 33,
+  "sources": {
+    "pureblack/src/com/gmhub/theme/PureBlackBackend.java": "47b9c5e061128c03f7366714a008a16b698e7332d3bc363700ccbcf2a2cc16f9",
+    "pureblack/src/com/gmhub/theme/PureBlackControl.java": "bbb496da670ea5eec4cf1ad99c1d12619d81bb8b44acffb900cf117b717fcfb6",
+    "pureblack/src/com/gmhub/theme/PureBlackPolicy.java": "373da65bedef48cb6a690b2dc39307809f8d361f4c610e42796931296d42730b"
+  },
+  "generated": {
+    "SecSettings.apk/smali_classes4/com/gmhub/theme/PureBlackBackend.smali": "746beae6d0de37406ab9fddb206c4c35ffa4fe0abf78822c267209f140ac55fa",
+    "SecSettings.apk/smali_classes4/com/gmhub/theme/PureBlackControl$$ExternalSyntheticLambda0.smali": "c424ed0f19ab263365505a890b58abedcdafc48fd493c6400987f0ec5817aca5",
+    "SecSettings.apk/smali_classes4/com/gmhub/theme/PureBlackControl$$ExternalSyntheticLambda1.smali": "cca86db3a55ec49aa995b03a7dbc10fb7520ffa9afc1c61ae9eacfb66efcdd9b",
+    "SecSettings.apk/smali_classes4/com/gmhub/theme/PureBlackControl.smali": "73ac71a14636dc45ab25c185566faaa8a9b9b416a5b593f2f66afb2d0ed3114c",
+    "SecSettings.apk/smali_classes4/com/gmhub/theme/PureBlackPolicy.smali": "8f8021451b17b9e5794b150483ea4f34d1ccf28eeeea22a1058263bdac375fe9"
+  },
+  "dependencies": {
+    "profiles/src/com/gmhub/profiles/ProfileEngine.java": "25dcf75d33f8ca142189ca4be2b2ebab0c88d8754ded48d3345ce3f154c4412d"
+  }
+}

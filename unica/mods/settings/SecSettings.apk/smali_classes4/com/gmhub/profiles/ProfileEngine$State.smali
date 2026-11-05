@@ -33,7 +33,7 @@
 
 # direct methods
 .method public constructor <init>(Ljava/lang/String;ZLjava/util/Map;)V
-    .locals 4
+    .locals 5
     .annotation system Ldalvik/annotation/Signature;
         value = {
             "(",
@@ -48,15 +48,17 @@
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
-    const-string v0, "gaming"
+    const-string v0, "battery"
 
-    const-string v1, "battery"
+    const-string v1, "pure_black"
 
     const-string v2, "stock"
 
     const-string v3, "smooth"
 
-    filled-new-array {v2, v3, v0, v1}, [Ljava/lang/String;
+    const-string v4, "gaming"
+
+    filled-new-array {v2, v3, v4, v0, v1}, [Ljava/lang/String;
 
     move-result-object v0
 
