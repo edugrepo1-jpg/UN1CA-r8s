@@ -37,7 +37,12 @@
 .end method
 
 .method public onPreferenceChange(Landroidx/preference/Preference;Ljava/lang/Object;)Z
-    .locals 4
+    .locals 5
+    const/4 v0, 0x0
+    if-eqz p1, :done
+    invoke-virtual {p1}, Landroidx/preference/Preference;->isEnabled()Z
+    move-result v1
+    if-eqz v1, :done
     invoke-virtual {p1}, Landroidx/preference/Preference;->getKey()Ljava/lang/String;
     move-result-object v1
     const-string v2, "gmhub_pure_black"
@@ -46,9 +51,18 @@
     if-eqz v1, :glass_engine
     invoke-direct {p0, p2}, Lcom/paradox/hub/GlassSettingsFragment;->savePureBlack(Ljava/lang/Object;)Z
     move-result v0
+    if-eqz v0, :notify_failed
+    invoke-direct {p0}, Lcom/paradox/hub/GlassSettingsFragment;->syncPureBlack()V
+    const/4 v0, 0x0
     return v0
     :glass_engine
     const/4 v0, 0x0
+    invoke-virtual {p1}, Landroidx/preference/Preference;->getKey()Ljava/lang/String;
+    move-result-object v1
+    const-string v2, "gmhub_liquid_glass_engine"
+    invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :done
     instance-of v1, p2, Ljava/lang/String;
     if-eqz v1, :done
     instance-of v1, p1, Landroidx/preference/ListPreference;
@@ -57,6 +71,12 @@
     check-cast p1, Landroidx/preference/ListPreference;
     invoke-virtual {p1, p2}, Landroidx/preference/ListPreference;->findIndexOfValue(Ljava/lang/String;)I
     move-result v1
+    if-ltz v1, :done
+    :try_start_parse
+    invoke-static {p2}, Ljava/lang/Integer;->parseInt(Ljava/lang/String;)I
+    move-result v1
+    :try_end_parse
+    .catch Ljava/lang/NumberFormatException; {:try_start_parse .. :try_end_parse} :parse_failed
     if-ltz v1, :done
     const/4 v2, 0x3
     if-gt v1, v2, :done
@@ -69,13 +89,23 @@
     const-string v3, "gmhub_liquid_glass_engine"
     invoke-static {v2, v3, v1}, Landroid/provider/Settings$Global;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z
     move-result v0
+    if-eqz v0, :try_end_save
+    const/4 v4, -0x1
+    invoke-static {v2, v3, v4}, Landroid/provider/Settings$Global;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
+    move-result v4
+    if-eq v4, v1, :try_end_save
+    const/4 v0, 0x0
     :try_end_save
     .catch Ljava/lang/RuntimeException; {:try_start_save .. :try_end_save} :save_failed
     if-eqz v0, :notify_failed
+    invoke-direct {p0}, Lcom/paradox/hub/GlassSettingsFragment;->syncValues()V
+    const/4 v0, 0x0
     return v0
     :save_failed
     move-exception v1
     :notify_failed
+    const/4 v0, 0x0
+    invoke-direct {p0}, Lcom/paradox/hub/GlassSettingsFragment;->syncValues()V
     invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
     move-result-object v1
     if-eqz v1, :done
@@ -86,13 +116,21 @@
     invoke-static {v1, v2, v0}, Landroid/widget/Toast;->makeText(Landroid/content/Context;II)Landroid/widget/Toast;
     move-result-object v1
     invoke-virtual {v1}, Landroid/widget/Toast;->show()V
+    :parse_failed
+    move-exception v1
     :done
     return v0
 .end method
 
 .method public onResume()V
-    .locals 5
+    .locals 0
     invoke-super {p0}, Lcom/android/settings/SettingsPreferenceFragment;->onResume()V
+    invoke-direct {p0}, Lcom/paradox/hub/GlassSettingsFragment;->syncValues()V
+    return-void
+.end method
+
+.method private syncValues()V
+    .locals 5
     const-string v0, "gmhub_liquid_glass_engine"
     invoke-virtual {p0, v0}, Landroidx/preference/PreferenceFragmentCompat;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
     move-result-object v1
@@ -145,7 +183,7 @@
 .end method
 
 .method private savePureBlack(Ljava/lang/Object;)Z
-    .locals 3
+    .locals 4
     const/4 v0, 0x0
     instance-of v1, p1, Ljava/lang/Boolean;
     if-eqz v1, :done
@@ -161,11 +199,18 @@
     const-string p1, "gmhub_pure_black"
     invoke-static {v1, p1, v2}, Landroid/provider/Settings$Global;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z
     move-result v0
+    if-eqz v0, :try_end
+    const/4 v3, -0x1
+    invoke-static {v1, p1, v3}, Landroid/provider/Settings$Global;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
+    move-result v3
+    if-eq v3, v2, :try_end
+    const/4 v0, 0x0
     :try_end
     .catch Ljava/lang/RuntimeException; {:try_start .. :try_end} :failed
     return v0
     :failed
     move-exception v1
+    const/4 v0, 0x0
     :done
     return v0
 .end method
