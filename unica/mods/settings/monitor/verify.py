@@ -6,6 +6,9 @@ import json
 
 def verify(root):
     manifest = json.loads((root / 'monitor/compiled.json').read_text(encoding='utf-8'))
+    sources = {p.relative_to(root).as_posix() for p in (root / 'monitor/src').rglob('*.java')}
+    if sources != set(manifest['sources']):
+        raise ValueError('Missing or unexpected monitor sources')
     for kind in ['sources', 'generated']:
         if not manifest[kind]:
             raise ValueError('Empty monitor compilation manifest')

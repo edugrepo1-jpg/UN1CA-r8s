@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_resource_ram">RAM usada / total</string>
+    <string name="gm_resource_active">Memória ativa</string>
+    <string name="gm_resource_cached">Memória em cache</string>
+    <string name="gm_resource_zram">Dados lógicos / capacidade da ZRAM</string>
+    <string name="gm_battery_current">Corrente instantânea</string>
+    <string name="gm_battery_cycles">Ciclos informados</string>
+    <string name="gm_resource_unavailable">Indisponível</string>
+    <string name="gm_resource_zram_ram">RAM física usada</string>
+    <string name="gm_resource_swap">Swap total</string>
+    <string name="gm_battery_remaining_charge">Carga restante</string>
+    <string name="gm_battery_health_status">Condição da bateria</string>
+    <string name="gm_battery_charging">Carregando</string>
+    <string name="gm_battery_discharging">Descarregando</string>
+    <string name="gm_battery_full">Carga completa</string>
+    <string name="gm_battery_paused">Sem carregar</string>
+    <string name="gm_battery_health_good">Boa</string>
+    <string name="gm_battery_health_hot">Superaquecimento</string>
+    <string name="gm_battery_health_cold">Temperatura baixa</string>
+    <string name="gm_battery_health_dead">Falha da bateria</string>
+    <string name="gm_battery_health_voltage">Sobretensão</string>
+    <string name="gm_battery_health_failure">Falha informada</string>
+</resources>

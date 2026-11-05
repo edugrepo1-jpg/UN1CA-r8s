@@ -38,6 +38,10 @@ def compile_sources(root, sdk, java_home, apktool):
         for path in sources:
             manifest['sources'][path.relative_to(root.parent).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
         dest = root.parent / 'SecSettings.apk/smali_classes4'
+        owned = dest / 'com/gmhub/monitor'
+        if owned.is_dir():
+            for stale in owned.glob('*.smali'):
+                stale.unlink()
         for path in generated:
             target = dest / path.relative_to(tmp / 'smali')
             target.parent.mkdir(parents=True, exist_ok=True)
