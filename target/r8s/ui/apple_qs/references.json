@@ -1,0 +1,305 @@
+{
+  "schema": 1,
+  "target": "iOS 26 Control Center",
+  "review_date": "2026-11-04",
+  "canonical_guide": "https://support.apple.com/pt-pt/guide/iphone/iph59095ec58/26/ios/26",
+  "scope": "Reference for appearance and editing; not a claim that the alternate SystemUI panel is installed.",
+  "media_exception": "Preserve the original One UI player design/content; edit only its position and supported dimensions.",
+  "reference_order": [
+    "versioned-official-guide",
+    "official-image-labelled-ios-26",
+    "secondary-ios-26-release",
+    "historical-beta-comparison-only"
+  ],
+  "observed_rules": [
+    "Four-column portrait composition with circles, capsules and larger rounded cards.",
+    "Top-left remove badge and curved lower-right resize grip, including small resizable controls.",
+    "Faint circular free slots only while editing; no permanent rectangular selection grid.",
+    "Right-side page/group rail; bottom add-control action while editing.",
+    "Searchable gallery with native previews of different spans, not uniform two-column action rows.",
+    "Long-press expanded controls preserve distinct foreground actions above a blurred backdrop.",
+    "Wallpaper, light/dark mode, accessibility and iOS beta revision affect material opacity; do not sample one screenshot as a fixed global tint.",
+    "An Android native control retains its real availability, policy and size limits; no invented Apple-only hardware actions."
+  ],
+  "images": [
+    {
+      "id": "apple-main-0",
+      "page": "https://support.apple.com/pt-pt/guide/iphone/iph59095ec58/26/ios/26",
+      "image": "https://help.apple.com/assets/69F8EBBDF3B89A4F6E0C704C/69F8EBC43862495245036393/pt_PT/0979bceae86a35291a07ccad9d99a222.png",
+      "purpose": "overview-and-group-rail",
+      "version_evidence": "official-26",
+      "authority": "official",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "apple-main-1",
+      "page": "https://support.apple.com/pt-pt/guide/iphone/iph59095ec58/26/ios/26",
+      "image": "https://help.apple.com/assets/69F8EBBDF3B89A4F6E0C704C/69F8EBC43862495245036393/pt_PT/0e39957da5eea0e463039907c6d9df51.png",
+      "purpose": "camera-expanded-options",
+      "version_evidence": "official-26",
+      "authority": "official",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "apple-main-2",
+      "page": "https://support.apple.com/pt-pt/guide/iphone/iph59095ec58/26/ios/26",
+      "image": "https://help.apple.com/assets/69F8EBBDF3B89A4F6E0C704C/69F8EBC43862495245036393/pt_PT/a0c75b8efc3849513fb0380fb92b77df.png",
+      "purpose": "edit-corner-chrome",
+      "version_evidence": "official-26",
+      "authority": "official",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "apple-main-3",
+      "page": "https://support.apple.com/pt-pt/guide/iphone/iph59095ec58/26/ios/26",
+      "image": "https://help.apple.com/assets/69F8EBBDF3B89A4F6E0C704C/69F8EBC43862495245036393/pt_PT/48b66de39a912cfdc047afb56c38ba17.png",
+      "purpose": "mixed-size-control-gallery",
+      "version_evidence": "official-26",
+      "authority": "official",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "apple-focus-0",
+      "page": "https://support.apple.com/pt-pt/guide/iphone/iph5c3f5b77b/26/ios/26",
+      "image": "https://help.apple.com/assets/69F8EBBDF3B89A4F6E0C704C/69F8EBC43862495245036393/pt_PT/96f897c9c556eb2250b35a47ac927310.png",
+      "purpose": "expanded-focus",
+      "version_evidence": "official-26",
+      "authority": "official",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "apple-focus-1",
+      "page": "https://support.apple.com/pt-pt/guide/iphone/iph5c3f5b77b/26/ios/26",
+      "image": "https://help.apple.com/assets/69F8EBBDF3B89A4F6E0C704C/69F8EBC43862495245036393/pt_PT/a18f93f1fe5dba3be234d777eb26509c.png",
+      "purpose": "focus-duration",
+      "version_evidence": "official-26",
+      "authority": "official",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "apple-satellite-0",
+      "page": "https://support.apple.com/en-us/105097",
+      "image": "https://cdsassets.apple.com/live/7WUAS350/images/ios/ios-26-iphone-16-pro-control-center-connectivity-controls-satellite.png",
+      "purpose": "expanded-connectivity-layout-only",
+      "version_evidence": "official-image-version",
+      "authority": "official",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "iphonelife-2",
+      "page": "https://www.iphonelife.com/content/iphone-customize-control-center",
+      "image": "https://www.iphonelife.com/sites/iphonelife.com/files/styles/2023_iphone14pro_642_2x/public/touch_and_hold_blank_space_in_control_center_to_enter_edit_mode.png",
+      "purpose": "long-press-empty-space",
+      "version_evidence": "article-26-tested",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "iphonelife-3",
+      "page": "https://www.iphonelife.com/content/iphone-customize-control-center",
+      "image": "https://www.iphonelife.com/sites/iphonelife.com/files/styles/2023_iphone14pro_642_2x/public/tap_control_center_feature_you_want_to_add.png",
+      "purpose": "gallery-native-previews",
+      "version_evidence": "article-26-tested",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "iphonelife-4",
+      "page": "https://www.iphonelife.com/content/iphone-customize-control-center",
+      "image": "https://www.iphonelife.com/sites/iphonelife.com/files/styles/2023_iphone14pro_642_2x/public/touch_and_drag_corner_to_change_icon_size.png",
+      "purpose": "resize-large-control",
+      "version_evidence": "article-26-tested",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "iphonelife-5",
+      "page": "https://www.iphonelife.com/content/iphone-customize-control-center",
+      "image": "https://www.iphonelife.com/sites/iphonelife.com/files/styles/2023_iphone14pro_642_2x/public/tap_minus_sign_to_delete_icon_from_control_center.png",
+      "purpose": "remove-small-control",
+      "version_evidence": "article-26-tested",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "macrumors-0",
+      "page": "https://www.macrumors.com/guide/ios-26-home-screen/",
+      "image": "https://images.macrumors.com/t/EwKw5nJqgTf39z0r7PgfPeyPojc=/400x0/article-new/2025/07/ios-26-control-center.jpg?lossy",
+      "purpose": "historical-beta-material-comparison",
+      "version_evidence": "beta-comparison-only",
+      "authority": "secondary",
+      "appearance": "historical-beta",
+      "visually_reviewed": true
+    },
+    {
+      "id": "allthings-3",
+      "page": "https://allthings.how/how-to-reduce-transparency-in-ios-26-easy-way-to-change-liquid-glass-effects/",
+      "image": "https://static.allthings.how/content/images/2025/09/IMG_2533---Copy.PNG",
+      "purpose": "reduced-transparency-light",
+      "version_evidence": "article-26-release",
+      "authority": "secondary",
+      "appearance": "accessibility-variant",
+      "visually_reviewed": true
+    },
+    {
+      "id": "allthings-4",
+      "page": "https://allthings.how/how-to-reduce-transparency-in-ios-26-easy-way-to-change-liquid-glass-effects/",
+      "image": "https://static.allthings.how/content/images/2025/09/IMG_2534.PNG",
+      "purpose": "reduced-transparency-dark",
+      "version_evidence": "article-26-release",
+      "authority": "secondary",
+      "appearance": "accessibility-variant",
+      "visually_reviewed": true
+    },
+    {
+      "id": "iphonetricks-1",
+      "page": "https://iphone-tricks.de/news/125414-liquid-glass-transparenz-reduzieren-in-ios-26",
+      "image": "https://iphone-tricks.de/files/2025/09/1101-093808.jpeg",
+      "purpose": "accessibility-material-variants",
+      "version_evidence": "article-26-release",
+      "authority": "secondary",
+      "appearance": "accessibility-variant",
+      "visually_reviewed": true
+    },
+    {
+      "id": "techmoblog-3",
+      "page": "https://www.techmoblog.com/how-to-turn-on-vehicle-motion-cues-on-iphone/",
+      "image": "https://www.techmoblog.com/uploads/content_images/202510/img_1760428287_4182518928bf.jpg",
+      "purpose": "normal-and-edit",
+      "version_evidence": "article-26-release",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "techmoblog-4",
+      "page": "https://www.techmoblog.com/how-to-turn-on-vehicle-motion-cues-on-iphone/",
+      "image": "https://www.techmoblog.com/uploads/content_images/202510/img_1760428287_0991026f3df8.jpg",
+      "purpose": "search-gallery-and-add",
+      "version_evidence": "article-26-release",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "techmoblog-5",
+      "page": "https://www.techmoblog.com/how-to-turn-on-vehicle-motion-cues-on-iphone/",
+      "image": "https://www.techmoblog.com/uploads/content_images/202510/img_1760428287_2285514b7ef0.jpg",
+      "purpose": "expanded-action-sheet",
+      "version_evidence": "article-26-release",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "01net-8",
+      "page": "https://www.01net.com/astuces/ios-26-comment-diminuer-la-transparence-de-liquid-glass.html",
+      "image": "https://www.01net.com/app/uploads/2025/09/iOS_26_supprimer_transparence_liquid_glass_12.jpg",
+      "purpose": "wide-player-and-dense-custom-layout",
+      "version_evidence": "article-26-release",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "01net-9",
+      "page": "https://www.01net.com/astuces/ios-26-comment-diminuer-la-transparence-de-liquid-glass.html",
+      "image": "https://www.01net.com/app/uploads/2025/09/iOS_26_supprimer_transparence_liquid_glass_12_2.jpg",
+      "purpose": "dense-edit-corner-handles",
+      "version_evidence": "article-26-release",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "01net-10",
+      "page": "https://www.01net.com/astuces/ios-26-comment-diminuer-la-transparence-de-liquid-glass.html",
+      "image": "https://www.01net.com/app/uploads/2025/09/iOS_26_supprimer_transparence_liquid_glass_13.jpg",
+      "purpose": "gallery-accessibility-category",
+      "version_evidence": "article-26-release",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "01net-11",
+      "page": "https://www.01net.com/astuces/ios-26-comment-diminuer-la-transparence-de-liquid-glass.html",
+      "image": "https://www.01net.com/app/uploads/2025/09/iOS_26_supprimer_transparence_liquid_glass_14.jpg",
+      "purpose": "custom-small-control-group",
+      "version_evidence": "article-26-release",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "01net-12",
+      "page": "https://www.01net.com/astuces/ios-26-comment-diminuer-la-transparence-de-liquid-glass.html",
+      "image": "https://www.01net.com/app/uploads/2025/09/iOS_26_supprimer_transparence_liquid_glass_15.jpg",
+      "purpose": "wallpaper-and-custom-group",
+      "version_evidence": "article-26-release",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "iphonelife-add",
+      "page": "https://www.iphonelife.com/content/iphone-customize-control-center",
+      "image": "https://www.iphonelife.com/sites/iphonelife.com/files/styles/2023_iphone14pro_642_2x/public/tap_add_a_control_0.png",
+      "purpose": "bottom-add-control",
+      "version_evidence": "article-26-tested",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "iphonelife-move",
+      "page": "https://www.iphonelife.com/content/iphone-customize-control-center",
+      "image": "https://www.iphonelife.com/sites/iphonelife.com/files/styles/2023_iphone14pro_642_2x/public/drag_and_drop_new_icon_where_you_want.png",
+      "purpose": "drag-with-neighbor-reflow",
+      "version_evidence": "article-26-tested",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    },
+    {
+      "id": "beebom-expanded",
+      "page": "https://gadgets.beebom.com/guides/how-to-turn-off-liquid-glass-on-iphone",
+      "image": "https://cdn.beebom.com/content/2025/09/How-to-Turn-Off-Liquid-Glass-in-iOS-26-on-iPhone-10.jpg",
+      "purpose": "expanded-brightness-structure",
+      "version_evidence": "pre-release-2025-09-04",
+      "authority": "secondary",
+      "appearance": "accessibility-variant",
+      "visually_reviewed": true
+    },
+    {
+      "id": "abilitynet-brightness",
+      "page": "https://mcmw.abilitynet.org.uk/how-to-reduce-the-intensity-of-blue-light-in-ios-18-on-your-iphone-or-ipad-copy",
+      "image": "https://mcmw.abilitynet.org.uk/media/public/2025/09/mcmw_ios26_night_shift_fig_1.png",
+      "purpose": "expanded-brightness-actions",
+      "version_evidence": "article-26-2025-09-30",
+      "authority": "secondary",
+      "appearance": "reference",
+      "visually_reviewed": true
+    }
+  ],
+  "video": {
+    "url": "https://help.apple.com/assets/69F8EBBDF3B89A4F6E0C704C/69F8EBC43862495245036393/pt_PT/e1f4ce10f6f12b39b36e8079f4f6db45.mp4",
+    "duration_seconds": 3.666667,
+    "fps": 60,
+    "observed": "Opening from the lockscreen, not editing/gallery interaction."
+  },
+  "remaining_reference_gaps": [
+    "Stable iOS 26 landscape-specific editing has not been verified; do not infer it from iOS 18, iPadOS or buggy beta examples."
+  ]
+}
