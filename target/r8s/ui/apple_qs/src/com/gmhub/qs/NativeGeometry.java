@@ -59,9 +59,27 @@ public final class NativeGeometry implements AutoCloseable {
         for(int i=0;i<now.size();i++)if(now.get(i)!=published.get(i))return false;
         return true;
     }
-    private void update(List<Object> values) throws Exception {
+    private static boolean sameLayout(List<Object> expected,List<Object> actual) throws Exception {
+        if(expected.size()!=actual.size())return false;
+        String[] fields={"spanWidth","spanHeight","spanOffset","extraHeight","expandedHeight",
+            "expandedSpanHeight","translationSpanOffset","translationOffset","resizeSpanRect",
+            "isTarget","isDropOnItem","isNew","expanded"};
+        for(int i=0;i<expected.size();i++) {
+            Object a=expected.get(i),b=actual.get(i);
+            if(a==null || b==null || a.getClass()!=b.getClass()
+                    || field(a,"gridTileItem")!=field(b,"gridTileItem"))return false;
+            for(String name:fields)if(!Objects.equals(field(a,name),field(b,name)))return false;
+        }
+        return true;
+    }
+    private List<Object> update(List<Object> values) throws Exception {
         Method m=store.getClass().getMethod("updateQsPanelItems",List.class);
         m.setAccessible(true); m.invoke(store,new ArrayList<>(values));
+        List<Object> actual=items();
+        if(!sameLayout(values,actual))throw new IllegalStateException("Native QS grid did not accept the edit");
+        // StateFlow suppresses equal values, retaining the previous wrappers.
+        // Track the actual stored objects, not newly allocated equal copies.
+        return actual;
     }
     private static Object copy(SamsungScene.Slot slot, QsLayout.Card card) throws Exception {
         Constructor<?> found=null;
@@ -69,6 +87,9 @@ public final class NativeGeometry implements AutoCloseable {
             Class<?>[] p=c.getParameterTypes();
             if(p.length==15 && p[0].isInstance(slot.nativeItem) && p[1]==int.class && p[2]==int.class
                     && p[3]==long.class && p[4]==float.class && p[5]==float.class && p[6]==int.class
+                    && p[7].getName().equals("androidx.compose.ui.unit.IntOffset")
+                    && p[8].getName().equals("androidx.compose.ui.unit.IntOffset")
+                    && p[9].getName().equals("androidx.compose.ui.unit.IntRect")
                     && p[10]==boolean.class && p[11]==boolean.class && p[12]==boolean.class && p[13]==boolean.class
                     && p[14].getName().equals("kotlin.jvm.internal.DefaultConstructorMarker")) {
                 if(found!=null)throw new IllegalStateException("Ambiguous native geometry constructor");
@@ -80,7 +101,10 @@ public final class NativeGeometry implements AutoCloseable {
         found.setAccessible(true);
         return found.newInstance(slot.nativeItem,card.width,card.height,offset,
             field(slot.nativeSlot,"extraHeight"),field(slot.nativeSlot,"expandedHeight"),
-            field(slot.nativeSlot,"expandedSpanHeight"),null,null,null,false,false,false,false,null);
+            field(slot.nativeSlot,"expandedSpanHeight"),field(slot.nativeSlot,"translationSpanOffset"),
+            field(slot.nativeSlot,"translationOffset"),field(slot.nativeSlot,"resizeSpanRect"),
+            field(slot.nativeSlot,"isTarget"),field(slot.nativeSlot,"isDropOnItem"),
+            field(slot.nativeSlot,"isNew"),field(slot.nativeSlot,"expanded"),null);
     }
     private void checkThread() {
         if(Thread.currentThread()!=owner)throw new IllegalStateException("QS UI thread required");
@@ -110,12 +134,21 @@ public final class NativeGeometry implements AutoCloseable {
             replacements.add(copy(slot,card));
         }
         List<Object> previous=published;
-        try { update(replacements); published=replacements; return true; }
+        try { published=update(replacements); return true; }
         catch(Exception failure) {
             // Defend even against a changed implementation throwing after it
             // published. Restore only the list that this edit still owns.
             published=replacements;
-            try { if(owns()) { update(previous); published=previous; } }
+            try {
+                if(owns()) published=update(previous);
+                else {
+                    // An ignored write leaves the previous list intact. A
+                    // foreign update invalidates ownership instead of being
+                    // overwritten by cancellation or a later pointer event.
+                    published=previous;
+                    if(!owns())closed=true;
+                }
+            }
             catch(Exception rollback) { failure.addSuppressed(rollback); }
             throw failure;
         }

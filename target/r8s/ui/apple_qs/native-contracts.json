@@ -12,14 +12,18 @@
       "methods": ["collapse()V", "launchEditMode()V", "launchPowerMenu()V", "launchSettings()V", "setOtherComponentDragging(Z)V"]
     },
     "com/android/systemui/samsung/quicksetting/ui/panel/PanelItemStoreImpl": {
-      "fields": ["qsPanelItems:Lkotlinx/coroutines/flow/ReadonlyStateFlow;"], "methods": []
+      "fields": ["qsPanelItems:Lkotlinx/coroutines/flow/ReadonlyStateFlow;", "currentScreenType:Lkotlinx/coroutines/flow/ReadonlyStateFlow;", "_qsPanelItems:Lkotlinx/coroutines/flow/StateFlowImpl;"],
+      "methods": ["updateQsPanelItems(Ljava/util/List;)V"]
     },
     "com/android/systemui/samsung/quicksetting/ui/panel/AvailableGridTilesViewModelImpl": {
       "fields": ["allTiles:Lkotlinx/coroutines/flow/ReadonlyStateFlow;"], "methods": []
     },
     "com/android/systemui/samsung/quicksetting/domain/model/QSPanelItem": {
-      "fields": ["gridTileItem:Lcom/android/systemui/samsung/quicksetting/domain/model/items/GridTileItem;"],
-      "methods": ["getSpanX()I", "getSpanY()I", "getSpanWidth()I", "getSpanHeight()I"]
+      "fields": ["gridTileItem:Lcom/android/systemui/samsung/quicksetting/domain/model/items/GridTileItem;", "spanWidth:I", "spanHeight:I", "spanOffset:J", "extraHeight:F", "expandedHeight:F", "expandedSpanHeight:I", "translationSpanOffset:Landroidx/compose/ui/unit/IntOffset;", "translationOffset:Landroidx/compose/ui/unit/IntOffset;", "resizeSpanRect:Landroidx/compose/ui/unit/IntRect;", "isTarget:Z", "isDropOnItem:Z", "isNew:Z", "expanded:Z"],
+      "methods": ["getSpanX()I", "getSpanY()I", "getSpanWidth()I", "getSpanHeight()I", "<init>(Lcom/android/systemui/samsung/quicksetting/domain/model/items/GridTileItem;IIJFFILandroidx/compose/ui/unit/IntOffset;Landroidx/compose/ui/unit/IntOffset;Landroidx/compose/ui/unit/IntRect;ZZZZLkotlin/jvm/internal/DefaultConstructorMarker;)V"]
+    },
+    "kotlinx/coroutines/flow/StateFlowImpl": {
+      "fields": [], "methods": ["getValue()Ljava/lang/Object;"]
     },
     "com/android/systemui/samsung/quicksetting/domain/model/items/GridTileItem": {
       "fields": [],

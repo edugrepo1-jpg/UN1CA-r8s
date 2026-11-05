@@ -16,6 +16,8 @@ SOURCE = ROOT / 'target/r8s/ui/apple_qs/src/com/gmhub/qs'
 HARNESS = r'''package com.gmhub.qs;
 import java.util.*;
 import kotlin.jvm.internal.DefaultConstructorMarker;
+import androidx.compose.ui.unit.IntOffset;
+import androidx.compose.ui.unit.IntRect;
 
 public final class NativeGeometryContract {
     static int checks;
@@ -41,15 +43,31 @@ public final class NativeGeometryContract {
         public final float extraHeight,expandedHeight;
         public final int expandedSpanHeight;
         public final boolean expanded;
+        public final IntOffset translationSpanOffset,translationOffset;
+        public final IntRect resizeSpanRect;
+        public final boolean isTarget,isDropOnItem,isNew;
+        public final int spanWidth,spanHeight;public final long spanOffset;
         final int width,height; final long offset;
         public Slot(Item item,int w,int h,long xy,float extra,float expandedHeight,int expandedSpan,
-                    Object a,Object b,Object c,boolean d,boolean e,boolean f,boolean expanded,
+                    IntOffset a,IntOffset b,IntRect c,boolean d,boolean e,boolean f,boolean expanded,
                     DefaultConstructorMarker marker) {
             gridTileItem=item;width=w;height=h;offset=xy;extraHeight=extra;
+            spanWidth=w;spanHeight=h;spanOffset=xy;
             this.expandedHeight=expandedHeight;expandedSpanHeight=expandedSpan;this.expanded=expanded;
+            translationSpanOffset=a;translationOffset=b;resizeSpanRect=c;
+            isTarget=d;isDropOnItem=e;isNew=f;
         }
         public int getSpanX(){return (int)(offset>>32);} public int getSpanY(){return (int)offset;}
         public int getSpanWidth(){return width;} public int getSpanHeight(){return height;}
+        @Override public boolean equals(Object other){
+            if(!(other instanceof Slot))return false;Slot b=(Slot)other;
+            return gridTileItem==b.gridTileItem&&width==b.width&&height==b.height&&offset==b.offset
+                &&extraHeight==b.extraHeight&&expandedHeight==b.expandedHeight&&expandedSpanHeight==b.expandedSpanHeight
+                &&translationSpanOffset==b.translationSpanOffset&&translationOffset==b.translationOffset
+                &&resizeSpanRect==b.resizeSpanRect&&isTarget==b.isTarget&&isDropOnItem==b.isDropOnItem
+                &&isNew==b.isNew&&expanded==b.expanded;
+        }
+        @Override public int hashCode(){return System.identityHashCode(gridTileItem);}
     }
     public static class Store {
         public final Flow currentScreenType=new Flow(new Object());
@@ -57,8 +75,13 @@ public final class NativeGeometryContract {
         public final Flow qsPanelItems=new Flow(null) {
             @Override public Object getValue(){return ((Flow)_qsPanelItems.value).value;}
         };
-        int updates;
-        public void updateQsPanelItems(List<Object> items){updates++;((Flow)_qsPanelItems.value).value=items;}
+        int updates;boolean ignoreNext,throwAfterNext;
+        public void updateQsPanelItems(List<Object> items){
+            updates++;if(ignoreNext){ignoreNext=false;return;}
+            Flow flow=(Flow)_qsPanelItems.value;
+            if(!Objects.equals(flow.value,items))flow.value=items;
+            if(throwAfterNext){throwAfterNext=false;throw new IllegalStateException("after publish");}
+        }
         @SuppressWarnings("unchecked") public List<Object> items(){return (List<Object>)qsPanelItems.getValue();}
     }
     public static class Host { int user; public int getUserId(){return user;} }
@@ -80,7 +103,8 @@ public final class NativeGeometryContract {
     }
     static class Fixture {
         final Scene nativeScene=new Scene(); final Store store=nativeScene.viewModel.$$delegate_2;
-        final Item player=new Item(); final Slot original=new Slot(player,2,2,0L,0f,0f,2,null,null,null,false,false,false,false,null);
+        final Item player=new Item(); final Slot original=new Slot(player,2,2,0L,5f,7f,2,
+            new IntOffset(),new IntOffset(),new IntRect(),true,true,true,false,null);
         final SamsungScene scene;
         final QsLayout.Board board=new QsLayout.Board(4,4,1);
         Fixture() throws Exception {
@@ -92,6 +116,8 @@ public final class NativeGeometryContract {
             return QsLayout.restore(board,Collections.singletonList(
                 new QsLayout.Card("media","media",QsLayout.Kind.MEDIA,1,0,2,2,0)),(card,board)->true);
         }
+        QsLayout.Snapshot unchanged(){return QsLayout.restore(board,Collections.singletonList(
+            new QsLayout.Card("media","media",QsLayout.Kind.MEDIA,0,0,2,2,0)),(card,board)->true);}
         void lock(){nativeScene.viewModel.keyguardStateController.unlocked=false;nativeScene.viewModel.keyguardStateController.visible=true;}
     }
     public static void main(String[] args) throws Exception {
@@ -99,6 +125,12 @@ public final class NativeGeometryContract {
         Fixture f=new Fixture(); NativeGeometry edit=f.edit();
         check(edit.preview(f.moved())); check(f.store.items().get(0)!=f.original);
         check(((Slot)f.store.items().get(0)).gridTileItem==f.player);
+        Slot copied=(Slot)f.store.items().get(0);
+        check(copied.translationSpanOffset==f.original.translationSpanOffset);
+        check(copied.translationOffset==f.original.translationOffset);
+        check(copied.resizeSpanRect==f.original.resizeSpanRect);
+        check(copied.isTarget&&copied.isDropOnItem&&copied.isNew);
+        check(copied.extraHeight==5f&&copied.expandedHeight==7f);
         f.lock(); f.scene.close(); check(f.store.items().get(0)==f.original);check(!edit.isOpen());
         // A late pointer event/finish cannot commit after keyguard becomes visible.
         for(boolean commit:new boolean[]{false,true}) {
@@ -118,6 +150,21 @@ public final class NativeGeometryContract {
         f=new Fixture();edit=f.edit();check(edit.preview(f.moved()));check(edit.commit());
         Object accepted=f.store.items().get(0);f.scene.close();check(f.store.items().get(0)==accepted);
         check(((Slot)accepted).gridTileItem==f.player);
+        // Kotlin StateFlow's equality suppression must not lose ownership.
+        f=new Fixture();edit=f.edit();check(edit.preview(f.unchanged()));
+        check(f.store.items().get(0)==f.original);check(edit.preview(f.moved()));
+        accepted=f.store.items().get(0);check(edit.preview(f.moved()));
+        check(f.store.items().get(0)==accepted);check(edit.commit());
+        // A silently ignored write must report failure and remain recoverable.
+        f=new Fixture();edit=f.edit();f.store.ignoreNext=true;
+        try{edit.preview(f.moved());throw new AssertionError("ignored write accepted");}
+        catch(IllegalStateException expected){check(f.store.items().get(0)==f.original);}
+        check(edit.preview(f.moved()));edit.close();check(f.store.items().get(0)==f.original);
+        // A failure after publication restores only this editor's own objects.
+        f=new Fixture();edit=f.edit();f.store.throwAfterNext=true;
+        try{edit.preview(f.moved());throw new AssertionError("late failure accepted");}
+        catch(java.lang.reflect.InvocationTargetException expected){check(f.store.items().get(0)==f.original);}
+        check(edit.preview(f.moved()));edit.close();check(f.store.items().get(0)==f.original);
         System.out.println(checks+" editor lifecycle checks passed");
     }
 }'''
@@ -137,6 +184,8 @@ class GeometryLifecycleTests(unittest.TestCase):
                 'com/gmhub/qs/NativeGeometryContract.java': HARNESS,
                 'com/gmhub/qs/SamsungTiles.java': 'package com.gmhub.qs; public class SamsungTiles { public boolean bind(Object host){return true;} public void setListening(boolean active){} }',
                 'kotlin/jvm/internal/DefaultConstructorMarker.java': 'package kotlin.jvm.internal; public class DefaultConstructorMarker {}',
+                'androidx/compose/ui/unit/IntOffset.java': 'package androidx.compose.ui.unit; public class IntOffset {}',
+                'androidx/compose/ui/unit/IntRect.java': 'package androidx.compose.ui.unit; public class IntRect {}',
             }
             files = []
             for name, content in sources.items():

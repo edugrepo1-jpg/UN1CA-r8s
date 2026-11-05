@@ -99,7 +99,11 @@ public final class GridEditOverlay extends ViewGroup implements AutoCloseable {
     private void cancelGesture() {
         if(active==null)return;
         Handle h=active;active=null;h.pointer.cancel();h.original=null;
-        getParentDisallow(false);commands.end(true);
+        boolean begun=h.begun;h.begun=false;
+        getParentDisallow(false);
+        // A tap, rejected begin or a second pointer before touch slop has no
+        // transaction to cancel. Do not close an unrelated accepted edit.
+        if(begun)commands.end(true);
     }
     private void getParentDisallow(boolean disallow) {
         if(getParent()!=null)getParent().requestDisallowInterceptTouchEvent(disallow);
@@ -141,13 +145,15 @@ public final class GridEditOverlay extends ViewGroup implements AutoCloseable {
             }
         }
         private void menuAction(int id) {
-            if(closed||original!=null)return;
+            if(closed||original!=null||active!=null)return;
             if(id==8){if(commands.canRemove(card.key))commands.remove(card.key);return;}
             if(!commands.begin(card.key))return;
             int x=card.x,y=card.y,w=card.width,h=card.height;
             switch(id){case 0:x--;break;case 1:x++;break;case 2:y--;break;case 3:y++;break;
                 case 4:w++;break;case 5:w--;break;case 6:h++;break;case 7:h--;break;default:commands.end(true);return;}
-            boolean accepted=commands.preview(card.key,x,y,w,h);commands.end(!accepted);
+            boolean accepted=false;
+            try { accepted=commands.preview(card.key,x,y,w,h); }
+            finally { commands.end(!accepted); }
         }
         @Override public boolean performClick() {
             super.performClick();if(closed)return false;
@@ -187,7 +193,7 @@ public final class GridEditOverlay extends ViewGroup implements AutoCloseable {
                     EditPointer.End end=pointer.end(id,rawX,rawY,false);
                     active=null;original=null;getParentDisallow(false);
                     if(begun){begun=false;commands.end(end!=EditPointer.End.DRAG);}
-                    else if(end==EditPointer.End.TAP){if(role==2)commands.remove(card.key);else performClick();}
+                    else if(end==EditPointer.End.TAP){if(role==2){if(commands.canRemove(card.key))commands.remove(card.key);}else performClick();}
                 }
             }
             return true;
