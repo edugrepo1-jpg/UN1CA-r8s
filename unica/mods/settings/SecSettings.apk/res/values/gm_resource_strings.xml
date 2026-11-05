@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="gm_battery_full_capacity">Estimated full-charge capacity</string>
+    <string name="gm_battery_asoc">Gauge health estimate</string>
     <string name="gm_resource_ram">RAM used / total</string>
     <string name="gm_resource_active">Active memory</string>
     <string name="gm_resource_cached">Cached memory</string>

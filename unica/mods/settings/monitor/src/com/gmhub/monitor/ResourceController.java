@@ -6,6 +6,7 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.text.format.Formatter;
 import java.io.File;
 import java.util.*;
@@ -30,6 +31,9 @@ public final class ResourceController {
     private boolean active, closed;
     private int generation;
     private Future<?> pending;
+    private SamsungBatteryReader.Snapshot gauge;
+    private int gaugeEpoch = -1;
+    private long nextGaugeRead;
     private final Runnable tick = () -> sample();
     public ResourceController(Host host, boolean battery) {
         this.host = host; context = host.context(); this.battery = battery;
@@ -57,7 +61,7 @@ public final class ResourceController {
         int epoch = generation;
         pending = worker.submit(() -> {
             Map<String, Row> rows;
-            try { rows = battery ? battery() : memory(); }
+            try { rows = battery ? battery(epoch) : memory(); }
             catch (RuntimeException failure) { rows = unavailable(); }
             final Map<String, Row> snapshot = rows;
             main.post(() -> {
@@ -76,8 +80,9 @@ public final class ResourceController {
         Map<String, Row> rows = new LinkedHashMap<>();
         if (battery) {
             for (String[] item : new String[][]{{"bat_current", "gm_battery_current"},
-                    {"bat_capacity", "gm_battery_remaining_charge"}, {"bat_cycles", "gm_battery_cycles"},
-                    {"bat_health", "gm_battery_health_status"}})
+                    {"bat_capacity", "gm_battery_full_capacity"}, {"bat_cycles", "gm_battery_cycles"},
+                    {"bat_health", "gm_battery_asoc"}, {"gm_battery_charge_remaining", "gm_battery_remaining_charge"},
+                    {"gm_battery_condition", "gm_battery_health_status"}})
                 rows.put(item[0], new Row(text(item[1]), text("gm_resource_unavailable")));
         } else {
             for (String[] item : new String[][]{{"ram_monitor", "gm_resource_ram"},
@@ -104,7 +109,12 @@ public final class ResourceController {
         try { return manager == null ? Integer.MIN_VALUE : manager.getIntProperty(property); }
         catch (RuntimeException unreadable) { return Integer.MIN_VALUE; }
     }
-    private Map<String, Row> battery() {
+    private Map<String, Row> battery(int epoch) {
+        long now = SystemClock.elapsedRealtime();
+        if (gauge == null || gaugeEpoch != epoch || now >= nextGaugeRead) {
+            gauge = SamsungBatteryReader.read(new File("/sys/class/power_supply/battery"));
+            gaugeEpoch = epoch; nextGaugeRead = now + 30000;
+        }
         BatteryManager manager = context.getSystemService(BatteryManager.class);
         Intent data;
         try { data = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED)); }
@@ -137,11 +147,14 @@ public final class ResourceController {
             int count = data.getIntExtra(BatteryManager.EXTRA_CYCLE_COUNT, -1);
             if (count >= 0) cycles = String.format(locale, "%d", count);
         }
+        if (cycles.equals(unavailable) && gauge.cycles != null) cycles = String.format(locale, "%d", gauge.cycles);
         Map<String, Row> rows = new LinkedHashMap<>();
         rows.put("bat_current", new Row(text("gm_battery_current"), current + " · " + text(state)));
-        rows.put("bat_capacity", new Row(text("gm_battery_remaining_charge"), BatteryUnits.charge(property(manager, BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER), locale, unavailable)));
+        rows.put("bat_capacity", new Row(text("gm_battery_full_capacity"), gauge.fullCapacityMah == null ? unavailable : String.format(locale, "%d mAh", gauge.fullCapacityMah)));
         rows.put("bat_cycles", new Row(text("gm_battery_cycles"), cycles));
-        rows.put("bat_health", new Row(text("gm_battery_health_status"), text(healthKey)));
+        rows.put("bat_health", new Row(text("gm_battery_asoc"), gauge.asocPercent == null ? unavailable : String.format(locale, "%d%%", gauge.asocPercent)));
+        rows.put("gm_battery_charge_remaining", new Row(text("gm_battery_remaining_charge"), BatteryUnits.charge(property(manager, BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER), locale, unavailable)));
+        rows.put("gm_battery_condition", new Row(text("gm_battery_health_status"), text(healthKey)));
         return rows;
     }
 }

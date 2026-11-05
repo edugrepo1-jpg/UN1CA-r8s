@@ -21,11 +21,17 @@
 
 .field private final context:Landroid/content/Context;
 
+.field private gauge:Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;
+
+.field private gaugeEpoch:I
+
 .field private generation:I
 
 .field private final host:Lcom/gmhub/monitor/ResourceController$Host;
 
 .field private final main:Landroid/os/Handler;
+
+.field private nextGaugeRead:J
 
 .field private pending:Ljava/util/concurrent/Future;
     .annotation system Ldalvik/annotation/Signature;
@@ -80,6 +86,10 @@
 
     iput-object v0, p0, Lcom/gmhub/monitor/ResourceController;->shown:Ljava/util/Map;
 
+    const/4 v0, -0x1
+
+    iput v0, p0, Lcom/gmhub/monitor/ResourceController;->gaugeEpoch:I
+
     new-instance v0, Lcom/gmhub/monitor/ResourceController$$ExternalSyntheticLambda1;
 
     invoke-direct {v0, p0}, Lcom/gmhub/monitor/ResourceController$$ExternalSyntheticLambda1;-><init>(Lcom/gmhub/monitor/ResourceController;)V
@@ -99,11 +109,11 @@
     return-void
 .end method
 
-.method private battery()Ljava/util/Map;
-    .locals 12
+.method private battery(I)Ljava/util/Map;
+    .locals 11
     .annotation system Ldalvik/annotation/Signature;
         value = {
-            "()",
+            "(I)",
             "Ljava/util/Map<",
             "Ljava/lang/String;",
             "Lcom/gmhub/monitor/ResourceController$Row;",
@@ -111,301 +121,446 @@
         }
     .end annotation
 
-    iget-object v0, p0, Lcom/gmhub/monitor/ResourceController;->context:Landroid/content/Context;
+    invoke-static {}, Landroid/os/SystemClock;->elapsedRealtime()J
 
-    const-class v1, Landroid/os/BatteryManager;
+    move-result-wide v0
 
-    invoke-virtual {v0, v1}, Landroid/content/Context;->getSystemService(Ljava/lang/Class;)Ljava/lang/Object;
+    iget-object v2, p0, Lcom/gmhub/monitor/ResourceController;->gauge:Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;
 
-    move-result-object v0
+    if-eqz v2, :cond_0
 
-    check-cast v0, Landroid/os/BatteryManager;
+    iget v2, p0, Lcom/gmhub/monitor/ResourceController;->gaugeEpoch:I
 
-    const/4 v1, 0x0
+    if-ne v2, p1, :cond_0
+
+    iget-wide v2, p0, Lcom/gmhub/monitor/ResourceController;->nextGaugeRead:J
+
+    cmp-long v2, v0, v2
+
+    if-ltz v2, :cond_1
+
+    :cond_0
+    new-instance v2, Ljava/io/File;
+
+    const-string v3, "/sys/class/power_supply/battery"
+
+    invoke-direct {v2, v3}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+
+    invoke-static {v2}, Lcom/gmhub/monitor/SamsungBatteryReader;->read(Ljava/io/File;)Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;
+
+    move-result-object v2
+
+    iput-object v2, p0, Lcom/gmhub/monitor/ResourceController;->gauge:Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;
+
+    iput p1, p0, Lcom/gmhub/monitor/ResourceController;->gaugeEpoch:I
+
+    const-wide/16 v2, 0x7530
+
+    add-long/2addr v0, v2
+
+    iput-wide v0, p0, Lcom/gmhub/monitor/ResourceController;->nextGaugeRead:J
+
+    :cond_1
+    iget-object p1, p0, Lcom/gmhub/monitor/ResourceController;->context:Landroid/content/Context;
+
+    const-class v0, Landroid/os/BatteryManager;
+
+    invoke-virtual {p1, v0}, Landroid/content/Context;->getSystemService(Ljava/lang/Class;)Ljava/lang/Object;
+
+    move-result-object p1
+
+    check-cast p1, Landroid/os/BatteryManager;
+
+    const/4 v0, 0x0
 
     :try_start_0
-    iget-object v2, p0, Lcom/gmhub/monitor/ResourceController;->context:Landroid/content/Context;
+    iget-object v1, p0, Lcom/gmhub/monitor/ResourceController;->context:Landroid/content/Context;
 
-    new-instance v3, Landroid/content/IntentFilter;
+    new-instance v2, Landroid/content/IntentFilter;
 
-    const-string v4, "android.intent.action.BATTERY_CHANGED"
+    const-string v3, "android.intent.action.BATTERY_CHANGED"
 
-    invoke-direct {v3, v4}, Landroid/content/IntentFilter;-><init>(Ljava/lang/String;)V
+    invoke-direct {v2, v3}, Landroid/content/IntentFilter;-><init>(Ljava/lang/String;)V
 
-    invoke-virtual {v2, v1, v3}, Landroid/content/Context;->registerReceiver(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;)Landroid/content/Intent;
+    invoke-virtual {v1, v0, v2}, Landroid/content/Context;->registerReceiver(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;)Landroid/content/Intent;
 
-    move-result-object v1
+    move-result-object v0
     :try_end_0
     .catch Ljava/lang/RuntimeException; {:try_start_0 .. :try_end_0} :catch_0
 
     :catch_0
-    iget-object v2, p0, Lcom/gmhub/monitor/ResourceController;->context:Landroid/content/Context;
+    iget-object v1, p0, Lcom/gmhub/monitor/ResourceController;->context:Landroid/content/Context;
 
-    invoke-virtual {v2}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
+    invoke-virtual {v1}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
 
-    move-result-object v2
+    move-result-object v1
 
-    invoke-virtual {v2}, Landroid/content/res/Resources;->getConfiguration()Landroid/content/res/Configuration;
+    invoke-virtual {v1}, Landroid/content/res/Resources;->getConfiguration()Landroid/content/res/Configuration;
 
-    move-result-object v2
+    move-result-object v1
 
-    invoke-virtual {v2}, Landroid/content/res/Configuration;->getLocales()Landroid/os/LocaleList;
+    invoke-virtual {v1}, Landroid/content/res/Configuration;->getLocales()Landroid/os/LocaleList;
 
-    move-result-object v2
+    move-result-object v1
 
-    const/4 v3, 0x0
+    const/4 v2, 0x0
 
-    invoke-virtual {v2, v3}, Landroid/os/LocaleList;->get(I)Ljava/util/Locale;
+    invoke-virtual {v1, v2}, Landroid/os/LocaleList;->get(I)Ljava/util/Locale;
 
-    move-result-object v2
+    move-result-object v1
 
-    const-string v3, "gm_resource_unavailable"
+    const-string v2, "gm_resource_unavailable"
 
-    invoke-direct {p0, v3}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
+    invoke-direct {p0, v2}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
 
-    move-result-object v4
+    move-result-object v3
 
-    const/4 v5, 0x2
+    const/4 v4, 0x2
 
-    invoke-direct {p0, v0, v5}, Lcom/gmhub/monitor/ResourceController;->property(Landroid/os/BatteryManager;I)I
+    invoke-direct {p0, p1, v4}, Lcom/gmhub/monitor/ResourceController;->property(Landroid/os/BatteryManager;I)I
 
-    move-result v6
+    move-result v5
 
-    invoke-static {v6, v2, v4}, Lcom/gmhub/monitor/BatteryUnits;->current(ILjava/util/Locale;Ljava/lang/String;)Ljava/lang/String;
+    invoke-static {v5, v1, v3}, Lcom/gmhub/monitor/BatteryUnits;->current(ILjava/util/Locale;Ljava/lang/String;)Ljava/lang/String;
 
-    move-result-object v6
+    move-result-object v5
 
-    const/4 v7, 0x1
+    const/4 v6, 0x1
 
-    if-nez v1, :cond_0
+    if-nez v0, :cond_2
 
-    move v8, v7
+    move v7, v6
 
     goto :goto_0
 
-    :cond_0
-    const-string v8, "status"
+    :cond_2
+    const-string v7, "status"
 
-    invoke-virtual {v1, v8, v7}, Landroid/content/Intent;->getIntExtra(Ljava/lang/String;I)I
+    invoke-virtual {v0, v7, v6}, Landroid/content/Intent;->getIntExtra(Ljava/lang/String;I)I
 
-    move-result v8
+    move-result v7
 
     :goto_0
-    if-eq v8, v5, :cond_4
+    if-eq v7, v4, :cond_6
 
-    const/4 v5, 0x3
+    const/4 v4, 0x3
 
-    if-eq v8, v5, :cond_3
+    if-eq v7, v4, :cond_5
 
-    const/4 v5, 0x4
+    const/4 v4, 0x4
 
-    if-eq v8, v5, :cond_2
+    if-eq v7, v4, :cond_4
 
-    const/4 v5, 0x5
+    const/4 v4, 0x5
 
-    if-eq v8, v5, :cond_1
+    if-eq v7, v4, :cond_3
 
-    move-object v5, v3
-
-    goto :goto_1
-
-    :cond_1
-    const-string v5, "gm_battery_full"
-
-    goto :goto_1
-
-    :cond_2
-    const-string v5, "gm_battery_paused"
+    move-object v4, v2
 
     goto :goto_1
 
     :cond_3
-    const-string v5, "gm_battery_discharging"
+    const-string v4, "gm_battery_full"
 
     goto :goto_1
 
     :cond_4
-    const-string v5, "gm_battery_charging"
+    const-string v4, "gm_battery_paused"
+
+    goto :goto_1
+
+    :cond_5
+    const-string v4, "gm_battery_discharging"
+
+    goto :goto_1
+
+    :cond_6
+    const-string v4, "gm_battery_charging"
 
     :goto_1
-    if-nez v1, :cond_5
+    if-nez v0, :cond_7
 
-    move v8, v7
+    move v7, v6
 
     goto :goto_2
 
-    :cond_5
-    const-string v8, "health"
+    :cond_7
+    const-string v7, "health"
 
-    invoke-virtual {v1, v8, v7}, Landroid/content/Intent;->getIntExtra(Ljava/lang/String;I)I
+    invoke-virtual {v0, v7, v6}, Landroid/content/Intent;->getIntExtra(Ljava/lang/String;I)I
 
-    move-result v8
+    move-result v7
 
     :goto_2
-    packed-switch v8, :pswitch_data_0
+    packed-switch v7, :pswitch_data_0
 
     goto :goto_3
 
     :pswitch_0
-    const-string v3, "gm_battery_health_cold"
+    const-string v2, "gm_battery_health_cold"
 
     goto :goto_3
 
     :pswitch_1
-    const-string v3, "gm_battery_health_failure"
+    const-string v2, "gm_battery_health_failure"
 
     goto :goto_3
 
     :pswitch_2
-    const-string v3, "gm_battery_health_voltage"
+    const-string v2, "gm_battery_health_voltage"
 
     goto :goto_3
 
     :pswitch_3
-    const-string v3, "gm_battery_health_dead"
+    const-string v2, "gm_battery_health_dead"
 
     goto :goto_3
 
     :pswitch_4
-    const-string v3, "gm_battery_health_hot"
+    const-string v2, "gm_battery_health_hot"
 
     goto :goto_3
 
     :pswitch_5
-    const-string v3, "gm_battery_health_good"
+    const-string v2, "gm_battery_health_good"
 
     :goto_3
-    if-eqz v1, :cond_6
+    const-string v7, "%d"
+
+    if-eqz v0, :cond_8
 
     const-string v8, "android.os.extra.CYCLE_COUNT"
 
-    invoke-virtual {v1, v8}, Landroid/content/Intent;->hasExtra(Ljava/lang/String;)Z
+    invoke-virtual {v0, v8}, Landroid/content/Intent;->hasExtra(Ljava/lang/String;)Z
 
     move-result v9
 
-    if-eqz v9, :cond_6
+    if-eqz v9, :cond_8
 
     const/4 v9, -0x1
 
-    invoke-virtual {v1, v8, v9}, Landroid/content/Intent;->getIntExtra(Ljava/lang/String;I)I
+    invoke-virtual {v0, v8, v9}, Landroid/content/Intent;->getIntExtra(Ljava/lang/String;I)I
 
-    move-result v1
+    move-result v0
 
-    if-ltz v1, :cond_6
+    if-ltz v0, :cond_8
 
-    invoke-static {v1}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+    invoke-static {v0}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
 
-    move-result-object v1
+    move-result-object v0
 
-    filled-new-array {v1}, [Ljava/lang/Object;
+    filled-new-array {v0}, [Ljava/lang/Object;
 
-    move-result-object v1
+    move-result-object v0
 
-    const-string v8, "%d"
+    invoke-static {v1, v7, v0}, Ljava/lang/String;->format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
 
-    invoke-static {v2, v8, v1}, Ljava/lang/String;->format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
-
-    move-result-object v1
+    move-result-object v0
 
     goto :goto_4
 
-    :cond_6
-    move-object v1, v4
+    :cond_8
+    move-object v0, v3
 
     :goto_4
-    new-instance v8, Ljava/util/LinkedHashMap;
+    invoke-virtual {v0, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
-    invoke-direct {v8}, Ljava/util/LinkedHashMap;-><init>()V
+    move-result v8
 
-    new-instance v9, Lcom/gmhub/monitor/ResourceController$Row;
+    if-eqz v8, :cond_9
 
-    const-string v10, "gm_battery_current"
+    iget-object v8, p0, Lcom/gmhub/monitor/ResourceController;->gauge:Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;
 
-    invoke-direct {p0, v10}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
+    iget-object v8, v8, Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;->cycles:Ljava/lang/Integer;
 
-    move-result-object v10
+    if-eqz v8, :cond_9
 
-    new-instance v11, Ljava/lang/StringBuilder;
+    iget-object v0, p0, Lcom/gmhub/monitor/ResourceController;->gauge:Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;
 
-    invoke-direct {v11}, Ljava/lang/StringBuilder;-><init>()V
+    iget-object v0, v0, Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;->cycles:Ljava/lang/Integer;
 
-    invoke-virtual {v11, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    filled-new-array {v0}, [Ljava/lang/Object;
 
-    const-string v6, " \u00b7 "
+    move-result-object v0
 
-    invoke-virtual {v11, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-static {v1, v7, v0}, Ljava/lang/String;->format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+
+    move-result-object v0
+
+    :cond_9
+    new-instance v7, Ljava/util/LinkedHashMap;
+
+    invoke-direct {v7}, Ljava/util/LinkedHashMap;-><init>()V
+
+    new-instance v8, Lcom/gmhub/monitor/ResourceController$Row;
+
+    const-string v9, "gm_battery_current"
+
+    invoke-direct {p0, v9}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v9
+
+    new-instance v10, Ljava/lang/StringBuilder;
+
+    invoke-direct {v10}, Ljava/lang/StringBuilder;-><init>()V
+
+    invoke-virtual {v10, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    const-string v5, " \u00b7 "
+
+    invoke-virtual {v10, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-direct {p0, v4}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v4
+
+    invoke-virtual {v10, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v10}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v4
+
+    invoke-direct {v8, v9, v4}, Lcom/gmhub/monitor/ResourceController$Row;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string v4, "bat_current"
+
+    invoke-interface {v7, v4, v8}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+
+    new-instance v4, Lcom/gmhub/monitor/ResourceController$Row;
+
+    const-string v5, "gm_battery_full_capacity"
 
     invoke-direct {p0, v5}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v5
 
-    invoke-virtual {v11, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    iget-object v8, p0, Lcom/gmhub/monitor/ResourceController;->gauge:Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;
 
-    invoke-virtual {v11}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    iget-object v8, v8, Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;->fullCapacityMah:Ljava/lang/Integer;
+
+    if-nez v8, :cond_a
+
+    move-object v8, v3
+
+    goto :goto_5
+
+    :cond_a
+    iget-object v8, p0, Lcom/gmhub/monitor/ResourceController;->gauge:Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;
+
+    iget-object v8, v8, Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;->fullCapacityMah:Ljava/lang/Integer;
+
+    filled-new-array {v8}, [Ljava/lang/Object;
+
+    move-result-object v8
+
+    const-string v9, "%d mAh"
+
+    invoke-static {v1, v9, v8}, Ljava/lang/String;->format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+
+    move-result-object v8
+
+    :goto_5
+    invoke-direct {v4, v5, v8}, Lcom/gmhub/monitor/ResourceController$Row;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string v5, "bat_capacity"
+
+    invoke-interface {v7, v5, v4}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+
+    new-instance v4, Lcom/gmhub/monitor/ResourceController$Row;
+
+    const-string v5, "gm_battery_cycles"
+
+    invoke-direct {p0, v5}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v5
 
-    invoke-direct {v9, v10, v5}, Lcom/gmhub/monitor/ResourceController$Row;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-direct {v4, v5, v0}, Lcom/gmhub/monitor/ResourceController$Row;-><init>(Ljava/lang/String;Ljava/lang/String;)V
 
-    const-string v5, "bat_current"
+    const-string v0, "bat_cycles"
 
-    invoke-interface {v8, v5, v9}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-interface {v7, v0, v4}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 
-    new-instance v5, Lcom/gmhub/monitor/ResourceController$Row;
+    new-instance v0, Lcom/gmhub/monitor/ResourceController$Row;
 
-    const-string v6, "gm_battery_remaining_charge"
+    const-string v4, "gm_battery_asoc"
 
-    invoke-direct {p0, v6}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
+    invoke-direct {p0, v4}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
 
-    move-result-object v6
+    move-result-object v4
 
-    invoke-direct {p0, v0, v7}, Lcom/gmhub/monitor/ResourceController;->property(Landroid/os/BatteryManager;I)I
+    iget-object v5, p0, Lcom/gmhub/monitor/ResourceController;->gauge:Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;
 
-    move-result v0
+    iget-object v5, v5, Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;->asocPercent:Ljava/lang/Integer;
 
-    invoke-static {v0, v2, v4}, Lcom/gmhub/monitor/BatteryUnits;->charge(ILjava/util/Locale;Ljava/lang/String;)Ljava/lang/String;
+    if-nez v5, :cond_b
+
+    move-object v5, v3
+
+    goto :goto_6
+
+    :cond_b
+    iget-object v5, p0, Lcom/gmhub/monitor/ResourceController;->gauge:Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;
+
+    iget-object v5, v5, Lcom/gmhub/monitor/SamsungBatteryReader$Snapshot;->asocPercent:Ljava/lang/Integer;
+
+    filled-new-array {v5}, [Ljava/lang/Object;
+
+    move-result-object v5
+
+    const-string v8, "%d%%"
+
+    invoke-static {v1, v8, v5}, Ljava/lang/String;->format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+
+    move-result-object v5
+
+    :goto_6
+    invoke-direct {v0, v4, v5}, Lcom/gmhub/monitor/ResourceController$Row;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string v4, "bat_health"
+
+    invoke-interface {v7, v4, v0}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+
+    new-instance v0, Lcom/gmhub/monitor/ResourceController$Row;
+
+    const-string v4, "gm_battery_remaining_charge"
+
+    invoke-direct {p0, v4}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v4
+
+    invoke-direct {p0, p1, v6}, Lcom/gmhub/monitor/ResourceController;->property(Landroid/os/BatteryManager;I)I
+
+    move-result p1
+
+    invoke-static {p1, v1, v3}, Lcom/gmhub/monitor/BatteryUnits;->charge(ILjava/util/Locale;Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object p1
+
+    invoke-direct {v0, v4, p1}, Lcom/gmhub/monitor/ResourceController$Row;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string p1, "gm_battery_charge_remaining"
+
+    invoke-interface {v7, p1, v0}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+
+    new-instance p1, Lcom/gmhub/monitor/ResourceController$Row;
+
+    const-string v0, "gm_battery_health_status"
+
+    invoke-direct {p0, v0}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v0
 
-    invoke-direct {v5, v6, v0}, Lcom/gmhub/monitor/ResourceController$Row;-><init>(Ljava/lang/String;Ljava/lang/String;)V
-
-    const-string v0, "bat_capacity"
-
-    invoke-interface {v8, v0, v5}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-
-    new-instance v0, Lcom/gmhub/monitor/ResourceController$Row;
-
-    const-string v2, "gm_battery_cycles"
-
     invoke-direct {p0, v2}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
-
-    move-result-object v2
-
-    invoke-direct {v0, v2, v1}, Lcom/gmhub/monitor/ResourceController$Row;-><init>(Ljava/lang/String;Ljava/lang/String;)V
-
-    const-string v1, "bat_cycles"
-
-    invoke-interface {v8, v1, v0}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-
-    new-instance v0, Lcom/gmhub/monitor/ResourceController$Row;
-
-    const-string v1, "gm_battery_health_status"
-
-    invoke-direct {p0, v1}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
-
-    move-result-object v1
-
-    invoke-direct {p0, v3}, Lcom/gmhub/monitor/ResourceController;->text(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object p0
 
-    invoke-direct {v0, v1, p0}, Lcom/gmhub/monitor/ResourceController$Row;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-direct {p1, v0, p0}, Lcom/gmhub/monitor/ResourceController$Row;-><init>(Ljava/lang/String;Ljava/lang/String;)V
 
-    const-string p0, "bat_health"
+    const-string p0, "gm_battery_condition"
 
-    invoke-interface {v8, p0, v0}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-interface {v7, p0, p1}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 
-    return-object v8
+    return-object v7
 
     nop
 
@@ -764,7 +919,7 @@
 .end method
 
 .method private unavailable()Ljava/util/Map;
-    .locals 10
+    .locals 12
     .annotation system Ldalvik/annotation/Signature;
         value = {
             "()",
@@ -795,40 +950,56 @@
 
     filled-new-array {v1, v5}, [Ljava/lang/String;
 
-    move-result-object v1
-
-    const-string v5, "bat_capacity"
-
-    const-string v6, "gm_battery_remaining_charge"
-
-    filled-new-array {v5, v6}, [Ljava/lang/String;
-
-    move-result-object v5
-
-    const-string v6, "bat_cycles"
-
-    const-string v7, "gm_battery_cycles"
-
-    filled-new-array {v6, v7}, [Ljava/lang/String;
-
     move-result-object v6
 
-    const-string v7, "bat_health"
+    const-string v1, "bat_capacity"
 
-    const-string v8, "gm_battery_health_status"
+    const-string v5, "gm_battery_full_capacity"
 
-    filled-new-array {v7, v8}, [Ljava/lang/String;
+    filled-new-array {v1, v5}, [Ljava/lang/String;
 
     move-result-object v7
 
-    filled-new-array {v1, v5, v6, v7}, [[Ljava/lang/String;
+    const-string v1, "bat_cycles"
+
+    const-string v5, "gm_battery_cycles"
+
+    filled-new-array {v1, v5}, [Ljava/lang/String;
+
+    move-result-object v8
+
+    const-string v1, "bat_health"
+
+    const-string v5, "gm_battery_asoc"
+
+    filled-new-array {v1, v5}, [Ljava/lang/String;
+
+    move-result-object v9
+
+    const-string v1, "gm_battery_charge_remaining"
+
+    const-string v5, "gm_battery_remaining_charge"
+
+    filled-new-array {v1, v5}, [Ljava/lang/String;
+
+    move-result-object v10
+
+    const-string v1, "gm_battery_condition"
+
+    const-string v5, "gm_battery_health_status"
+
+    filled-new-array {v1, v5}, [Ljava/lang/String;
+
+    move-result-object v11
+
+    filled-new-array/range {v6 .. v11}, [[Ljava/lang/String;
 
     move-result-object v1
 
     move v5, v4
 
     :goto_0
-    const/4 v6, 0x4
+    const/4 v6, 0x6
 
     if-ge v5, v6, :cond_1
 
@@ -970,7 +1141,7 @@
 
     if-eqz v0, :cond_0
 
-    invoke-direct {p0}, Lcom/gmhub/monitor/ResourceController;->battery()Ljava/util/Map;
+    invoke-direct {p0, p1}, Lcom/gmhub/monitor/ResourceController;->battery(I)Ljava/util/Map;
 
     move-result-object v0
 

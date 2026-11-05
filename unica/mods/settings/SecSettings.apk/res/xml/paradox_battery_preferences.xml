@@ -2,7 +2,9 @@
 <PreferenceScreen android:title="@string/paradox_cat_battery"
   xmlns:android="http://schemas.android.com/apk/res/android">
     <Preference android:selectable="false" android:icon="@drawable/sec_ic_settings_smart_manager" android:title="@string/paradox_bat_current" android:key="bat_current" android:summary="-- mA" />
-    <Preference android:selectable="false" android:icon="@drawable/sec_ic_settings_battery" android:title="@string/gm_battery_remaining_charge" android:key="bat_capacity" android:summary="-- mAh" />
+    <Preference android:selectable="false" android:icon="@drawable/sec_ic_settings_battery" android:title="@string/gm_battery_full_capacity" android:key="bat_capacity" android:summary="@string/gm_resource_unavailable" />
     <Preference android:selectable="false" android:icon="@drawable/sec_ic_settings_software_update" android:title="@string/paradox_bat_cycles" android:key="bat_cycles" android:summary="--" />
-    <Preference android:selectable="false" android:icon="@drawable/sec_ic_settings_accessibility" android:title="@string/gm_battery_health_status" android:key="bat_health" android:summary="@string/gm_resource_unavailable" />
+    <Preference android:selectable="false" android:icon="@drawable/sec_ic_settings_accessibility" android:title="@string/gm_battery_asoc" android:key="bat_health" android:summary="@string/gm_resource_unavailable" />
+    <Preference android:selectable="false" android:icon="@drawable/sec_ic_settings_battery" android:title="@string/gm_battery_remaining_charge" android:key="gm_battery_charge_remaining" android:summary="@string/gm_resource_unavailable" />
+    <Preference android:selectable="false" android:icon="@drawable/sec_ic_settings_battery" android:title="@string/gm_battery_health_status" android:key="gm_battery_condition" android:summary="@string/gm_resource_unavailable" />
 </PreferenceScreen>

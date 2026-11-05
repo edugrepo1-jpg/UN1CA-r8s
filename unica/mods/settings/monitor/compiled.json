@@ -4,7 +4,8 @@
   "sources": {
     "monitor/src/com/gmhub/monitor/BatteryUnits.java": "6cd06997b0a20157ad2aa9e240f29e6c4adb7e54a6a41f3e5b93aaa7530775c2",
     "monitor/src/com/gmhub/monitor/MemoryReader.java": "8b9a251ea3fa9724924bc8ac710af8669f1cbdd13ee7428357319d1830f2a9de",
-    "monitor/src/com/gmhub/monitor/ResourceController.java": "161ba3adff066dfc54de45bc70ff8020fcb3d6df6801563049fb3613c21a3836",
+    "monitor/src/com/gmhub/monitor/ResourceController.java": "d714ec2a69664c8b30fbb5501a79c68d3371c58b6393348ec171fd0c1c7a95ef",
+    "monitor/src/com/gmhub/monitor/SamsungBatteryReader.java": "b5f14699e5bdbce11c9ad9a5fa57eed77bbeaaf853f84db05e4b263ab27d64cb",
     "monitor/src/com/gmhub/monitor/ThermalPanel.java": "d4e912243653eeb7043f178ef2cd9ef459a543cd72a819bf5403964e12d93d64",
     "monitor/src/com/gmhub/monitor/ThermalReader.java": "faae52f63e6d12b468b147e10a7ecfb8b347460c6c900e7866c322010972fb40"
   },
@@ -18,7 +19,9 @@
     "SecSettings.apk/smali_classes4/com/gmhub/monitor/ResourceController$$ExternalSyntheticLambda2.smali": "16ce5e07f8fa37236a6f7c24b52682d423c900c9c953a0533d9f69398691bd48",
     "SecSettings.apk/smali_classes4/com/gmhub/monitor/ResourceController$Host.smali": "cbeaaf695a943ceff8f03a8418b698f02b1aa422d77a92f49686be223f8b778f",
     "SecSettings.apk/smali_classes4/com/gmhub/monitor/ResourceController$Row.smali": "cd872e188d137db7a1ab222d236f7a9535e97559d3b6439adb5a6204c0169e08",
-    "SecSettings.apk/smali_classes4/com/gmhub/monitor/ResourceController.smali": "ed9f0a5ade5f09f7630cde8079b04dd1c70ed9d87993850cad4d986f49f72f1f",
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/ResourceController.smali": "1ba33298847030b2ec19276b8ab68438f32788a13615f1f5c4734417e4d1368c",
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/SamsungBatteryReader$Snapshot.smali": "96de7aaa93c194934d620fa001413483405d4eb09d69dbadeb100268ff60d23e",
+    "SecSettings.apk/smali_classes4/com/gmhub/monitor/SamsungBatteryReader.smali": "f1fec23fcb734da67bd5bc632434c02c3f7159d2f81291091c39a6d1528b75ca",
     "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalPanel$$ExternalSyntheticLambda0.smali": "1231c4ed11b2ba8f85313b02a398740b93b91944e56a103389539dc195b49963",
     "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalPanel$$ExternalSyntheticLambda1.smali": "0e163a8cc12c7dd709df826edb54cd18e65bf570caed4f36eb7360732c027ea3",
     "SecSettings.apk/smali_classes4/com/gmhub/monitor/ThermalPanel$$ExternalSyntheticLambda2.smali": "3bafd76e3b2dc7ef4fc0bee17c7b4da37313844a6a6c573f6cda173ea1d06134",

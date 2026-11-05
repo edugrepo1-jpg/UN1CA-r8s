@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import com.gmhub.monitor.MemoryReader;
 import com.gmhub.monitor.BatteryUnits;
+import com.gmhub.monitor.SamsungBatteryReader;
 public class ResourcesContract {
  static int checks;
  static void check(boolean value){checks++;if(!value)throw new AssertionError("check "+checks);}
@@ -66,6 +67,23 @@ public class ResourcesContract {
   check(BatteryUnits.charge(-1,Locale.US,"N/A").equals("N/A"));
   check(BatteryUnits.charge(Integer.MIN_VALUE,Locale.US,"N/A").equals("N/A"));
   check(BatteryUnits.charge(Integer.MAX_VALUE,Locale.US,"N/A").equals("N/A"));
+  Path gauge=root.resolve("battery");
+  var battery=SamsungBatteryReader.read(gauge.toFile());
+  check(battery.fullCapacityMah==null&&battery.cycles==null&&battery.asocPercent==null);
+  write(gauge.resolve("fg_fullcapnom"),"4450\n");write(gauge.resolve("battery_cycle"),"243\n");write(gauge.resolve("fg_asoc"),"98\n");
+  battery=SamsungBatteryReader.read(gauge.toFile());
+  check(battery.fullCapacityMah==4450);check(battery.cycles==243);check(battery.asocPercent==98);
+  // Samsung's full-capacity output is already scaled by the exact gauge driver.
+  check(new String(Files.readAllBytes(gauge.resolve("fg_fullcapnom"))).equals("4450\n"));
+  write(gauge.resolve("fg_fullcapnom"),"-1\n");write(gauge.resolve("battery_cycle"),"-1\n");write(gauge.resolve("fg_asoc"),"-1\n");
+  battery=SamsungBatteryReader.read(gauge.toFile());
+  check(battery.fullCapacityMah==null&&battery.cycles==null&&battery.asocPercent==null);
+  write(gauge.resolve("fg_fullcapnom"),"0\n");write(gauge.resolve("battery_cycle"),"0\n");write(gauge.resolve("fg_asoc"),"101\n");
+  battery=SamsungBatteryReader.read(gauge.toFile());
+  check(battery.fullCapacityMah==null);check(battery.cycles==0);check(battery.asocPercent==101);
+  write(gauge.resolve("fg_fullcapnom"),"2147483647\n");write(gauge.resolve("battery_cycle"),"12\n34\n");write(gauge.resolve("fg_asoc"),new String(new char[65]).replace('\0','9'));
+  battery=SamsungBatteryReader.read(gauge.toFile());
+  check(battery.fullCapacityMah==null&&battery.cycles==null&&battery.asocPercent==null);
   System.out.println(checks+" memory, ZRAM and battery-unit checks passed");
  }
 }'''
@@ -84,7 +102,7 @@ class ResourceTests(unittest.TestCase):
             contract = out / 'ResourcesContract.java'
             contract.write_text(CONTRACT, encoding='utf-8')
             base = SETTINGS / 'monitor/src/com/gmhub/monitor'
-            compiled = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(out), str(base / 'MemoryReader.java'), str(base / 'BatteryUnits.java'), str(contract)], capture_output=True, text=True, timeout=45)
+            compiled = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(out), str(base / 'MemoryReader.java'), str(base / 'BatteryUnits.java'), str(base / 'SamsungBatteryReader.java'), str(contract)], capture_output=True, text=True, timeout=45)
             self.assertEqual(compiled.returncode, 0, compiled.stderr)
             result = subprocess.run([java, '-Xverify:all', '-cp', str(out), 'ResourcesContract', str(out / 'fixtures')], capture_output=True, text=True, timeout=30)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -96,7 +114,7 @@ class ResourceTests(unittest.TestCase):
         verifier.verify(SETTINGS)
         a = '{http://schemas.android.com/apk/res/android}'
         for name, xml, keys in [('Memory', 'paradox_memory_preferences', {'ram_monitor','active_monitor','cached_monitor','zram_monitor','gm_swap_monitor'}),
-                                ('Battery', 'paradox_battery_preferences', {'bat_current','bat_capacity','bat_cycles','bat_health'})]:
+                                ('Battery', 'paradox_battery_preferences', {'bat_current','bat_capacity','bat_cycles','bat_health','gm_battery_charge_remaining','gm_battery_condition'})]:
             fragment = SETTINGS / f'SecSettings.apk/smali_classes4/com/paradox/hub/Paradox{name}Fragment.smali'
             text = fragment.read_text()
             self.assertNotIn('->postDelayed(', text)
@@ -105,6 +123,9 @@ class ResourceTests(unittest.TestCase):
             nodes = list(ET.parse(SETTINGS / f'SecSettings.apk/res/xml/{xml}.xml').getroot())
             self.assertEqual({n.get(a+'key') for n in nodes}, keys)
             self.assertTrue(all(n.get(a+'selectable') == 'false' for n in nodes))
+        hub = SETTINGS / 'SecSettings.apk/smali_classes4/com/paradox/hub'
+        self.assertFalse((hub/'ParadoxBatteryFragment$BatteryAsync.smali').exists())
+        self.assertFalse((hub/'ParadoxBatteryFragment$BatterySyncUI.smali').exists())
         translated = []
         for folder in ['values','values-pt-rBR']:
             translated.append({n.get('name') for n in ET.parse(SETTINGS / f'SecSettings.apk/res/{folder}/gm_resource_strings.xml').getroot()})
