@@ -22,3 +22,14 @@ Tests run the actual writer against narrow native-service fixtures covering
 60/96/120-Hz lists, another resolution, changed displays, absent services, failed
 and ignored writes, and rollback. These are host contracts, not a display emulator.
 SDK37/D8 compilation and whole-Hub smali assembly validate the shipped adapter.
+
+
+The optional legacy `screen_resolution` entry now uses `DisplayScale`, which
+calls the WindowManager Binder interface verified against the Android17 donor.
+It preserves the current density-to-width ratio, checks native size/density and
+saved override values, and rolls back its own confirmed partial writes. An
+unrelated change or user switch stops rollback. Only r8s logical 720x1600 and
+1080x2400 inputs are accepted; this does not add physical WQHD support. The entry
+is not newly exposed in the current Hub. No shell command or SystemUI/biometric
+process kill is used. WindowManager owns persistence; the old receiver no longer
+replays scale changes on unlock or clears native overrides during shutdown.

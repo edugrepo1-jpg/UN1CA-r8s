@@ -2,9 +2,14 @@
   "sdk_api": 37,
   "min_api": 33,
   "sources": {
+    "refresh/src/com/gmhub/refresh/DisplayScale.java": "ae99b07cdcde127b2b79fa0ba375360e304c4b54c9bda2f69730da6ac0971049",
     "refresh/src/com/gmhub/refresh/RefreshSettings.java": "77f4757664e9847636f190149073ae394459a640d093f01f72e08cc627c85bdf"
   },
   "generated": {
+    "SecSettings.apk/smali_classes4/com/gmhub/refresh/DisplayScale$NativePort.smali": "dcecdd9ac4d6a4b955cc049fb096c037832bf8cfd39c02c39a9b5d8dfedd4443",
+    "SecSettings.apk/smali_classes4/com/gmhub/refresh/DisplayScale$Port.smali": "56f9cfd830d711a9f6aa3607bd9dba0f770605326e0f5e520593dadbb2fb714b",
+    "SecSettings.apk/smali_classes4/com/gmhub/refresh/DisplayScale$State.smali": "1d852a2db9c669933e1505d467ab4723af70794d84dbcd011fe9fef8f8271500",
+    "SecSettings.apk/smali_classes4/com/gmhub/refresh/DisplayScale.smali": "e444d0467a741df4b6f6279ee5e99c4d88759379cbe5b547c28faccc5af1ce56",
     "SecSettings.apk/smali_classes4/com/gmhub/refresh/RefreshSettings.smali": "81e5a96f4c2559d8ce601ff26ac9f34dcaa32338945676b07650bed770a56220"
   }
 }

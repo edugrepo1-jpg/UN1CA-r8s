@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_resolution_confirmed">Logical display scale confirmed.</string>
+    <string name="gm_resolution_failed">The display scale could not be confirmed. The control shows the current system value.</string>
+</resources>
