@@ -23,4 +23,5 @@
     <string name="gm_battery_health_dead">Falha da bateria</string>
     <string name="gm_battery_health_voltage">Sobretensão</string>
     <string name="gm_battery_health_failure">Falha informada</string>
+    <string name="gm_freezer_not_confirmed">O Android não confirmou o ajuste de suspensão de apps em cache. A seleção não foi aceita.</string>
 </resources>

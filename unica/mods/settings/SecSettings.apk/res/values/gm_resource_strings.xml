@@ -23,4 +23,5 @@
     <string name="gm_battery_health_dead">Battery failure</string>
     <string name="gm_battery_health_voltage">Overvoltage</string>
     <string name="gm_battery_health_failure">Failure reported</string>
+    <string name="gm_freezer_not_confirmed">Android did not confirm the cached-app freezer setting. The selection was not accepted.</string>
 </resources>

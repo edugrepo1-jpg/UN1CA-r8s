@@ -204,11 +204,7 @@
     :cond_8
     iget-object v0, p0, Lcom/paradox/hub/ParadoxCenterFragment$UpdateTask;->this$0:Lcom/paradox/hub/ParadoxCenterFragment;
 
-    iget-object v0, v0, Lcom/paradox/hub/ParadoxCenterFragment;->mHandler:Landroid/os/Handler;
-
-    const-wide/16 v1, 0x3e8
-
-    invoke-virtual {v0, p0, v1, v2}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
+    invoke-virtual {v0}, Lcom/paradox/hub/ParadoxCenterFragment;->queueLiveMonitor()V
 
     return-void
 .end method

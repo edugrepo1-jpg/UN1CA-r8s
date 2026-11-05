@@ -894,6 +894,11 @@
     invoke-static {v1, v4, p2}, Landroid/provider/Settings$Global;->putString(Landroid/content/ContentResolver;Ljava/lang/String;Ljava/lang/String;)Z
     move-result v2
     if-eqz v2, :freezer_reject
+    invoke-static {v1, v4}, Landroid/provider/Settings$Global;->getString(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    invoke-virtual {p2, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v2
+    if-eqz v2, :freezer_reject
     invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
     move-result-object v4
     const-string v5, "paradox_toast_reboot"
@@ -905,6 +910,17 @@
     return v6
 
     :freezer_reject
+    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
+    move-result-object v4
+    if-eqz v4, :freezer_reject_done
+    const-string v5, "gm_freezer_not_confirmed"
+    invoke-static {v4, v5}, Lcom/paradox/hub/ParadoxCenterFragment;->getParadoxString(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v5
+    const/4 v2, 0x1
+    invoke-static {v4, v5, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+    move-result-object v2
+    invoke-virtual {v2}, Landroid/widget/Toast;->show()V
+    :freezer_reject_done
     const/4 v2, 0x0
     return v2
 
@@ -1340,14 +1356,50 @@
     invoke-virtual {v1, v2}, Landroidx/preference/TwoStatePreference;->setChecked(Z)V
 
     :cond_b
+    invoke-virtual {p0}, Lcom/paradox/hub/ParadoxCenterFragment;->queueLiveMonitor()V
+
+    return-void
+.end method
+
+.method public queueLiveMonitor()V
+    .locals 8
     iget-object v0, p0, Lcom/paradox/hub/ParadoxCenterFragment;->mHandler:Landroid/os/Handler;
-
     iget-object v1, p0, Lcom/paradox/hub/ParadoxCenterFragment;->mUpdateTask:Ljava/lang/Runnable;
-
+    invoke-virtual {v0, v1}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
+    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->isAdded()Z
+    move-result v2
+    if-eqz v2, :done
+    const-string v2, "cpu_temp"
+    const-string v3, "bat_temp"
+    const-string v4, "ram_usage"
+    const-string v5, "bat_capacity"
+    const-string v6, "bat_cycles"
+    const-string v7, "bat_health"
+    filled-new-array/range {v2 .. v7}, [Ljava/lang/String;
+    move-result-object v3
+    const/4 v2, 0x0
+    :scan
+    array-length v4, v3
+    if-ge v2, v4, :remaining
+    aget-object v4, v3, v2
+    invoke-virtual {p0, v4}, Landroidx/preference/PreferenceFragmentCompat;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
+    move-result-object v4
+    if-nez v4, :schedule
+    add-int/lit8 v2, v2, 0x1
+    goto :scan
+    :remaining
+    const-string v2, "gpu_overclock"
+    invoke-virtual {p0, v2}, Landroidx/preference/PreferenceFragmentCompat;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
+    move-result-object v2
+    if-nez v2, :schedule
+    const-string v2, "paradox_header_banner"
+    invoke-virtual {p0, v2}, Landroidx/preference/PreferenceFragmentCompat;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
+    move-result-object v2
+    if-eqz v2, :done
+    :schedule
     const-wide/16 v2, 0x3e8
-
     invoke-virtual {v0, v1, v2, v3}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
-
+    :done
     return-void
 .end method
 
