@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_profiles_custom_label">Personalizado</string>
+    <string name="gm_profiles_pending_label">Recuperação necessária</string>
+    <string name="gm_profiles_working">Conferindo as configurações do perfil…</string>
+    <string name="gm_profiles_custom">Há configurações alteradas fora deste perfil. A restauração preserva essas mudanças.</string>
+    <string name="gm_profiles_pending">Uma operação incompleta precisa de recuperação. Use Restaurar antes de aplicar outro perfil.</string>
+    <string name="gm_profiles_restore_conflict">Algumas configurações não puderam ser restauradas ou foram alteradas por outros meios. Os registros de recuperação foram mantidos.</string>
+    <string name="gm_profiles_preserved">Alterações do perfil restauradas. Configurações alteradas por outros meios foram preservadas.</string>
+    <string name="gm_profiles_confirmed">Configurações do perfil confirmadas</string>
+    <string name="gm_profiles_failed">O perfil não foi confirmado. Confira o estado atual antes de tentar novamente.</string>
+    <string name="gm_profiles_unavailable">Os perfis exigem o usuário principal e os serviços nativos do sistema.</string>
+    <string name="gm_profiles_unreadable">Não foi possível ler o registro do perfil. Nenhum sucesso foi informado.</string>
+</resources>

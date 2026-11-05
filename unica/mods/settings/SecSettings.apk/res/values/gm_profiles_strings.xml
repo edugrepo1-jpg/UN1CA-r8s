@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_profiles_custom_label">Custom</string>
+    <string name="gm_profiles_pending_label">Recovery needed</string>
+    <string name="gm_profiles_working">Checking profile settings…</string>
+    <string name="gm_profiles_custom">Settings changed outside this profile. Restore preserves those changes.</string>
+    <string name="gm_profiles_pending">An incomplete operation needs recovery. Use Restore before applying another profile.</string>
+    <string name="gm_profiles_restore_conflict">Some settings could not be restored or were changed elsewhere. Their recovery records were kept.</string>
+    <string name="gm_profiles_preserved">Profile changes restored. Settings changed elsewhere were preserved.</string>
+    <string name="gm_profiles_confirmed">Profile settings confirmed</string>
+    <string name="gm_profiles_failed">The profile was not confirmed. Check the current status before trying again.</string>
+    <string name="gm_profiles_unavailable">Profiles require the main user and native system services.</string>
+    <string name="gm_profiles_unreadable">Could not read the profile journal. No success was reported.</string>
+</resources>
