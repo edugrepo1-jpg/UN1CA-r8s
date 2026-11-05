@@ -56,6 +56,10 @@ def install(decoded, module):
                       ('smali_sha256', 'smali/com/gmhub/glass/GlassDrawable.smali')]:
         if hashlib.sha256((module / path).read_bytes()).hexdigest() != adapter[key]:
             raise ValueError('Adapter source and generated smali are out of sync: ' + path)
+    generated={p.relative_to(module/'smali').as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
+               for p in (module/'smali').rglob('*.smali')}
+    if generated!=adapter.get('smali_files'):
+        raise ValueError('Adapter generated classes are out of sync')
     candidates = list(decoded.glob('smali*/com/android/systemui/blur/domain/interactor/SecCapturedBlurBitmapGenerator.smali'))
     if len(candidates) != 1:
         raise ValueError('Expected one Samsung captured-blur generator')

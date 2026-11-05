@@ -33,7 +33,7 @@ public final class GlassDrawable extends BitmapDrawable {
     private static final int MAX_SHADER_BYTES = 128 * 1024;
     private static final int MAX_PIXELS = 4 * 1024 * 1024;
     private static final String[] SOURCES = new String[4];
-    private static final boolean[] BROKEN = new boolean[4];
+    private static final Health HEALTH = new Health();
     private static final String MAPPER = "uniform shader bitmap; uniform float2 captureSize; "
         + "uniform float2 viewSize; half4 main(float2 p) { "
         + "return bitmap.eval(clamp(p / viewSize * captureSize, float2(0.5), captureSize - 0.5)); }";
@@ -49,7 +49,26 @@ public final class GlassDrawable extends BitmapDrawable {
     private final float density;
     private int width, height;
     private long nextPolicyCheck;
-    private boolean allowed;
+    private boolean allowed, failed;
+
+    /** Transient capture/memory failures belong to that capture. Incompatible
+     * programs remain disabled; a later healthy capture may retry after OOM.
+     * No timer, shared mutable RuntimeShader or background shader pool. */
+    static final class Health {
+        private static final long RETRY_DELAY_MS=15000;
+        private final boolean[] incompatible=new boolean[4],logged=new boolean[4];
+        private final long[] retryAt=new long[4];
+        synchronized boolean available(int engine,long now) {
+            return engine>=1 && engine<=3 && now>=0 && !incompatible[engine] && now>=retryAt[engine];
+        }
+        synchronized boolean record(int engine,long now,boolean permanent) {
+            if(engine<1 || engine>3)throw new IllegalArgumentException("Invalid glass engine");
+            incompatible[engine]|=permanent;
+            long start=Math.max(0,now);
+            retryAt[engine]=start>Long.MAX_VALUE-RETRY_DELAY_MS?Long.MAX_VALUE:start+RETRY_DELAY_MS;
+            boolean first=!logged[engine];logged[engine]=true;return first;
+        }
+    }
 
     /** Failure returns the original already-blurred drawable, never a raw frame. */
     public static BitmapDrawable wrap(Context c, Bitmap raw, BitmapDrawable original, String scene) {
@@ -65,7 +84,7 @@ public final class GlassDrawable extends BitmapDrawable {
         // Keeping Samsung's existing blurred drawable needs no new allocation.
         if (!usable(raw) || !usable(original.getBitmap())) return original;
         int e = selected(c);
-        if (e == 0 || BROKEN[e] || !policyAllows(c)) return original;
+        if (!HEALTH.available(e,SystemClock.uptimeMillis()) || !policyAllows(c)) return original;
         try {
             return new GlassDrawable(c, raw, original, e);
         } catch (RuntimeException | LinkageError | OutOfMemoryError ex) {
@@ -113,13 +132,13 @@ public final class GlassDrawable extends BitmapDrawable {
             byte[] buffer = new byte[4096];
             int n;
             while ((n = in.read(buffer)) != -1) {
-                if (out.size() + n > MAX_SHADER_BYTES) throw new IllegalStateException("Shader exceeds size limit");
+                if (out.size() + n > MAX_SHADER_BYTES) throw new IllegalArgumentException("Shader exceeds size limit");
                 out.write(buffer, 0, n);
             }
             String result = new String(out.toByteArray(), StandardCharsets.UTF_8);
-            if (result.isEmpty()) throw new IllegalStateException("Empty shader");
+            if (result.isEmpty()) throw new IllegalArgumentException("Empty shader");
             return SOURCES[engine] = result;
-        } catch (java.io.IOException ex) { throw new IllegalStateException("Missing glass asset", ex); }
+        } catch (java.io.IOException ex) { throw new IllegalArgumentException("Missing glass asset", ex); }
     }
 
     private GlassDrawable(Context c, Bitmap raw, BitmapDrawable original, int e) {
@@ -132,6 +151,10 @@ public final class GlassDrawable extends BitmapDrawable {
         engine = e;
         density = c.getResources().getDisplayMetrics().density;
         black.setColor(0xff000000);
+        veil.setColor(0x33000000);
+        // Respect the native fade/filter even when wrapping a drawable which
+        // was already configured by its binder before the capture completed.
+        setAlpha(original.getAlpha());setColorFilter(original.getColorFilter());
         if (e == 0) {
             lens = null;
             mapper = null;
@@ -153,7 +176,6 @@ public final class GlassDrawable extends BitmapDrawable {
         }
         glass.setShader(lens);
         // Retain separation from white foreground labels; no foreground shader.
-        veil.setColor(0x33000000);
     }
 
     private void configure(int w, int h) {
@@ -203,31 +225,36 @@ public final class GlassDrawable extends BitmapDrawable {
 
     private void f(String name, float... values) { lens.setFloatUniform(name, values); }
 
-    private static synchronized void fail(int e, Throwable ex) {
-        if (!BROKEN[e]) Log.w(TAG, "Glass engine " + e + " unavailable; retaining Samsung blur", ex);
-        BROKEN[e] = true;
+    private static void fail(int e, Throwable ex) {
+        boolean permanent=ex instanceof IllegalArgumentException || ex instanceof LinkageError;
+        if (HEALTH.record(e,SystemClock.uptimeMillis(),permanent))
+            Log.w(TAG,"Glass engine "+e+" unavailable; retaining Samsung blur",ex);
     }
 
     @Override public void draw(Canvas canvas) {
         Rect b = getBounds();
         if (b.isEmpty() || getAlpha() == 0) return;
+        Bitmap blurred=fallback.getBitmap();
+        // Native capture disposal may race the last display-list draw. Do not
+        // upload a recycled bitmap, retry a dead capture or substitute raw data.
         fallback.setBounds(b);
         if (engine == 0) {
             if (pureBlack(context)) {
                 black.setAlpha(getAlpha());
                 canvas.drawRect(b, black);
-            } else {
+            } else if(blurred!=null && !blurred.isRecycled()) {
                 fallback.draw(canvas);
             }
             return;
         }
+        if(blurred==null || blurred.isRecycled())return;
         long now = SystemClock.uptimeMillis();
         // At most once per second WHILE drawn; no timer, observer or idle work.
         if (now >= nextPolicyCheck) {
             allowed = selected(context) == engine && policyAllows(context);
             nextPolicyCheck = now + 1000;
         }
-        if (!allowed || BROKEN[engine] || !canvas.isHardwareAccelerated()
+        if (!allowed || failed || !HEALTH.available(engine,now) || !canvas.isHardwareAccelerated()
                 || b.width() < 4 || b.height() < 4
                 || (long)b.width()*b.height() > MAX_PIXELS || raw.isRecycled()) {
             fallback.draw(canvas); return;
@@ -240,9 +267,10 @@ public final class GlassDrawable extends BitmapDrawable {
             float r = Math.min(28*density, Math.min(width, height)/2f);
             canvas.drawRoundRect(0, 0, width, height, r, r, veil);
         } catch (RuntimeException | LinkageError | OutOfMemoryError ex) {
+            failed=true;
             fail(engine, ex);
         } finally { canvas.restoreToCount(save); }
-        if (BROKEN[engine]) fallback.draw(canvas);
+        if (failed) fallback.draw(canvas);
     }
 
     @Override public void setAlpha(int alpha) {

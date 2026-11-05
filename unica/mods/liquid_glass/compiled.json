@@ -1,6 +1,10 @@
 {
-  "java_sha256": "2f14c4f150c94c73cc0dc4b38b2d60f1c6b01db18f2de8adc038c9c68eff5e1b",
-  "smali_sha256": "c551c7e930632ebae6697864b04a0f48f1c7824c7121b8ec4a51acbc08006fb1",
+  "java_sha256": "a8bab2a17198c3fdf4277d23308fbb3cb7fc0110bae8f56a5299f2cf1cbc4388",
+  "smali_sha256": "9a8aefaf4f01b88e822af6f1ee4a0af92becbc4933aa5cbccd2c62f6c7ef97ef",
+  "smali_files": {
+    "com/gmhub/glass/GlassDrawable$Health.smali": "1e540a0d34d8d26cdc26d2931942492814353e57d51a477265ad92446e292181",
+    "com/gmhub/glass/GlassDrawable.smali": "9a8aefaf4f01b88e822af6f1ee4a0af92becbc4933aa5cbccd2c62f6c7ef97ef"
+  },
   "min_api": 33,
   "sdk_api": 37
 }

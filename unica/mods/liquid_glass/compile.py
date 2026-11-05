@@ -42,7 +42,8 @@ def compile_adapter(module, sdk, java_home, apktool, build_tools='36.0.0'):
         smali = tmp / 'smali'
         disassemble(java, apktool, tmp / 'classes.dex', smali)
         compiled = list(smali.rglob('*.smali'))
-        if [f.relative_to(smali).as_posix() for f in compiled] != ['com/gmhub/glass/GlassDrawable.smali']:
+        expected={'com/gmhub/glass/GlassDrawable.smali','com/gmhub/glass/GlassDrawable$Health.smali'}
+        if {f.relative_to(smali).as_posix() for f in compiled} != expected:
             raise ValueError('Unexpected generated adapter classes')
         shutil.copytree(smali, module / 'smali', dirs_exist_ok=True)
         # Git checks out text as LF on the Linux builder. Hash the same bytes
@@ -52,6 +53,8 @@ def compile_adapter(module, sdk, java_home, apktool, build_tools='36.0.0'):
     digest = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
     result = {'java_sha256': digest(source),
               'smali_sha256': digest(module / 'smali/com/gmhub/glass/GlassDrawable.smali'),
+              'smali_files': {p.relative_to(module/'smali').as_posix():digest(p)
+                              for p in sorted((module/'smali').rglob('*.smali'))},
               'min_api': 33, 'sdk_api': 37}
     (module / 'compiled.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
     print('Compiled and disassembled native SDK adapter; no compiler stubs packaged')

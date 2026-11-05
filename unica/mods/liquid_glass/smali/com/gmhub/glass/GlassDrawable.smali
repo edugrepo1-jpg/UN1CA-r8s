@@ -3,10 +3,18 @@
 .source "GlassDrawable.java"
 
 
-# static fields
-.field private static final BROKEN:[Z
+# annotations
+.annotation system Ldalvik/annotation/MemberClasses;
+    value = {
+        Lcom/gmhub/glass/GlassDrawable$Health;
+    }
+.end annotation
 
+
+# static fields
 .field public static final ENGINE_KEY:Ljava/lang/String; = "gmhub_liquid_glass_engine"
+
+.field private static final HEALTH:Lcom/gmhub/glass/GlassDrawable$Health;
 
 .field private static final MAPPER:Ljava/lang/String; = "uniform shader bitmap; uniform float2 captureSize; uniform float2 viewSize; half4 main(float2 p) { return bitmap.eval(clamp(p / viewSize * captureSize, float2(0.5), captureSize - 0.5)); }"
 
@@ -32,6 +40,8 @@
 
 .field private final engine:I
 
+.field private failed:Z
+
 .field private final fallback:Landroid/graphics/drawable/BitmapDrawable;
 
 .field private final glass:Landroid/graphics/Paint;
@@ -53,23 +63,25 @@
 
 # direct methods
 .method static constructor <clinit>()V
-    .locals 2
+    .locals 1
 
     const/4 v0, 0x4
 
-    new-array v1, v0, [Ljava/lang/String;
+    new-array v0, v0, [Ljava/lang/String;
 
-    sput-object v1, Lcom/gmhub/glass/GlassDrawable;->SOURCES:[Ljava/lang/String;
+    sput-object v0, Lcom/gmhub/glass/GlassDrawable;->SOURCES:[Ljava/lang/String;
 
-    new-array v0, v0, [Z
+    new-instance v0, Lcom/gmhub/glass/GlassDrawable$Health;
 
-    sput-object v0, Lcom/gmhub/glass/GlassDrawable;->BROKEN:[Z
+    invoke-direct {v0}, Lcom/gmhub/glass/GlassDrawable$Health;-><init>()V
+
+    sput-object v0, Lcom/gmhub/glass/GlassDrawable;->HEALTH:Lcom/gmhub/glass/GlassDrawable$Health;
 
     return-void
 .end method
 
 .method private constructor <init>(Landroid/content/Context;Landroid/graphics/Bitmap;Landroid/graphics/drawable/BitmapDrawable;I)V
-    .locals 5
+    .locals 4
 
     invoke-virtual {p1}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
 
@@ -125,6 +137,22 @@
 
     invoke-virtual {v1, v3}, Landroid/graphics/Paint;->setColor(I)V
 
+    const/high16 v1, 0x33000000
+
+    invoke-virtual {v2, v1}, Landroid/graphics/Paint;->setColor(I)V
+
+    invoke-virtual {p3}, Landroid/graphics/drawable/BitmapDrawable;->getAlpha()I
+
+    move-result v1
+
+    invoke-virtual {p0, v1}, Lcom/gmhub/glass/GlassDrawable;->setAlpha(I)V
+
+    invoke-virtual {p3}, Landroid/graphics/drawable/BitmapDrawable;->getColorFilter()Landroid/graphics/ColorFilter;
+
+    move-result-object v1
+
+    invoke-virtual {p0, v1}, Lcom/gmhub/glass/GlassDrawable;->setColorFilter(Landroid/graphics/ColorFilter;)V
+
     const/4 v1, 0x0
 
     if-nez p4, :cond_0
@@ -136,15 +164,15 @@
     return-void
 
     :cond_0
-    new-instance v3, Landroid/graphics/RuntimeShader;
+    new-instance v2, Landroid/graphics/RuntimeShader;
 
     invoke-static {p1, p4}, Lcom/gmhub/glass/GlassDrawable;->source(Landroid/content/Context;I)Ljava/lang/String;
 
     move-result-object p1
 
-    invoke-direct {v3, p1}, Landroid/graphics/RuntimeShader;-><init>(Ljava/lang/String;)V
+    invoke-direct {v2, p1}, Landroid/graphics/RuntimeShader;-><init>(Ljava/lang/String;)V
 
-    iput-object v3, p0, Lcom/gmhub/glass/GlassDrawable;->lens:Landroid/graphics/RuntimeShader;
+    iput-object v2, p0, Lcom/gmhub/glass/GlassDrawable;->lens:Landroid/graphics/RuntimeShader;
 
     const/4 p1, 0x3
 
@@ -155,9 +183,9 @@
     :cond_1
     new-instance v1, Landroid/graphics/RuntimeShader;
 
-    const-string v4, "uniform shader bitmap; uniform float2 captureSize; uniform float2 viewSize; half4 main(float2 p) { return bitmap.eval(clamp(p / viewSize * captureSize, float2(0.5), captureSize - 0.5)); }"
+    const-string v3, "uniform shader bitmap; uniform float2 captureSize; uniform float2 viewSize; half4 main(float2 p) { return bitmap.eval(clamp(p / viewSize * captureSize, float2(0.5), captureSize - 0.5)); }"
 
-    invoke-direct {v1, v4}, Landroid/graphics/RuntimeShader;-><init>(Ljava/lang/String;)V
+    invoke-direct {v1, v3}, Landroid/graphics/RuntimeShader;-><init>(Ljava/lang/String;)V
 
     :goto_0
     iput-object v1, p0, Lcom/gmhub/glass/GlassDrawable;->mapper:Landroid/graphics/RuntimeShader;
@@ -216,25 +244,21 @@
 
     const-string p0, "content"
 
-    invoke-virtual {v3, p0, v1}, Landroid/graphics/RuntimeShader;->setInputShader(Ljava/lang/String;Landroid/graphics/Shader;)V
+    invoke-virtual {v2, p0, v1}, Landroid/graphics/RuntimeShader;->setInputShader(Ljava/lang/String;Landroid/graphics/Shader;)V
 
     goto :goto_2
 
     :cond_3
     const-string p1, "uSource"
 
-    invoke-virtual {v3, p1, p0}, Landroid/graphics/RuntimeShader;->setInputShader(Ljava/lang/String;Landroid/graphics/Shader;)V
+    invoke-virtual {v2, p1, p0}, Landroid/graphics/RuntimeShader;->setInputShader(Ljava/lang/String;Landroid/graphics/Shader;)V
 
     const-string p1, "uSourceLowRes"
 
-    invoke-virtual {v3, p1, p0}, Landroid/graphics/RuntimeShader;->setInputShader(Ljava/lang/String;Landroid/graphics/Shader;)V
+    invoke-virtual {v2, p1, p0}, Landroid/graphics/RuntimeShader;->setInputShader(Ljava/lang/String;Landroid/graphics/Shader;)V
 
     :goto_2
-    invoke-virtual {v0, v3}, Landroid/graphics/Paint;->setShader(Landroid/graphics/Shader;)Landroid/graphics/Shader;
-
-    const/high16 p0, 0x33000000
-
-    invoke-virtual {v2, p0}, Landroid/graphics/Paint;->setColor(I)V
+    invoke-virtual {v0, v2}, Landroid/graphics/Paint;->setShader(Landroid/graphics/Shader;)Landroid/graphics/Shader;
 
     return-void
 
@@ -1208,60 +1232,63 @@
     return-void
 .end method
 
-.method private static declared-synchronized fail(ILjava/lang/Throwable;)V
-    .locals 5
+.method private static fail(ILjava/lang/Throwable;)V
+    .locals 4
 
-    const-string v0, "Glass engine "
+    instance-of v0, p1, Ljava/lang/IllegalArgumentException;
 
-    const-class v1, Lcom/gmhub/glass/GlassDrawable;
+    if-nez v0, :cond_1
 
-    monitor-enter v1
+    instance-of v0, p1, Ljava/lang/LinkageError;
 
-    :try_start_0
-    sget-object v2, Lcom/gmhub/glass/GlassDrawable;->BROKEN:[Z
+    if-eqz v0, :cond_0
 
-    aget-boolean v3, v2, p0
-
-    if-nez v3, :cond_0
-
-    const-string v3, "GMHubGlass"
-
-    new-instance v4, Ljava/lang/StringBuilder;
-
-    invoke-direct {v4, v0}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
-
-    invoke-virtual {v4, p0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
-
-    const-string v0, " unavailable; retaining Samsung blur"
-
-    invoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v0
-
-    invoke-static {v3, v0, p1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
+    goto :goto_0
 
     :cond_0
-    const/4 p1, 0x1
+    const/4 v0, 0x0
 
-    aput-boolean p1, v2, p0
-    :try_end_0
-    .catchall {:try_start_0 .. :try_end_0} :catchall_0
+    goto :goto_1
 
-    monitor-exit v1
+    :cond_1
+    :goto_0
+    const/4 v0, 0x1
 
+    :goto_1
+    sget-object v1, Lcom/gmhub/glass/GlassDrawable;->HEALTH:Lcom/gmhub/glass/GlassDrawable$Health;
+
+    invoke-static {}, Landroid/os/SystemClock;->uptimeMillis()J
+
+    move-result-wide v2
+
+    invoke-virtual {v1, p0, v2, v3, v0}, Lcom/gmhub/glass/GlassDrawable$Health;->record(IJZ)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_2
+
+    new-instance v0, Ljava/lang/StringBuilder;
+
+    const-string v1, "Glass engine "
+
+    invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    const-string p0, " unavailable; retaining Samsung blur"
+
+    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object p0
+
+    const-string v0, "GMHubGlass"
+
+    invoke-static {v0, p0, p1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
+
+    :cond_2
     return-void
-
-    :catchall_0
-    move-exception p0
-
-    :try_start_1
-    monitor-exit v1
-    :try_end_1
-    .catchall {:try_start_1 .. :try_end_1} :catchall_0
-
-    throw p0
 .end method
 
 .method private static policyAllows(Landroid/content/Context;)Z
@@ -1527,11 +1554,11 @@
     goto :goto_0
 
     :cond_1
-    new-instance p1, Ljava/lang/IllegalStateException;
+    new-instance p1, Ljava/lang/IllegalArgumentException;
 
     const-string v2, "Shader exceeds size limit"
 
-    invoke-direct {p1, v2}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
+    invoke-direct {p1, v2}, Ljava/lang/IllegalArgumentException;-><init>(Ljava/lang/String;)V
 
     throw p1
 
@@ -1578,11 +1605,11 @@
 
     :cond_4
     :try_start_7
-    new-instance p1, Ljava/lang/IllegalStateException;
+    new-instance p1, Ljava/lang/IllegalArgumentException;
 
     const-string v2, "Empty shader"
 
-    invoke-direct {p1, v2}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
+    invoke-direct {p1, v2}, Ljava/lang/IllegalArgumentException;-><init>(Ljava/lang/String;)V
 
     throw p1
     :try_end_7
@@ -1638,11 +1665,11 @@
     move-exception p0
 
     :try_start_c
-    new-instance p1, Ljava/lang/IllegalStateException;
+    new-instance p1, Ljava/lang/IllegalArgumentException;
 
     const-string v0, "Missing glass asset"
 
-    invoke-direct {p1, v0, p0}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;Ljava/lang/Throwable;)V
+    invoke-direct {p1, v0, p0}, Ljava/lang/IllegalArgumentException;-><init>(Ljava/lang/String;Ljava/lang/Throwable;)V
 
     throw p1
 
@@ -1712,7 +1739,7 @@
 .end method
 
 .method public static wrap(Landroid/content/Context;Landroid/graphics/Bitmap;Landroid/graphics/drawable/BitmapDrawable;Ljava/lang/String;)Landroid/graphics/drawable/BitmapDrawable;
-    .locals 1
+    .locals 3
 
     const-string v0, "QUICK_PANEL"
 
@@ -1767,13 +1794,17 @@
 
     move-result p3
 
-    if-eqz p3, :cond_3
+    sget-object v0, Lcom/gmhub/glass/GlassDrawable;->HEALTH:Lcom/gmhub/glass/GlassDrawable$Health;
 
-    sget-object v0, Lcom/gmhub/glass/GlassDrawable;->BROKEN:[Z
+    invoke-static {}, Landroid/os/SystemClock;->uptimeMillis()J
 
-    aget-boolean v0, v0, p3
+    move-result-wide v1
 
-    if-nez v0, :cond_3
+    invoke-virtual {v0, p3, v1, v2}, Lcom/gmhub/glass/GlassDrawable$Health;->available(IJ)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_3
 
     invoke-static {p0}, Lcom/gmhub/glass/GlassDrawable;->policyAllows(Landroid/content/Context;)Z
 
@@ -1809,7 +1840,7 @@
 
 # virtual methods
 .method public draw(Landroid/graphics/Canvas;)V
-    .locals 11
+    .locals 12
 
     invoke-virtual {p0}, Lcom/gmhub/glass/GlassDrawable;->getBounds()Landroid/graphics/Rect;
 
@@ -1819,7 +1850,7 @@
 
     move-result v3
 
-    if-nez v3, :cond_9
+    if-nez v3, :cond_a
 
     invoke-virtual {p0}, Lcom/gmhub/glass/GlassDrawable;->getAlpha()I
 
@@ -1832,19 +1863,25 @@
     :cond_0
     iget-object v3, p0, Lcom/gmhub/glass/GlassDrawable;->fallback:Landroid/graphics/drawable/BitmapDrawable;
 
-    invoke-virtual {v3, v0}, Landroid/graphics/drawable/BitmapDrawable;->setBounds(Landroid/graphics/Rect;)V
+    invoke-virtual {v3}, Landroid/graphics/drawable/BitmapDrawable;->getBitmap()Landroid/graphics/Bitmap;
 
-    iget v3, p0, Lcom/gmhub/glass/GlassDrawable;->engine:I
+    move-result-object v3
 
-    if-nez v3, :cond_2
+    iget-object v4, p0, Lcom/gmhub/glass/GlassDrawable;->fallback:Landroid/graphics/drawable/BitmapDrawable;
 
-    iget-object v3, p0, Lcom/gmhub/glass/GlassDrawable;->context:Landroid/content/Context;
+    invoke-virtual {v4, v0}, Landroid/graphics/drawable/BitmapDrawable;->setBounds(Landroid/graphics/Rect;)V
 
-    invoke-static {v3}, Lcom/gmhub/glass/GlassDrawable;->pureBlack(Landroid/content/Context;)Z
+    iget v4, p0, Lcom/gmhub/glass/GlassDrawable;->engine:I
 
-    move-result v3
+    if-nez v4, :cond_2
 
-    if-eqz v3, :cond_1
+    iget-object v4, p0, Lcom/gmhub/glass/GlassDrawable;->context:Landroid/content/Context;
+
+    invoke-static {v4}, Lcom/gmhub/glass/GlassDrawable;->pureBlack(Landroid/content/Context;)Z
+
+    move-result v4
+
+    if-eqz v4, :cond_1
 
     iget-object v3, p0, Lcom/gmhub/glass/GlassDrawable;->black:Landroid/graphics/Paint;
 
@@ -1861,6 +1898,14 @@
     return-void
 
     :cond_1
+    if-eqz v3, :cond_a
+
+    invoke-virtual {v3}, Landroid/graphics/Bitmap;->isRecycled()Z
+
+    move-result v0
+
+    if-nez v0, :cond_a
+
     iget-object v0, p0, Lcom/gmhub/glass/GlassDrawable;->fallback:Landroid/graphics/drawable/BitmapDrawable;
 
     invoke-virtual {v0, p1}, Landroid/graphics/drawable/BitmapDrawable;->draw(Landroid/graphics/Canvas;)V
@@ -1868,6 +1913,17 @@
     return-void
 
     :cond_2
+    if-eqz v3, :cond_a
+
+    invoke-virtual {v3}, Landroid/graphics/Bitmap;->isRecycled()Z
+
+    move-result v3
+
+    if-eqz v3, :cond_3
+
+    goto/16 :goto_4
+
+    :cond_3
     invoke-static {}, Landroid/os/SystemClock;->uptimeMillis()J
 
     move-result-wide v3
@@ -1876,7 +1932,9 @@
 
     cmp-long v5, v3, v5
 
-    if-ltz v5, :cond_4
+    const/4 v10, 0x1
+
+    if-ltz v5, :cond_5
 
     iget-object v5, p0, Lcom/gmhub/glass/GlassDrawable;->context:Landroid/content/Context;
 
@@ -1886,7 +1944,7 @@
 
     iget v6, p0, Lcom/gmhub/glass/GlassDrawable;->engine:I
 
-    if-ne v5, v6, :cond_3
+    if-ne v5, v6, :cond_4
 
     iget-object v5, p0, Lcom/gmhub/glass/GlassDrawable;->context:Landroid/content/Context;
 
@@ -1894,13 +1952,13 @@
 
     move-result v5
 
-    if-eqz v5, :cond_3
+    if-eqz v5, :cond_4
 
-    const/4 v5, 0x1
+    move v5, v10
 
     goto :goto_0
 
-    :cond_3
+    :cond_4
     const/4 v5, 0x0
 
     :goto_0
@@ -1908,28 +1966,34 @@
 
     const-wide/16 v5, 0x3e8
 
-    add-long/2addr v3, v5
+    add-long/2addr v5, v3
 
-    iput-wide v3, p0, Lcom/gmhub/glass/GlassDrawable;->nextPolicyCheck:J
+    iput-wide v5, p0, Lcom/gmhub/glass/GlassDrawable;->nextPolicyCheck:J
 
-    :cond_4
-    iget-boolean v3, p0, Lcom/gmhub/glass/GlassDrawable;->allowed:Z
+    :cond_5
+    iget-boolean v5, p0, Lcom/gmhub/glass/GlassDrawable;->allowed:Z
 
-    if-eqz v3, :cond_8
+    if-eqz v5, :cond_9
 
-    sget-object v3, Lcom/gmhub/glass/GlassDrawable;->BROKEN:[Z
+    iget-boolean v5, p0, Lcom/gmhub/glass/GlassDrawable;->failed:Z
 
-    iget v4, p0, Lcom/gmhub/glass/GlassDrawable;->engine:I
+    if-nez v5, :cond_9
 
-    aget-boolean v3, v3, v4
+    sget-object v5, Lcom/gmhub/glass/GlassDrawable;->HEALTH:Lcom/gmhub/glass/GlassDrawable$Health;
 
-    if-nez v3, :cond_8
+    iget v6, p0, Lcom/gmhub/glass/GlassDrawable;->engine:I
+
+    invoke-virtual {v5, v6, v3, v4}, Lcom/gmhub/glass/GlassDrawable$Health;->available(IJ)Z
+
+    move-result v3
+
+    if-eqz v3, :cond_9
 
     invoke-virtual {p1}, Landroid/graphics/Canvas;->isHardwareAccelerated()Z
 
     move-result v3
 
-    if-eqz v3, :cond_8
+    if-eqz v3, :cond_9
 
     invoke-virtual {v0}, Landroid/graphics/Rect;->width()I
 
@@ -1937,13 +2001,13 @@
 
     const/4 v4, 0x4
 
-    if-lt v3, v4, :cond_8
+    if-lt v3, v4, :cond_9
 
     invoke-virtual {v0}, Landroid/graphics/Rect;->height()I
 
     move-result v3
 
-    if-lt v3, v4, :cond_8
+    if-lt v3, v4, :cond_9
 
     invoke-virtual {v0}, Landroid/graphics/Rect;->width()I
 
@@ -1963,7 +2027,7 @@
 
     cmp-long v3, v3, v5
 
-    if-gtz v3, :cond_8
+    if-gtz v3, :cond_9
 
     iget-object v3, p0, Lcom/gmhub/glass/GlassDrawable;->raw:Landroid/graphics/Bitmap;
 
@@ -1971,14 +2035,14 @@
 
     move-result v3
 
-    if-eqz v3, :cond_5
+    if-eqz v3, :cond_6
 
     goto/16 :goto_3
 
-    :cond_5
+    :cond_6
     invoke-virtual {p1}, Landroid/graphics/Canvas;->save()I
 
-    move-result v10
+    move-result v11
 
     :try_start_0
     iget v3, p0, Lcom/gmhub/glass/GlassDrawable;->width:I
@@ -1987,7 +2051,7 @@
 
     move-result v4
 
-    if-ne v3, v4, :cond_6
+    if-ne v3, v4, :cond_7
 
     iget v3, p0, Lcom/gmhub/glass/GlassDrawable;->height:I
 
@@ -1995,9 +2059,9 @@
 
     move-result v4
 
-    if-eq v3, v4, :cond_7
+    if-eq v3, v4, :cond_8
 
-    :cond_6
+    :cond_7
     invoke-virtual {v0}, Landroid/graphics/Rect;->width()I
 
     move-result v3
@@ -2008,7 +2072,7 @@
 
     invoke-direct {p0, v3, v4}, Lcom/gmhub/glass/GlassDrawable;->configure(II)V
 
-    :cond_7
+    :cond_8
     iget v3, v0, Landroid/graphics/Rect;->left:I
 
     int-to-float v3, v3
@@ -2097,6 +2161,8 @@
     move-exception v0
 
     :try_start_1
+    iput-boolean v10, p0, Lcom/gmhub/glass/GlassDrawable;->failed:Z
+
     iget v3, p0, Lcom/gmhub/glass/GlassDrawable;->engine:I
 
     invoke-static {v3, v0}, Lcom/gmhub/glass/GlassDrawable;->fail(ILjava/lang/Throwable;)V
@@ -2104,15 +2170,11 @@
     .catchall {:try_start_1 .. :try_end_1} :catchall_0
 
     :goto_1
-    invoke-virtual {p1, v10}, Landroid/graphics/Canvas;->restoreToCount(I)V
+    invoke-virtual {p1, v11}, Landroid/graphics/Canvas;->restoreToCount(I)V
 
-    sget-object v0, Lcom/gmhub/glass/GlassDrawable;->BROKEN:[Z
+    iget-boolean v0, p0, Lcom/gmhub/glass/GlassDrawable;->failed:Z
 
-    iget v3, p0, Lcom/gmhub/glass/GlassDrawable;->engine:I
-
-    aget-boolean v0, v0, v3
-
-    if-eqz v0, :cond_9
+    if-eqz v0, :cond_a
 
     iget-object v0, p0, Lcom/gmhub/glass/GlassDrawable;->fallback:Landroid/graphics/drawable/BitmapDrawable;
 
@@ -2121,17 +2183,17 @@
     goto :goto_4
 
     :goto_2
-    invoke-virtual {p1, v10}, Landroid/graphics/Canvas;->restoreToCount(I)V
+    invoke-virtual {p1, v11}, Landroid/graphics/Canvas;->restoreToCount(I)V
 
     throw v0
 
-    :cond_8
+    :cond_9
     :goto_3
     iget-object v0, p0, Lcom/gmhub/glass/GlassDrawable;->fallback:Landroid/graphics/drawable/BitmapDrawable;
 
     invoke-virtual {v0, p1}, Landroid/graphics/drawable/BitmapDrawable;->draw(Landroid/graphics/Canvas;)V
 
-    :cond_9
+    :cond_a
     :goto_4
     return-void
 .end method
