@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:settings="http://schemas.android.com/apk/res-auto" android:title="@string/gm_qs_title" settings:hierarchicalParentFragment="io.mesalabs.unica.settings.UnicaSettingsFragment">
+    <ListPreference android:key="gmhub_qs_style" android:title="@string/gm_qs_style_title" android:entries="@array/gm_qs_styles" android:entryValues="@array/gm_qs_style_values" android:defaultValue="0" android:persistent="false" android:summary="@string/gm_qs_selection_summary" />
+    <Preference android:title="@string/gm_qs_edit_title" android:summary="@string/gm_qs_edit_summary" android:selectable="false" />
+    <Preference android:title="@string/gm_qs_media_title" android:summary="@string/gm_qs_media_summary" android:selectable="false" />
+</PreferenceScreen>

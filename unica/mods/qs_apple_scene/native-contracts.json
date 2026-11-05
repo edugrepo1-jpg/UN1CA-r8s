@@ -1,0 +1,173 @@
+{
+  "api": 37,
+  "source_firmware": "S926BXXSIEZJ1",
+  "classes": {
+    "androidx/compose/runtime/Composer": {
+      "fields": [
+        "Companion:Landroidx/compose/runtime/Composer$Companion;"
+      ],
+      "methods": [
+        "startRestartGroup(I)Landroidx/compose/runtime/Composer;",
+        "endRestartGroup()Landroidx/compose/runtime/ScopeUpdateScope;",
+        "startReplaceGroup(I)V",
+        "endReplaceGroup()V",
+        "changedInstance(Ljava/lang/Object;)Z",
+        "changed(I)Z",
+        "rememberedValue()Ljava/lang/Object;",
+        "updateRememberedValue(Ljava/lang/Object;)V",
+        "consume(Landroidx/compose/runtime/CompositionLocal;)Ljava/lang/Object;"
+      ]
+    },
+    "androidx/compose/runtime/Composer$Companion": {
+      "fields": [],
+      "methods": [
+        "getEmpty()Ljava/lang/Object;"
+      ]
+    },
+    "androidx/compose/runtime/CompositionLocalKt": {
+      "fields": [],
+      "methods": [
+        "compositionLocalOf$default(Lkotlin/jvm/functions/Function0;)Landroidx/compose/runtime/DynamicProvidableCompositionLocal;",
+        "CompositionLocalProvider(Landroidx/compose/runtime/ProvidedValue;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V"
+      ]
+    },
+    "androidx/compose/runtime/ProvidableCompositionLocal": {
+      "fields": [],
+      "methods": [
+        "provides(Ljava/lang/Object;)Landroidx/compose/runtime/ProvidedValue;"
+      ]
+    },
+    "androidx/compose/runtime/SnapshotStateKt": {
+      "fields": [],
+      "methods": [
+        "mutableStateOf$default(Ljava/lang/Object;)Landroidx/compose/runtime/MutableState;"
+      ]
+    },
+    "androidx/compose/runtime/State": {
+      "fields": [],
+      "methods": [
+        "getValue()Ljava/lang/Object;"
+      ]
+    },
+    "androidx/compose/runtime/MutableState": {
+      "fields": [],
+      "methods": [
+        "setValue(Ljava/lang/Object;)V"
+      ]
+    },
+    "androidx/compose/runtime/EffectsKt": {
+      "fields": [],
+      "methods": [
+        "DisposableEffect(Ljava/lang/Object;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;)V"
+      ]
+    },
+    "androidx/compose/runtime/DisposableEffectResult": {
+      "fields": [],
+      "methods": [
+        "dispose()V"
+      ]
+    },
+    "androidx/compose/runtime/ScopeUpdateScope": {
+      "fields": [],
+      "methods": [
+        "updateScope(Lkotlin/jvm/functions/Function2;)V"
+      ]
+    },
+    "androidx/compose/runtime/internal/ComposableLambdaKt": {
+      "fields": [],
+      "methods": [
+        "rememberComposableLambda(IZLjava/lang/Object;Landroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/internal/ComposableLambda;"
+      ]
+    },
+    "kotlin/Unit": {
+      "fields": [
+        "INSTANCE:Lkotlin/Unit;"
+      ],
+      "methods": []
+    },
+    "kotlin/jvm/functions/Function0": {
+      "fields": [],
+      "methods": [
+        "invoke()Ljava/lang/Object;"
+      ]
+    },
+    "kotlin/jvm/functions/Function1": {
+      "fields": [],
+      "methods": [
+        "invoke(Ljava/lang/Object;)Ljava/lang/Object;"
+      ]
+    },
+    "kotlin/jvm/functions/Function2": {
+      "fields": [],
+      "methods": [
+        "invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"
+      ]
+    },
+    "com/android/systemui/samsung/quicksetting/ui/SecQuickSettingSceneKt": {
+      "fields": [
+        "LocalViewModel:Landroidx/compose/runtime/DynamicProvidableCompositionLocal;"
+      ],
+      "methods": [
+        "SecQuickSettingSceneMain(Lcom/android/compose/animation/scene/ContentScope;Landroidx/compose/ui/Modifier;Ljava/util/List;Lcom/android/systemui/samsung/quicksetting/ui/panel/QuickTileBoxViewModel;Landroidx/compose/runtime/Composer;I)V"
+      ]
+    },
+    "com/android/systemui/samsung/quicksetting/ui/panel/QuickSettingSceneViewModel": {
+      "fields": [
+        "qsHost:Lcom/android/systemui/qs/QSHost;"
+      ],
+      "methods": []
+    },
+    "com/android/systemui/qs/QSHost": {
+      "fields": [],
+      "methods": [
+        "getUserId()I",
+        "getUserContext()Landroid/content/Context;"
+      ]
+    },
+    "com/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridTileKt$$ExternalSyntheticLambda6": {
+      "fields": [
+        "f$1:Lcom/android/systemui/samsung/quicksetting/domain/model/items/GridTileItem;",
+        "f$17:Landroidx/compose/foundation/shape/RoundedCornerShape;",
+        "f$22:Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridTileScopeImpl;"
+      ],
+      "methods": []
+    },
+    "com/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridTileScopeImpl": {
+      "fields": [
+        "spanSize:J",
+        "inAvailableGrid:Z",
+        "expanded:Z"
+      ],
+      "methods": []
+    },
+    "androidx/compose/foundation/shape/RoundedCornerShapeKt": {
+      "fields": [],
+      "methods": [
+        "RoundedCornerShape(I)Landroidx/compose/foundation/shape/RoundedCornerShape;",
+        "RoundedCornerShape-0680j_4(F)Landroidx/compose/foundation/shape/RoundedCornerShape;"
+      ]
+    },
+    "com/android/systemui/samsung/quicksetting/domain/model/items/MediaPlayer": {
+      "fields": [],
+      "methods": []
+    },
+    "com/android/systemui/samsung/quicksetting/domain/model/items/LegacyMediaPlayer": {
+      "fields": [],
+      "methods": []
+    }
+  },
+  "hooks": [
+    {
+      "kind": "entry",
+      "class": "com/android/systemui/samsung/quicksetting/ui/SecQuickSettingScene$$ExternalSyntheticLambda7",
+      "signature": ".method public final invoke(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+      "method_sha256": "e4e1c7540e576c297249a1845559221fa771c7bbc90e03e3f669b4f315a09119"
+    },
+    {
+      "kind": "shape",
+      "class": "com/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridTileKt$$ExternalSyntheticLambda6",
+      "signature": ".method public final invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+      "method_sha256": "012a939cd0a2ef8c1e97e3ad647b4269b0f9e3174a683afea919843b9e2519ab"
+    }
+  ]
+}

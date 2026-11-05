@@ -1,0 +1,10 @@
+{
+  "sdk_api": 37,
+  "min_api": 33,
+  "sources": {
+    "panelstyle/src/com/gmhub/panelstyle/PanelStyleControl.java": "c1d3eeefaab4f225126ff47a1013f3fe35364caa9df27589405e07f0dc7cf55b"
+  },
+  "generated": {
+    "SecSettings.apk/smali_classes4/com/gmhub/panelstyle/PanelStyleControl.smali": "0af1bdc8810bf00952ad30b62a24b7d966d9be403a2ea21f74646793c1e59ce7"
+  }
+}

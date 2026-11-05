@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_qs_title">Central de controles</string>
+    <string name="gm_qs_home_summary">Aparência dos controles e edição do painel</string>
+    <string name="gm_qs_style_title">Formato dos controles</string>
+    <string name="gm_qs_native">One UI</string>
+    <string name="gm_qs_ios">iOS 26</string>
+    <string name="gm_qs_selection_summary">A escolha vale para este usuário. O formato é atualizado ao abrir o painel; One UI restaura os formatos originais.</string>
+    <string name="gm_qs_edit_title">Editar controles</string>
+    <string name="gm_qs_edit_summary">Use a edição no próprio painel para adicionar, remover, mover e redimensionar os controles disponíveis.</string>
+    <string name="gm_qs_media_title">Player de mídia</string>
+    <string name="gm_qs_media_summary">O player mantém a aparência original da One UI e as opções de posição e tamanho oferecidas no editor.</string>
+    <string name="gm_qs_unavailable">A integração desta central não está disponível nesta instalação.</string>
+    <string name="gm_qs_save_error">Não foi possível confirmar a escolha. Abra esta página novamente para conferir o valor salvo.</string>
+    <string-array name="gm_qs_styles"><item>@string/gm_qs_native</item><item>@string/gm_qs_ios</item></string-array>
+    <string-array name="gm_qs_style_values"><item>0</item><item>1</item></string-array>
+</resources>

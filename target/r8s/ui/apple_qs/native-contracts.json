@@ -1,7 +1,10 @@
 {
   "api": 37,
   "source_firmware": "S926BXXSIEZJ1",
-  "installation_status": "staged_not_installed",
+  "installation_status": "native_scene_appearance_binding",
+  "ios26_panel_complete": false,
+  "native_editor_owner": "samsung",
+  "alternate_editor_mounted": false,
   "classes": {
     "com/android/systemui/samsung/quicksetting/ui/SecQuickSettingScene": {
       "fields": [

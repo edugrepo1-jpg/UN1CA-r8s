@@ -1,9 +1,19 @@
 # Editable QS integration status
 
-This directory is staged, not installed by the ROM pipeline yet. The native
-Samsung API37 panel, controls and Compose media player remain authoritative.
-Do not advertise the alternate panel as available until the complete entry point,
-editor, native control lifecycle and installer are connected and validated.
+`unica/mods/qs_apple_scene` now installs an appearance provider at the exact
+Samsung API37 Compose entry. The Hub's **Central de controles / Formato dos
+controles** preference connects to this provider through per-user Secure
+settings. The native panel, editor, gallery, controls and Compose player remain
+authoritative. This is an installed scene binding in the build source, not yet
+a complete iOS 26 panel or an installed/validated change on the physical phone.
+
+The current iOS choice changes the generic frames to circles/capsules and large
+rounded cards. It explicitly excludes both native media item types, expanded
+details and gallery previews. Returning to One UI returns the original frame
+object; no native lambda field is modified. iOS header/group navigation, gallery
+presentation, edit chrome and independent per-style geometry remain unfinished.
+The pre-existing `NativeGridEditor` is still staged; it is not mounted as a
+second editor over Samsung's functioning editor.
 
 The exact donor contract includes every native field used by geometry copying,
 the synthetic public constructor and the active-flow writer. Validation of the
@@ -148,8 +158,37 @@ Research was checked against pinned source, not feature lists:
   `AndroidView` factory/update/release own the edit overlay. A Compose root is
   not a legacy ViewGroup to reparent, and a ViewOverlay is not a touch host.
 
-The remaining entry integration must supply the actual native scrolling/RTL
-coordinates, composition lifecycle, scene selection and gallery/header actions.
-Do not expose a Hub switch while it would select a controller that is not mounted.
-Separate orientation/style metadata must not overwrite the native One UI layout.
-The installation flag remains staged until those pieces are connected.
+The native scene now supplies composition lifecycle and user-scoped appearance
+selection. Any later mounting of `NativeGridEditor` must still supply actual
+scrolling/RTL coordinates and the measured grid bounds. Separate orientation/
+style metadata must not overwrite the native One UI layout. The new Hub choice
+describes control formats; it does not advertise completed full-panel parity.
+
+## Installed scene binding
+
+The installer checks 23 exact donor class contracts and pins the bodies of the
+two modified methods. It redirects only the outer main call in
+`SecQuickSettingScene$$ExternalSyntheticLambda7`, leaving the native main,
+its restart lambda and `MediaPlayerKt` byte-identical. The second hook replaces
+only a local frame value in the native grid's content lambda; it does not
+mutate a captured shape, replace controls or capture the media view model.
+
+`ComposePanelRoot` provides one Compose-local selection through a native
+`rememberComposableLambda` slot. Its remembered session follows the native QS
+user context. A `DisposableEffect` registers a Secure-setting observer after
+composition commits, re-reads after registration, and unregisters on disposal
+or user changes. No polling timer, service, sensor, duplicate tile host or
+SystemUI restart is introduced. Unknown values and unavailable observation use
+the native appearance. Runtime ABI preflight falls back before emitting any
+composition; native content failures propagate once, without retrying a partly
+emitted scene.
+
+The Settings writer verifies the provider readback and attempts to recover its
+previous value on failure. Its preference has no independent SharedPreferences
+writer. It remains disabled unless the matching scene installer sets its build
+capability property. Both adapters ship generated SDK37/D8 smali with source/
+output integrity manifests, so ordinary ROM builds need no additional SDK.
+
+Exact-donor dry runs, DEX assembly and controlled host lifecycle tests cover
+these source contracts. They do not establish physical rendering, fluidity,
+cold-load persistence or the visual identity of the completed panel.

@@ -2,6 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:settings="http://schemas.android.com/apk/res-auto" android:title="@string/unica_settings_title" settings:hierarchicalParentFragment="com.android.settings.homepage.TopLevelSettings" settings:keywords="@string/keywords_unica_settings" settings:topLevelPreferenceKey="top_level_unica">
     <com.android.settingslib.widget.LayoutPreference android:layout="@layout/unica_settings_logo_layout" android:selectable="false" android:key="unica_logo" />
     <PreferenceCategory android:title="@string/gm_hub_appearance">
+        <Preference android:icon="@drawable/ic_unica_settings_ui" android:title="@string/gm_qs_title" android:summary="@string/gm_qs_home_summary" android:key="gm_hub_qs" android:fragment="com.paradox.hub.PanelStyleFragment" />
         <Preference android:icon="@drawable/ic_unica_settings_ui" android:title="@string/gm_hub_materials" android:summary="@string/gm_glass_home_summary" android:key="gm_hub_liquid_glass" android:fragment="com.paradox.hub.GlassSettingsFragment" />
         <io.mesalabs.unica.settings.preference.IconPreference android:icon="@drawable/ic_unica_settings_ui" android:title="@string/unica_ui_settings_title" android:key="unica_ui_settings" android:fragment="io.mesalabs.unica.settings.ui.UISettingsFragment" settings:controller="io.mesalabs.unica.settings.ui.UISettingsPreferenceController" />
     </PreferenceCategory>
