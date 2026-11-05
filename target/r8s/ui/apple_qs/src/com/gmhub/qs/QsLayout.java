@@ -19,7 +19,7 @@ public final class QsLayout {
     public static final class Board {
         public final int columns, rows, pages;
         public Board(int columns, int rows, int pages) {
-            if (columns < 1 || columns > 8 || rows < 1 || rows > 64 || pages < 1 || pages > 10)
+            if (columns < 1 || columns > 16 || rows < 1 || rows > 64 || pages < 1 || pages > 10)
                 throw new IllegalArgumentException("Invalid QS board");
             this.columns = columns; this.rows = rows; this.pages = pages;
         }

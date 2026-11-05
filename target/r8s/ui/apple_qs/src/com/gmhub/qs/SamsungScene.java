@@ -14,7 +14,7 @@ import java.util.List;
  */
 public final class SamsungScene implements AutoCloseable {
     private final Thread owner = Thread.currentThread();
-    private final Object model, adapter, host, store, available;
+    private final Object model, adapter, host, store, grid, available;
     private final int user;
     private final SamsungTiles tiles;
     private final Method collapse, edit, power, settings, dragging;
@@ -58,6 +58,8 @@ public final class SamsungScene implements AutoCloseable {
         adapter = field(nativeScene, "qsAdapter");
         host = field(model, "qsHost");
         store = field(model, "$$delegate_2");
+        grid = field(model, "$$delegate_1");
+        field(grid, "currentGridSize");
         available = field(model, "$$delegate_3");
         user = number(invoke(host, "getUserId"));
         collapse = method(model, "collapse"); edit = method(model, "launchEditMode");
@@ -124,6 +126,12 @@ public final class SamsungScene implements AutoCloseable {
         if (geometry != null && geometry.isOpen()) throw new IllegalStateException("QS geometry is already being edited");
         geometry = new NativeGeometry(this, store, columns, rows, screenFlag, deviceFlag);
         return geometry;
+    }
+    Object gridToken() throws Exception {
+        check(); return invoke(field(grid,"currentGridSize"),"getValue");
+    }
+    boolean sameGrid(Object token) throws Exception {
+        return java.util.Objects.equals(token,gridToken());
     }
     boolean geometryOwned() throws Exception {
         if (Thread.currentThread()!=owner) throw new IllegalStateException("QS UI thread required");

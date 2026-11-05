@@ -90,7 +90,9 @@ public final class NativeGeometryContract {
         boolean unlocked=true,visible;
         public boolean isUnlocked(){return unlocked;} public boolean isVisible(){return visible;}
     }
+    public static class Grid { public final Flow currentGridSize=new Flow(42L); }
     public static class Model {
+        public final Grid $$delegate_1=new Grid();
         public final Host qsHost=new Host();
         public final Store $$delegate_2=new Store();
         public final Available $$delegate_3=new Available();
@@ -146,6 +148,20 @@ public final class NativeGeometryContract {
         f=new Fixture();edit=f.edit();check(edit.preview(f.moved()));
         Object current=f.store.items().get(0);f.nativeScene.viewModel.qsHost.user=10;
         edit.close();check(f.store.items().get(0)==current);
+        // Same-screen grid measurements can change without rotating or replacing
+        // the active flow (density, font scale or window resize).
+        for(boolean commit:new boolean[]{false,true}) {
+            f=new Fixture();edit=f.edit();check(edit.preview(f.moved()));
+            f.nativeScene.viewModel.$$delegate_1.currentGridSize.value=99L;
+            check(!(commit?edit.commit():edit.preview(f.moved())));
+            check(!edit.isOpen());check(f.store.items().get(0)==f.original);
+        }
+        // The immutable layout and native geometry adapter share the same 16-column bound.
+        QsLayout.Board wide=new QsLayout.Board(16,4,1);
+        QsLayout.Snapshot wideLayout=QsLayout.restore(wide,Arrays.asList(
+            new QsLayout.Card("left","wifi",QsLayout.Kind.TILE,0,0,8,1,0),
+            new QsLayout.Card("right","bt",QsLayout.Kind.TILE,8,0,8,1,0)),(card,board)->true);
+        check(wideLayout!=null);check(wideLayout.find("right").x==8);
         // Accepted edits retain the original player/model identity after close.
         f=new Fixture();edit=f.edit();check(edit.preview(f.moved()));check(edit.commit());
         Object accepted=f.store.items().get(0);f.scene.close();check(f.store.items().get(0)==accepted);

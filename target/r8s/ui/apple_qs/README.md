@@ -30,3 +30,9 @@ started must not send an unmatched transaction-end callback.
 Host lifecycle/failure contracts and SDK37/D8 compilation are separate from
 native UI and physical-device validation. They do not establish renderer
 performance or that the complete Apple-style panel is installed.
+
+A measured native-grid size change cancels an open geometry transaction even
+when screen type and active flow identity remain unchanged (window/density
+changes). Cancellation restores only wrappers still owned by that transaction.
+The bounded immutable layout supports up to 16 columns, matching the existing
+native geometry adapter; this does not force a 16-column layout on the device.

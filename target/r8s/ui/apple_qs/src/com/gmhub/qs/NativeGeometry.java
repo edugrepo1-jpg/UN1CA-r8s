@@ -13,7 +13,7 @@ import java.util.*;
 public final class NativeGeometry implements AutoCloseable {
     private final Thread owner=Thread.currentThread();
     private final SamsungScene scene;
-    private final Object store, screen, activeFlow;
+    private final Object store, screen, activeFlow, gridToken;
     private final int columns, rows;
     private final boolean screenFlag, deviceFlag;
     private final List<Object> original;
@@ -28,6 +28,7 @@ public final class NativeGeometry implements AutoCloseable {
         this.scene=scene; this.store=store; this.columns=columns; this.rows=rows;
         this.screenFlag=screenFlag; this.deviceFlag=deviceFlag;
         screen=flow(field(store,"currentScreenType"));
+        gridToken=scene.gridToken();
         activeFlow=flow(field(store,"_qsPanelItems"));
         original=items(); published=original;
         List< SamsungScene.Slot> visible=scene.slots();
@@ -116,7 +117,7 @@ public final class NativeGeometry implements AutoCloseable {
     public boolean preview(QsLayout.Snapshot snapshot) throws Exception {
         checkThread();
         if(closed)return false;
-        if(!scene.geometryAllowed() || !owns()) { close(); return false; }
+        if(!scene.geometryAllowed() || !scene.sameGrid(gridToken) || !owns()) { close(); return false; }
         if(snapshot==null || snapshot.board.columns!=columns || snapshot.board.rows!=rows
                 || snapshot.cards.size()!=original.size())return false;
         Set<String> keys=new HashSet<>(); boolean[][] occupied=new boolean[rows][columns];
@@ -156,7 +157,7 @@ public final class NativeGeometry implements AutoCloseable {
     public boolean commit() throws Exception {
         checkThread();
         if(closed)return false;
-        if(!scene.geometryAllowed() || !owns()) { close(); return false; }
+        if(!scene.geometryAllowed() || !scene.sameGrid(gridToken) || !owns()) { close(); return false; }
         closed=true; return true;
     }
     @Override public void close() {
