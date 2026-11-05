@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gm_apps_summary">Ativar, desativar e restaurar alterações feitas pelo Hub</string>
+    <string name="gm_apps_load_failed">Não foi possível carregar os apps. Reabra esta página para tentar novamente.</string>
+    <string name="gm_apps_empty">Nenhum app encontrado</string>
+    <string name="gm_apps_protected">Componente necessário ou em uso; desativação indisponível</string>
+    <string name="gm_apps_result">Alterações confirmadas: %1$d. Falhas: %2$d.</string>
+    <string name="gm_apps_restore">Restaurar alterações do Hub</string>
+    <string name="gm_apps_restore_summary">Restaurar apenas os estados alterados por este Hub para o usuário atual. Apps alterados por outros meios não serão modificados.</string>
+    <string name="gm_apps_disable_selected">Desativar apps opcionais selecionados</string>
+    <string name="gm_apps_enable_selected">Ativar apps opcionais selecionados</string>
+</resources>

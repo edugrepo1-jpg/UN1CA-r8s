@@ -1,0 +1,34 @@
+{
+  "sdk_api": 37,
+  "min_api": 33,
+  "sources": {
+    "apps/src/com/gmhub/apps/AppBackend.java": "8f71ef95cd6120e64569ff25888c5c91f6a35310c648f99c15e1fcd94a878299",
+    "apps/src/com/gmhub/apps/AppsController.java": "45123a838a38d9801c28c94a0e79e143bd0b16d9518bc976edea4075d9c31ca0",
+    "apps/src/com/gmhub/apps/AppStateEngine.java": "8b798cc09a83da862f3cbdd958a48af20710d39e91b0782f52601ba23a0d6389"
+  },
+  "generated": {
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppBackend.smali": "33a964edaae69ccc9e0b910383bcb7e99cb78889f8c5eccd296817580271f35f",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda0.smali": "57284395f53bbc8d3c192250c00547907eedbf6f7548639a3c3591fb10225d7e",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda1.smali": "4d3fdbfeaa0b4aa98dab53a93739df1fef932b57a4713d55d54e4b764871411f",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda10.smali": "4da5ee1bb38d8b4f09274f8a3a8451d4fbfb42bcde237440a071a19aac0cad32",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda11.smali": "03a6ff4fd8b11e8d8faa66411f46493b4df1585bf980921aad64c593a3623557",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda12.smali": "7c602e5e5543b65c5465bb4fea256ee5c94c729501e610df66d935f10c937bb2",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda13.smali": "a697e2985a123c3286eb63b857948f6a60bb5ad1aae5f916a73e0a0bd9f1d792",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda14.smali": "26c8c815b6ad48e6ba14aa94364cd0ca30d4ec46292a36b835e647596f1e0c9c",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda2.smali": "e975a35d3219ad8b81716b4b93f324612554f97655e18bb6733bb1b647c5ae52",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda3.smali": "9a7da0fdb0dce99fb0d40b04907e2006b1aa53cc08a22e6a725861f233fd77d2",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda4.smali": "02858c6836a449728761fdfb236e4ea9e9c5c7b70155348dc8e07a3004d6a847",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda5.smali": "90c54977f363af00a5e3f76599d308b7f7f2d3bc1d6c82f0d2be012e31b64188",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda6.smali": "32478d1c508caded4c930c1879a5f9c40bee4163f8abaea2cd8489eaa8a7d5af",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda7.smali": "6e110cb248e3a22f4315dd884c281bf3e4709732def992ae7c6497a224a7555c",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda8.smali": "bcdd7b983680f6ec0e829f9e9c981a3a7e31f35ddc538359b3d8afffe0b3f66e",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$$ExternalSyntheticLambda9.smali": "d504d8a3bf9042e50474bf3dec5c7a1c2762a6f7ef7786d764052f2141de2430",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$Host.smali": "728dcf7c822267a986f84b8eca00f2351818079f499f348b430702492ca80298",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController$Row.smali": "4fdb19ac63dd1e629ef37fb9347671be6ea61a9110715000b536c91b55c58e95",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppsController.smali": "d1645cdcd664f6e89c81f96bfe1e2d48e556172e379ea8b742c50b863351e657",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppStateEngine$Access.smali": "8972dce0b64d7d115cb0177a1cc9f2ad0477fdeaa4913a1e963e4b5f4364425d",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppStateEngine$Journal.smali": "0cde1f9e35e24ab8a56ece3afcce631abf34327acbfd331769eac7d22d6ab213",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppStateEngine$Record.smali": "b7f2335d5883830328a7b3319d7921935d566412b1491103e8e21da201dd265d",
+    "SecSettings.apk/smali_classes4/com/gmhub/apps/AppStateEngine.smali": "7b3e69c58e959f1c1e652f8b357423aa5ebaccd88653bdcf21d27770153cd53b"
+  }
+}
