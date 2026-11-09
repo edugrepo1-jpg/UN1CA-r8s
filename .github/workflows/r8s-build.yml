@@ -2,12 +2,14 @@ name: GMHUB r8s manual build
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # A reusable call must not cancel its caller's identical concurrency group.
+  group: ${{ github.workflow }}-${{ github.ref }}-r8s-port
   cancel-in-progress: true
 
 jobs:
@@ -29,6 +31,7 @@ jobs:
       - name: Validate r8s port and pinned GM kernel
         run: |
           set -euo pipefail
+          python3 scripts/internal/verify_gmhub_inputs.py
           python3 -m unittest discover -s tests -p 'test_*.py' -v
           KERNEL_SOURCE=platform/exynos990/patches/extremekrnl/customize.sh
           KERNEL_BRANCH=$(sed -n 's/^GMKERNEL_BRANCH="\([^"]*\)"/\1/p' "$KERNEL_SOURCE")
@@ -213,4 +216,3 @@ jobs:
             out/target/r8s/apktool/system/priv-app/SamsungCamera/SamsungCamera.apk/smali*/com/sec/android/app/camera/engine/core/CapabilityProvider.smali
             out/target/r8s/apktool/system/priv-app/SamsungCamera/SamsungCamera.apk/smali*/com/samsung/android/camera/core2/node/llhdr/**/*.smali
             out/target/r8s/apktool/system/priv-app/SamsungCamera/SamsungCamera.apk/smali*/com/samsung/android/camera/core2/node/mfhdr/**/*.smali
-

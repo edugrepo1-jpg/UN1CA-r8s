@@ -21,7 +21,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  r8s:
+    if: github.event_name == 'workflow_dispatch' && github.ref_name == 'gmhub-r8s-integration'
+    permissions:
+      contents: read
+    # Build is already registered on the default branch. Dispatching it with
+    # the integration ref selects this branch's reusable, r8s-only pipeline.
+    uses: ./.github/workflows/r8s-build.yml
+    secrets: inherit
+
   build:
+    if: github.event_name != 'workflow_dispatch' || github.ref_name != 'gmhub-r8s-integration'
     runs-on: ubuntu-24.04
 
     strategy:

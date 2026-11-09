@@ -41,8 +41,8 @@ def patch(text):
     return text[:start] + method + text[end:]
 
 
-def install(decoded, module):
-    # Verify every packaged shader against its pinned provenance before editing.
+def verify_generated(module):
+    """Read-only input validation, also usable before firmware downloads."""
     assets = module / 'assets/gmhub/liquid_glass'
     provenance = json.loads((assets / 'provenance.json').read_text(encoding='utf-8'))
     if {p['id'] for p in provenance} != {'qwea', 'kyant', 'color'}:
@@ -60,6 +60,10 @@ def install(decoded, module):
                for p in (module/'smali').rglob('*.smali')}
     if generated!=adapter.get('smali_files'):
         raise ValueError('Adapter generated classes are out of sync')
+
+
+def install(decoded, module):
+    verify_generated(module)
     candidates = list(decoded.glob('smali*/com/android/systemui/blur/domain/interactor/SecCapturedBlurBitmapGenerator.smali'))
     if len(candidates) != 1:
         raise ValueError('Expected one Samsung captured-blur generator')
