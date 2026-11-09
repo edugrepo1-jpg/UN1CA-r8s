@@ -21,7 +21,13 @@ FIXTURES = {
     'android/os/Build.java': 'package android.os; public class Build {public static class VERSION {public static int SDK_INT=37;}}',
     'android/os/SystemProperties.java': 'package android.os; public class SystemProperties {public static int installed=1; public static int getInt(String key,int def){return installed;}}',
     'android/database/ContentObserver.java': 'package android.database; public class ContentObserver {public ContentObserver(android.os.Handler h){} public void onChange(boolean self){}}',
-    'android/content/res/Resources.java': 'package android.content.res; public class Resources {public int getIdentifier(String name,String kind,String pkg){return 1;}}',
+    'android/content/res/Resources.java': '''package android.content.res; public class Resources {
+ public static boolean missingIcons=true;
+ public int getIdentifier(String name,String kind,String pkg){
+  if(name.equals("gmhub_qs_remove"))return missingIcons?0:42;
+  if(name.equals("gmhub_qs_resize"))return missingIcons?0:43;
+  return 1;
+ }}''',
     'android/content/ContentResolver.java': '''package android.content;
 public class ContentResolver {
  public java.util.Map<String,Integer> values=new java.util.HashMap<>();
@@ -122,7 +128,7 @@ import com.android.systemui.samsung.quicksetting.ui.SecQuickSettingSceneKt;
 import com.android.systemui.samsung.quicksetting.ui.panel.*;
 import com.android.systemui.samsung.quicksetting.ui.base.spannablegrid.*;
 public class Support {
- static int checks,nativeCalls;static boolean failNative;static Object lastShape;
+ static int checks,nativeCalls,lastRemove,lastResize;static boolean failNative;static Object lastShape;
  static final Object nativeShape=new Object(),player=new Object();
  static final List<Object> items=Arrays.asList(player);
  static final SpannableGridTileKt$$ExternalSyntheticLambda6 holder=new SpannableGridTileKt$$ExternalSyntheticLambda6();
@@ -133,6 +139,11 @@ public class Support {
   nativeCalls++;check(supplied==items && supplied.get(0)==player);
   if(failNative)throw new IllegalStateException("native marker");
   lastShape=ComposePanelRoot.shape(holder,nativeShape,c);
+  lastRemove=ComposePanelRoot.editResource(0x7e080fe4,c,0);
+  lastResize=ComposePanelRoot.editResource(0x7e080820,c,1);
+  check(ComposePanelRoot.editResource(0x7e080bda,c,1)==0x7e080bda);
+  check(ComposePanelRoot.editResource(0x7e080988,c,1)==0x7e080988);
+  check(ComposePanelRoot.editResource(123,c,0)==123);
  }
  public static final class Host implements com.android.systemui.qs.QSHost {
   final int id;final Context context;Host(int id,Context context){this.id=id;this.context=context;}
@@ -166,8 +177,12 @@ public class Support {
   Context zero=new Context(),ten=new Context();Host h0=new Host(0,zero),h10=new Host(10,ten);
   C c=new C(new QuickSettingSceneViewModel(h0));span(1,1);holder.f$1=new Object();
   render(c);check(lastShape==nativeShape);check(zero.resolver.observers.size()==1);
+  check(lastRemove==0x7e080fe4 && lastResize==0x7e080820);
   android.provider.Settings.Secure.putInt(zero.resolver,KEY,1);render(c);
   check("percent/50".equals(lastShape));check(zero.resolver.observers.size()==1);
+  check(lastRemove==0x7e080fe4 && lastResize==0x7e080820);
+  android.content.res.Resources.missingIcons=false;render(c);
+  check(lastRemove==42 && lastResize==43);
   c.restart.invoke(c,1);check("percent/50".equals(lastShape));check(zero.resolver.observers.size()==1);
   span(2,2);render(c);check("dp/32.0".equals(lastShape));
   holder.f$1=new com.android.systemui.samsung.quicksetting.domain.model.items.MediaPlayer();render(c);check(lastShape==nativeShape);
@@ -175,6 +190,7 @@ public class Support {
   holder.f$1=new Object();holder.f$22.inAvailableGrid=true;render(c);check(lastShape==nativeShape);
   holder.f$22.inAvailableGrid=false;holder.f$22.expanded=true;render(c);check(lastShape==nativeShape);holder.f$22.expanded=false;
   android.provider.Settings.Secure.putInt(zero.resolver,KEY,0);render(c);check(lastShape==nativeShape);
+  check(lastRemove==0x7e080fe4 && lastResize==0x7e080820);
   c.model=new QuickSettingSceneViewModel(h10);render(c);
   check(zero.resolver.observers.isEmpty());check(ten.resolver.observers.size()==1);check(lastShape==nativeShape);
   android.provider.Settings.Secure.putInt(zero.resolver,KEY,1);render(c);check(lastShape==nativeShape);

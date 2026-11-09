@@ -32,8 +32,12 @@ def fixture(decoded, module):
             body = (hook['signature'] + '\n    .locals 16\n'
                     '    invoke-static/range {v10 .. v15}, ' + installer.NATIVE_MAIN
                     + '\n    return-object v0\n.end method')
-        else:
+        elif hook['kind'] == 'shape':
             body = (hook['signature'] + '\n    .locals 50\n' + installer.COMPOSER_ANCHOR
+                    + '\n' + installer.REMOVE_ANCHOR
+                    + '\n    return-object v0\n.end method')
+        else:
+            body = (hook['signature'] + '\n    .locals 30\n' + installer.RESIZE_ANCHOR
                     + '\n    return-object v0\n.end method')
         hook['method_sha256'] = hashlib.sha256(body.encode()).hexdigest()
         path = decoded / 'smali_classes3' / (hook['class'] + '.smali')
@@ -63,11 +67,11 @@ class SceneInstallTests(unittest.TestCase):
             installer.install(decoded, module)
             self.assertEqual(first, snapshot(decoded))
             changed = [name for name in before if before[name] != first[name]]
-            self.assertEqual(len(changed), 2)
+            self.assertEqual(len(changed), 3)
             self.assertTrue(all(any(h['class'] + '.smali' in name for h in contract['hooks']) for name in changed))
             for hook in contract['hooks']:
                 text = (decoded / 'smali_classes3' / (hook['class'] + '.smali')).read_text()
-                self.assertEqual(text.count(installer.ROOT + '->'), 1)
+                self.assertEqual(text.count(installer.ROOT + '->'), 2 if hook['kind'] == 'shape' else 1)
             # Re-installation must reuse one DEX directory, never duplicate the
             # root or the generated nested classes into a second class loader.
             self.assertEqual(len(list(decoded.glob('smali*/com/gmhub/qs/ComposePanelRoot.smali'))), 1)
@@ -114,6 +118,35 @@ class SceneInstallTests(unittest.TestCase):
             target.write_text(target.read_text() + '\n# stale\n')
             with self.assertRaisesRegex(ValueError, 'out of sync'):
                 installer.verify_generated(module)
+
+    def test_prior_shape_only_hook_upgrades_without_duplicate_calls(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            module = root / 'module'
+            shutil.copytree(MODULE, module)
+            decoded = root / 'decoded'
+            contract = fixture(decoded, module)
+            hook = next(h for h in contract['hooks'] if h['kind'] == 'shape')
+            path = decoded / 'smali_classes3' / (hook['class'] + '.smali')
+            original = path.read_text(encoding='utf-8')
+            previous = original.replace('    .locals 50', '    .locals 53', 1).replace(
+                installer.COMPOSER_ANCHOR, installer.COMPOSER_ANCHOR + installer.SHAPE_CODE, 1)
+            self.assertEqual(installer.patch(previous, hook), installer.patch(original, hook))
+
+    def test_conflicting_editor_icon_cannot_leave_partial_native_hooks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            module = root / 'module'
+            shutil.copytree(MODULE, module)
+            decoded = root / 'decoded'
+            fixture(decoded, module)
+            icon = decoded / 'res/drawable/gmhub_qs_remove.xml'
+            icon.parent.mkdir(parents=True)
+            icon.write_text('<vector />', encoding='utf-8')
+            before = snapshot(decoded)
+            with self.assertRaisesRegex(ValueError, 'Conflicting owned QS icon'):
+                installer.install(decoded, module)
+            self.assertEqual(before, snapshot(decoded))
 
     def test_hub_choice_is_user_scoped_and_exposes_native_restore(self):
         xml = ET.parse(SETTINGS / 'SecSettings.apk/res/xml/gm_qs_preferences.xml').getroot()

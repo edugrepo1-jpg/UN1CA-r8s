@@ -49,6 +49,7 @@ def compile_adapter(sdk, java_home, apktool, build_tools='36.0.0'):
     digest = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
     result = {'sources': {p.relative_to(SOURCE).as_posix(): digest(p) for p in sorted(SOURCE.rglob('*.java'))},
               'smali': {p.relative_to(destination).as_posix(): digest(p) for p in sorted(destination.rglob('*.smali'))},
+              'resources': {p.relative_to(MODULE / 'res').as_posix(): digest(p) for p in sorted((MODULE / 'res').rglob('*.xml'))},
               'sdk_api': 37, 'min_api': 33}
     (MODULE / 'compiled.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
     print('Generated QS scene adapter from SDK37 source')

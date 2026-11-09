@@ -168,6 +168,12 @@
       "class": "com/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridTileKt$$ExternalSyntheticLambda6",
       "signature": ".method public final invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
       "method_sha256": "012a939cd0a2ef8c1e97e3ad647b4269b0f9e3174a683afea919843b9e2519ab"
+    },
+    {
+      "kind": "resize_icon",
+      "class": "com/android/systemui/samsung/quicksetting/ui/base/spannablegrid/ResizeHandleKt",
+      "signature": ".method public static final ResizeHandle-HfmGiiY(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;JLcom/android/systemui/samsung/quicksetting/ui/base/editable/ResizeContentInsets;Lkotlin/jvm/functions/Function0;Lcom/android/systemui/samsung/quicksetting/ui/base/editable/ResizingState$HandleType;Ljava/lang/String;ZLandroidx/compose/runtime/Composer;I)V",
+      "method_sha256": "15504ca94ce23ea480800f09081a54cd82989147fdf38b65e2152e52cb20f412"
     }
   ]
 }

@@ -10,8 +10,13 @@ a complete iOS 26 panel or an installed/validated change on the physical phone.
 The current iOS choice changes the generic frames to circles/capsules and large
 rounded cards. It explicitly excludes both native media item types, expanded
 details and gallery previews. Returning to One UI returns the original frame
-object; no native lambda field is modified. iOS header/group navigation, gallery
-presentation, edit chrome and independent per-style geometry remain unfinished.
+object; no native lambda field is modified. Native editor painter lookups now
+select an owned minus badge and curved corner grip for the iOS style. Original
+remove/resize callbacks, hit areas, labels, media content and save actions are
+retained. Height-only and width-only handles retain their native direction cues.
+Missing resources and One UI selection return the original icon IDs.
+iOS header/group navigation, gallery presentation, final edit placement and
+independent per-style geometry remain unfinished.
 The pre-existing `NativeGridEditor` is still staged; it is not mounted as a
 second editor over Samsung's functioning editor.
 
@@ -167,11 +172,12 @@ describes control formats; it does not advertise completed full-panel parity.
 ## Installed scene binding
 
 The installer checks 23 exact donor class contracts and pins the bodies of the
-two modified methods. It redirects only the outer main call in
+three modified methods. It redirects only the outer main call in
 `SecQuickSettingScene$$ExternalSyntheticLambda7`, leaving the native main,
-its restart lambda and `MediaPlayerKt` byte-identical. The second hook replaces
-only a local frame value in the native grid's content lambda; it does not
-mutate a captured shape, replace controls or capture the media view model.
+its restart lambda and `MediaPlayerKt` byte-identical. The frame hook replaces
+a local frame value and the native editor's remove-badge painter ID. The third
+hook selects the corner-grip painter ID at the native resize handle. Neither
+hook mutates captured fields, replaces controls or captures a media view model.
 
 `ComposePanelRoot` provides one Compose-local selection through a native
 `rememberComposableLambda` slot. Its remembered session follows the native QS

@@ -29,8 +29,37 @@ public final class ComposePanelRoot {
     private static volatile Abi abi;
     private static volatile Method original;
     private static boolean attempted;
+    private static volatile int removeIcon, resizeIcon;
 
     private ComposePanelRoot() { }
+
+    /** Change only editor artwork at the original painter lookup. Native hit
+     * targets, drag/resize handlers, permissions and save callbacks stay owned
+     * by Samsung. No replacement editor is installed over the native one. */
+    public static int editResource(int nativeResource, Object composer, int kind) {
+        Abi api = abi;
+        if (api == null || (kind != 0 && kind != 1)) return nativeResource;
+        // Height-only/width-only affordances retain their native direction.
+        // These IDs belong to the exact pinned painter call-site contracts.
+        if (kind == 0 && nativeResource != 0x7e080fe4) return nativeResource;
+        if (kind == 1 && nativeResource != 0x7e080820 && nativeResource != 0x7e0809cf)
+            return nativeResource;
+        if (!Integer.valueOf(1).equals(call(api.consume, composer, api.localStyle))) return nativeResource;
+        int cached = kind == 0 ? removeIcon : resizeIcon;
+        if (cached != 0) return cached;
+        try {
+            Object model = call(api.consume, composer, api.localModel);
+            Context context = (Context)call(api.userContext, api.host.get(model));
+            if (context == null) return nativeResource;
+            int id = context.getResources().getIdentifier(
+                kind == 0 ? "gmhub_qs_remove" : "gmhub_qs_resize", "drawable", "com.android.systemui");
+            if (id == 0) return nativeResource;
+            if (kind == 0) removeIcon = id; else resizeIcon = id;
+            return id;
+        } catch (IllegalAccessException | SecurityException unavailable) {
+            return nativeResource;
+        }
+    }
 
     /** The only rewritten call site is the outer scene's original main call.
      * Samsung's main function and its own restart lambda are left untouched. */

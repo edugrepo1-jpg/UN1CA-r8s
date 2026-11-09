@@ -1,6 +1,6 @@
 {
   "sources": {
-    "com/gmhub/qs/ComposePanelRoot.java": "8105ae61956af9376d049b9782f018a210087d94ab9bb77ecf0df05ba0ee315d"
+    "com/gmhub/qs/ComposePanelRoot.java": "b9c8fc6dfb65c88bba4df2d97556b8476a7bab81848fdedd34631fdf22b8eb85"
   },
   "smali": {
     "com/gmhub/qs/ComposePanelRoot$Abi$$ExternalSyntheticLambda0.smali": "769ba2d62d9f3d015954d977310b22a2c4198fd7fab309d8bc7cb45332f93008",
@@ -13,7 +13,11 @@
     "com/gmhub/qs/ComposePanelRoot$Session$$ExternalSyntheticLambda1.smali": "a0a1578ddb0b700baf8cf899c7322903cc750dd8df8f4c8a9c12bc4c0684640a",
     "com/gmhub/qs/ComposePanelRoot$Session$1.smali": "8a0d9e51b31a65fcb93a2c9902061b1ae7d14b0481c83552285ee7937781c445",
     "com/gmhub/qs/ComposePanelRoot$Session.smali": "59ce0af8fc1aeb1d8abe64fc26eb32fcf853a845e0d602f5448d94b31d46fc2c",
-    "com/gmhub/qs/ComposePanelRoot.smali": "08dff13e374e984b28fab683e1a50e4b9c2cbdada949421cf7339bfd410a331d"
+    "com/gmhub/qs/ComposePanelRoot.smali": "4220ed0985e3ad2b8607eeb532ae1fcb4ff4c085d933d3704320139323ec3c63"
+  },
+  "resources": {
+    "drawable/gmhub_qs_remove.xml": "3781d7741d00039b0e26c7a73bf6bd58aa9fa676440f692008d93f386e2789b4",
+    "drawable/gmhub_qs_resize.xml": "477a0a6e3a902e9df3fde29c5049e8e2952f150c37093ee732e2b365684d6859"
   },
   "sdk_api": 37,
   "min_api": 33
