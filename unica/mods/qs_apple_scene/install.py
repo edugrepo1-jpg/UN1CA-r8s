@@ -24,6 +24,18 @@ BRIDGE = ROOT + '->content(Ljava/lang/Object;Ljava/lang/Object;Ljava/util/List;L
 NATIVE_HEADER = ('Lcom/android/systemui/samsung/quicksetting/ui/panel/SecQuickSettingHeaderKt;'
     '->HeaderContainer(Landroidx/compose/ui/Modifier;Landroidx/compose/ui/focus/FocusRequester;Landroidx/compose/runtime/Composer;I)V')
 HEADER_BRIDGE = ROOT + '->header(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;I)V'
+GRID_ANCHOR = ('    invoke-static/range {v0 .. v27}, '
+    'Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridKt;'
+    '->SpannableGrid-I6XV8Ug(')
+ASPECT_CODE = '''    move/from16 v35, v8
+
+    move-object/from16 v36, v23
+
+    invoke-static/range {v35 .. v36}, Lcom/gmhub/qs/ComposePanelRoot;->cellAspect(FLjava/lang/Object;)F
+
+    move-result v8
+
+'''
 COMPOSER_ANCHOR = '    check-cast v13, Landroidx/compose/runtime/Composer;'
 SHAPE_CODE = '''
 
@@ -79,6 +91,18 @@ def patch(text, hook):
         if original.count(NATIVE_HEADER) != 1:
             raise ValueError('Changed native QS header call')
         changed = original.replace(NATIVE_HEADER, HEADER_BRIDGE)
+    elif hook['kind'] == 'cell_aspect':
+        original = body
+        if ROOT + '->cellAspect(' in original:
+            if original.count(ASPECT_CODE) != 1:
+                raise ValueError('Partially installed QS cell measure hook')
+            original = original.replace(ASPECT_CODE, '', 1).replace('    .locals 37', '    .locals 35', 1)
+        if original.count('    .locals 35') != 1 or original.count(GRID_ANCHOR) != 1:
+            raise ValueError('Changed native QS grid measure call')
+        if re.search(r'\bv(?:3[5-9]|[4-9][0-9]|[1-9][0-9]{2,})\b', original):
+            raise ValueError('Native grid uses the reserved measure registers')
+        changed = original.replace('    .locals 35', '    .locals 37', 1)
+        changed = changed.replace(GRID_ANCHOR, ASPECT_CODE + GRID_ANCHOR, 1)
     elif hook['kind'] == 'shape':
         original = body
         if ROOT + '->editResource(' in original:

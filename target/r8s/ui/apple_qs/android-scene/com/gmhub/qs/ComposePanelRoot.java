@@ -42,6 +42,26 @@ public final class ComposePanelRoot {
         return api != null && Integer.valueOf(1).equals(call(api.consume, composer, api.localStyle));
     }
 
+    /** Change the native measure policy, not only the drawn corner shape.
+     * GridLayoutInfo and the native drag/resize hit tests receive the same
+     * square cell pitch. Do not repack or write a different tile list here. */
+    public static float cellAspect(float nativeAspect, Object composer) {
+        Abi api = abi;
+        if (api == null || !ios(composer) || !Float.isFinite(nativeAspect) || nativeAspect <= 0f)
+            return nativeAspect;
+        try {
+            Object model = call(api.consume, composer, api.localModel);
+            Context context = (Context)call(api.userContext, api.host.get(model));
+            if (context == null || !Boolean.TRUE.equals(call(api.portrait, model,
+                    context.getResources().getConfiguration()))
+                    || Boolean.TRUE.equals(call(api.tablet, model))
+                    || Boolean.TRUE.equals(call(api.popover, model))) return nativeAspect;
+            return 1f;
+        } catch (IllegalAccessException unavailable) {
+            return nativeAspect;
+        }
+    }
+
     /** Change only editor artwork at the original painter lookup. Native hit
      * targets, drag/resize handlers, permissions and save callbacks stay owned
      * by Samsung. No replacement editor is installed over the native one. */
@@ -153,7 +173,7 @@ public final class ComposePanelRoot {
         final Class<?> function0, function1, function2, disposable, media, legacyMedia;
         final Method start, end, startReplace, endReplace, changedObject, changedInt;
         final Method remembered, remember, consume, state, value, setValue, disposableEffect;
-        final Method provide, provider, composable, updateScope, userId, userContext;
+        final Method provide, provider, composable, updateScope, userId, userContext, portrait, tablet, popover;
         final Field host, tileItem, tileScope, spanSize, inAvailableGrid, expanded;
         final Object empty, unit, localModel, localStyle, capsule, card, galleryCard;
 
@@ -194,6 +214,8 @@ public final class ComposePanelRoot {
                 .invoke(null, function(function0, args -> Integer.valueOf(0)));
             Class<?> model = type(loader, SCENE + "panel.QuickSettingSceneViewModel");
             host = field(model, "qsHost");
+            portrait = method(model, "isPortraitPanel", android.content.res.Configuration.class);
+            tablet = method(model, "isTablet"); popover = method(model, "isPopOverEnabled");
             Class<?> qsHost = type(loader, "com.android.systemui.qs.QSHost");
             userId = method(qsHost, "getUserId"); userContext = method(qsHost, "getUserContext");
             Class<?> tile = type(loader, GRID + "SpannableGridTileKt$$ExternalSyntheticLambda6");

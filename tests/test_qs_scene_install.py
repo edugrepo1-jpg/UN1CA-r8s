@@ -40,6 +40,9 @@ def fixture(decoded, module):
         elif hook['kind'] == 'resize_icon':
             body = (hook['signature'] + '\n    .locals 30\n' + installer.RESIZE_ANCHOR
                     + '\n    return-object v0\n.end method')
+        elif hook['kind'] == 'cell_aspect':
+            body = (hook['signature'] + '\n    .locals 35\n' + installer.GRID_ANCHOR
+                    + 'native-descriptor)V\n    return-object v0\n.end method')
         else:
             body = (hook['signature'] + '\n    .locals 16\n'
                     '    invoke-static {v1, v0, v12, v13}, ' + installer.NATIVE_HEADER
@@ -83,7 +86,7 @@ class SceneInstallTests(unittest.TestCase):
             installer.install(decoded, module)
             self.assertEqual(first, snapshot(decoded))
             changed = [name for name in before if before[name] != first[name]]
-            self.assertEqual(len(changed), 4)
+            self.assertEqual(len(changed), 5)
             self.assertTrue(all(any(h['class'] + '.smali' in name for h in contract['hooks']) for name in changed))
             for hook in contract['hooks']:
                 text = (decoded / 'smali_classes3' / (hook['class'] + '.smali')).read_text()
@@ -124,6 +127,9 @@ class SceneInstallTests(unittest.TestCase):
                 if hook['kind'] == 'shape':
                     with self.assertRaises(ValueError):
                         installer.patch(changed.replace('move-object/from16 v51, v21', ''), hook)
+                if hook['kind'] == 'cell_aspect':
+                    with self.assertRaises(ValueError):
+                        installer.patch(changed.replace('move-object/from16 v36, v23', ''), hook)
 
     def test_generated_code_has_no_stale_or_external_classes(self):
         installer.verify_generated()

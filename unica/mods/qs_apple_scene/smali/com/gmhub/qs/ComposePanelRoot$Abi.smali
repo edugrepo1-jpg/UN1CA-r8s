@@ -103,6 +103,10 @@
     .end annotation
 .end field
 
+.field final popover:Ljava/lang/reflect/Method;
+
+.field final portrait:Ljava/lang/reflect/Method;
+
 .field final provide:Ljava/lang/reflect/Method;
 
 .field final provider:Ljava/lang/reflect/Method;
@@ -120,6 +124,8 @@
 .field final startReplace:Ljava/lang/reflect/Method;
 
 .field final state:Ljava/lang/reflect/Method;
+
+.field final tablet:Ljava/lang/reflect/Method;
 
 .field final tileItem:Ljava/lang/reflect/Field;
 
@@ -579,9 +585,43 @@
 
     invoke-static {v0, v1}, Lcom/gmhub/qs/ComposePanelRoot;->access$200(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/reflect/Field;
 
+    move-result-object v1
+
+    iput-object v1, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->host:Ljava/lang/reflect/Field;
+
+    const-class v1, Landroid/content/res/Configuration;
+
+    filled-new-array {v1}, [Ljava/lang/Class;
+
+    move-result-object v1
+
+    const-string v2, "isPortraitPanel"
+
+    invoke-static {v0, v2, v1}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+    move-result-object v1
+
+    iput-object v1, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->portrait:Ljava/lang/reflect/Method;
+
+    const-string v1, "isTablet"
+
+    new-array v2, v6, [Ljava/lang/Class;
+
+    invoke-static {v0, v1, v2}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+    move-result-object v1
+
+    iput-object v1, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->tablet:Ljava/lang/reflect/Method;
+
+    const-string v1, "isPopOverEnabled"
+
+    new-array v2, v6, [Ljava/lang/Class;
+
+    invoke-static {v0, v1, v2}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
     move-result-object v0
 
-    iput-object v0, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->host:Ljava/lang/reflect/Field;
+    iput-object v0, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->popover:Ljava/lang/reflect/Method;
 
     const-string v0, "com.android.systemui.qs.QSHost"
 

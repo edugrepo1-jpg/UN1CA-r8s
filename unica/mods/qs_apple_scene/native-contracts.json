@@ -269,6 +269,12 @@
       "class": "com/android/systemui/samsung/quicksetting/ui/panel/SecQuickSettingHeaderKt$$ExternalSyntheticLambda4",
       "signature": ".method public final invoke(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
       "method_sha256": "8c6b5e20a9c0595e6389df14de70211e4bd721db868c0391636d464c8d3c21d2"
+    },
+    {
+      "kind": "cell_aspect",
+      "class": "com/android/systemui/samsung/quicksetting/ui/panel/QuickSettingTileGridKt",
+      "signature": ".method public static final QuickSettingSpannableGridWithOverscroll-eWkJ3H8(Lcom/android/compose/animation/scene/ContentScope;Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridState;Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/GridCellFocusState;JFJZZLcom/android/systemui/samsung/quicksetting/ui/base/editable/ResizingInfo;Lcom/android/systemui/samsung/quicksetting/ui/panel/ContextMenuScope;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/State;Landroidx/compose/foundation/ScrollState;Landroidx/compose/runtime/MutableState;Lcom/android/systemui/samsung/quicksetting/ui/banner/BottomBannerViewModel;Landroidx/compose/runtime/Composer;II)V",
+      "method_sha256": "3bf714d8f0260496cd1acb31b52254b257d6c91874239d3a0fbfea4ee8573eb8"
     }
   ],
   "support_methods": [
@@ -291,6 +297,16 @@
       "class": "com/android/systemui/samsung/quicksetting/ui/available/AvailableTileTrayButtonKt$$ExternalSyntheticLambda4",
       "signature": ".method public final invoke()Ljava/lang/Object;",
       "method_sha256": "8dd39cfc9b6d37ca4ebe1d13ce2ce416ed0f9bbcde3e33df3b087f9c8ccb48cd"
+    },
+    {
+      "class": "com/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridKt$SpannableGrid$18$1",
+      "signature": ".method public final measure-3p2s80s(Landroidx/compose/ui/layout/MeasureScope;Ljava/util/List;J)Landroidx/compose/ui/layout/MeasureResult;",
+      "method_sha256": "f594a289dc9b5e224739a6d688b4991a40bbf5d62ee307e84e58ba6a8d881e2d"
+    },
+    {
+      "class": "com/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridKt$SpannableGrid$18$1",
+      "signature": ".method public constructor <init>(Ljava/lang/String;IFFLandroidx/compose/runtime/State;Lcom/android/systemui/samsung/quicksetting/ui/base/editable/ResizingInfo;Landroidx/compose/runtime/MutableState;IZJLandroidx/compose/runtime/MutableState;Landroidx/compose/runtime/MutableState;Landroidx/compose/runtime/MutableIntState;Lkotlin/jvm/functions/Function1;Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridState;Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/GridCellFocusState;)V",
+      "method_sha256": "d59560427dbecd89e4a86e2f92bd167955f4040990889f72a4998965be08fc48"
     }
   ]
 }

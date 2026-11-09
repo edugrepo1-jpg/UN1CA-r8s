@@ -16,6 +16,17 @@ select an owned minus badge and curved corner grip for the iOS style. Original
 remove/resize callbacks, hit areas, labels, media content and save actions are
 retained. Height-only and width-only handles retain their native direction cues.
 Missing resources and One UI selection return the original icon IDs.
+
+The portrait-phone iOS mode also selects a 1:1 native cell aspect ratio at the
+verified `SpannableGrid` measure call. Changing a rounded shape alone cannot
+produce circular controls when the underlying cell pitch is rectangular.
+The original measure policy calculates cell height, `GridLayoutInfo`, native
+hit tests and drag/resize positions together; no drawing-only transform or
+separate pointer scale is added. Column count, native wrappers, item spans,
+provider and media content are unchanged. Returning to One UI, landscape,
+tablet or popover restores the original aspect value, including unusual or
+invalid inputs. The measure policy and its parameter-mapping constructor are
+guarded byte-for-byte before installation.
 The iOS header now provides plus, localized Done and power controls inside the
 native portrait-phone scene. Plus enters Samsung's editor or opens its existing
 gallery; Done dispatches the original save callback. User, keyguard and native
@@ -180,8 +191,8 @@ describes control formats; it does not advertise completed full-panel parity.
 ## Installed scene binding
 
 The installer checks 35 exact donor class contracts and pins the bodies of the
-four modified methods. Four additional read-only body hashes guard native
-header, Done, edit entry and gallery-open semantics. It redirects only the outer main call in
+five modified methods. Six additional read-only body hashes guard native
+header, Done, edit entry, gallery-open and cell-measure semantics. It redirects only the outer main call in
 `SecQuickSettingScene$$ExternalSyntheticLambda7`, leaving the native main,
 its restart lambda and `MediaPlayerKt` byte-identical. The frame hook replaces
 a local frame value and the native editor's remove-badge painter ID. The third
@@ -189,6 +200,8 @@ hook selects the corner-grip painter ID at the native resize handle. The fourth
 hook redirects the outer HeaderContainer call to the style-aware header adapter;
 the original HeaderContainer body and restart callback remain unchanged. These
 hooks do not mutate captured fields, replace controls or capture a media view model.
+The fifth hook supplies the portrait iOS cell aspect to Samsung's existing
+measure function; it leaves the measure body and item renderers unchanged.
 
 The header collects Samsung's edit and available-control flows with its native
 lifecycle-aware Compose collector. It uses AndroidView factory/update/release

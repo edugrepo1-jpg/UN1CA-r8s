@@ -15,6 +15,7 @@ R = 'androidx/compose/runtime/'
 S = 'com/android/systemui/samsung/quicksetting/ui/'
 
 FIXTURES = {
+    'android/content/res/Configuration.java': 'package android.content.res; public class Configuration {}',
     'com/gmhub/qs/IosHeader.java': 'package com.gmhub.qs; public class IosHeader {public static void content(Object m,Object f,Object c,int flags){}}',
     'android/net/Uri.java': 'package android.net; public class Uri {public final String key; public Uri(String key){this.key=key;}}',
     'android/os/Looper.java': 'package android.os; public class Looper {public static Looper getMainLooper(){return new Looper();}}',
@@ -24,6 +25,7 @@ FIXTURES = {
     'android/database/ContentObserver.java': 'package android.database; public class ContentObserver {public ContentObserver(android.os.Handler h){} public void onChange(boolean self){}}',
     'android/content/res/Resources.java': '''package android.content.res; public class Resources {
  public static boolean missingIcons=true;
+ public Configuration getConfiguration(){return new Configuration();}
  public int getIdentifier(String name,String kind,String pkg){
   if(name.equals("gmhub_qs_remove"))return missingIcons?0:42;
   if(name.equals("gmhub_qs_resize"))return missingIcons?0:43;
@@ -102,7 +104,12 @@ public class ContentResolver {
     'androidx/compose/ui/Modifier.java': 'package androidx.compose.ui; public interface Modifier {}',
     'com/android/compose/animation/scene/ContentScope.java': 'package com.android.compose.animation.scene; public interface ContentScope {}',
     'com/android/systemui/qs/QSHost.java': 'package com.android.systemui.qs; public interface QSHost {int getUserId();android.content.Context getUserContext();}',
-    S + 'panel/QuickSettingSceneViewModel.java': 'package com.android.systemui.samsung.quicksetting.ui.panel; public class QuickSettingSceneViewModel {public com.android.systemui.qs.QSHost qsHost;public QuickSettingSceneViewModel(com.android.systemui.qs.QSHost host){qsHost=host;}}',
+    S + 'panel/QuickSettingSceneViewModel.java': '''package com.android.systemui.samsung.quicksetting.ui.panel; public class QuickSettingSceneViewModel {
+ public com.android.systemui.qs.QSHost qsHost;public boolean portrait=true,tablet,popover;
+ public QuickSettingSceneViewModel(com.android.systemui.qs.QSHost host){qsHost=host;}
+ public boolean isPortraitPanel(android.content.res.Configuration c){return portrait;}
+ public boolean isTablet(){return tablet;}public boolean isPopOverEnabled(){return popover;}
+}''',
     S + 'panel/QuickTileBoxViewModel.java': 'package com.android.systemui.samsung.quicksetting.ui.panel; public class QuickTileBoxViewModel {}',
     S + 'SecQuickSettingSceneKt.java': '''package com.android.systemui.samsung.quicksetting.ui; public class SecQuickSettingSceneKt {
  public static final androidx.compose.runtime.DynamicProvidableCompositionLocal LocalViewModel=new androidx.compose.runtime.DynamicProvidableCompositionLocal(()->null);
@@ -130,6 +137,7 @@ import com.android.systemui.samsung.quicksetting.ui.panel.*;
 import com.android.systemui.samsung.quicksetting.ui.base.spannablegrid.*;
 public class Support {
  static int checks,nativeCalls,lastRemove,lastResize;static boolean failNative;static Object lastShape;
+ static float lastAspect;
  static final Object nativeShape=new Object(),player=new Object();
  static final List<Object> items=Arrays.asList(player);
  static final SpannableGridTileKt$$ExternalSyntheticLambda6 holder=new SpannableGridTileKt$$ExternalSyntheticLambda6();
@@ -140,6 +148,11 @@ public class Support {
   nativeCalls++;check(supplied==items && supplied.get(0)==player);
   if(failNative)throw new IllegalStateException("native marker");
   lastShape=ComposePanelRoot.shape(holder,nativeShape,c);
+  lastAspect=ComposePanelRoot.cellAspect(0.83f,c);
+  check(Float.isNaN(ComposePanelRoot.cellAspect(Float.NaN,c)));
+  check(ComposePanelRoot.cellAspect(0f,c)==0f);
+  check(ComposePanelRoot.cellAspect(-1f,c)==-1f);
+  check(ComposePanelRoot.cellAspect(Float.POSITIVE_INFINITY,c)==Float.POSITIVE_INFINITY);
   lastRemove=ComposePanelRoot.editResource(0x7e080fe4,c,0);
   lastResize=ComposePanelRoot.editResource(0x7e080820,c,1);
   check(ComposePanelRoot.editResource(0x7e080bda,c,1)==0x7e080bda);
@@ -177,10 +190,15 @@ public class Support {
  public static void main(String[] args){
   Context zero=new Context(),ten=new Context();Host h0=new Host(0,zero),h10=new Host(10,ten);
   C c=new C(new QuickSettingSceneViewModel(h0));span(1,1);holder.f$1=new Object();
-  render(c);check(lastShape==nativeShape);check(zero.resolver.observers.size()==1);
+  render(c);check(lastShape==nativeShape && lastAspect==0.83f);check(zero.resolver.observers.size()==1);
   check(lastRemove==0x7e080fe4 && lastResize==0x7e080820);
   android.provider.Settings.Secure.putInt(zero.resolver,KEY,1);render(c);
-  check("percent/50".equals(lastShape));check(zero.resolver.observers.size()==1);
+  check("percent/50".equals(lastShape) && lastAspect==1f);check(zero.resolver.observers.size()==1);
+  QuickSettingSceneViewModel model=(QuickSettingSceneViewModel)c.model;
+  model.portrait=false;render(c);check(lastAspect==0.83f);model.portrait=true;
+  model.tablet=true;render(c);check(lastAspect==0.83f);model.tablet=false;
+  model.popover=true;render(c);check(lastAspect==0.83f);model.popover=false;
+  render(c);check(lastAspect==1f);
   check(lastRemove==0x7e080fe4 && lastResize==0x7e080820);
   android.content.res.Resources.missingIcons=false;render(c);
   check(lastRemove==42 && lastResize==43);
@@ -193,7 +211,7 @@ public class Support {
   holder.f$1=new com.android.systemui.samsung.quicksetting.domain.model.items.MediaPlayer();render(c);check(lastShape==nativeShape);
   holder.f$1=new Object();span(2,2);
   holder.f$22.inAvailableGrid=false;holder.f$22.expanded=true;render(c);check(lastShape==nativeShape);holder.f$22.expanded=false;
-  android.provider.Settings.Secure.putInt(zero.resolver,KEY,0);render(c);check(lastShape==nativeShape);
+  android.provider.Settings.Secure.putInt(zero.resolver,KEY,0);render(c);check(lastShape==nativeShape && lastAspect==0.83f);
   check(lastRemove==0x7e080fe4 && lastResize==0x7e080820);
   c.model=new QuickSettingSceneViewModel(h10);render(c);
   check(zero.resolver.observers.isEmpty());check(ten.resolver.observers.size()==1);check(lastShape==nativeShape);
