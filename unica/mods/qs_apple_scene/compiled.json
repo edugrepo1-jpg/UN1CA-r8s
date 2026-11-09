@@ -1,23 +1,44 @@
 {
   "sources": {
-    "com/gmhub/qs/ComposePanelRoot.java": "b9c8fc6dfb65c88bba4df2d97556b8476a7bab81848fdedd34631fdf22b8eb85"
+    "com/gmhub/qs/ComposePanelRoot.java": "82636b858dfc5748f59e0290aa1e3f3041d92710779783633fb757639d3408ff",
+    "com/gmhub/qs/IosHeader.java": "1d3cd96e5aac652264b138cdd0ceb767c9570051e6c48c98f32d6c05fd01303a",
+    "com/gmhub/qs/NativeHeaderActions.java": "7cb6cd358bf6062526197000e18fb823764e4259370240f9b7f76adb005546d7"
   },
   "smali": {
     "com/gmhub/qs/ComposePanelRoot$Abi$$ExternalSyntheticLambda0.smali": "769ba2d62d9f3d015954d977310b22a2c4198fd7fab309d8bc7cb45332f93008",
     "com/gmhub/qs/ComposePanelRoot$Abi$$ExternalSyntheticLambda1.smali": "865f6c152961e7e6f33e49972269c07bb261e5a9572f1f8cc21a02c759f66a9f",
     "com/gmhub/qs/ComposePanelRoot$Abi$$ExternalSyntheticLambda2.smali": "dd4cd863257aab5ca0b009e9bcf5817eaa2274838ddef09336e83b44245e54a1",
     "com/gmhub/qs/ComposePanelRoot$Abi$$ExternalSyntheticLambda3.smali": "087d5f72ea772c4841a7698a9d57760a812e4c194907af88c6da5e50377cf6b4",
-    "com/gmhub/qs/ComposePanelRoot$Abi.smali": "2bc69bc10a08cc3859363ff27dea30f09d254ee45aa99f2b38b217ab1e29fb4d",
+    "com/gmhub/qs/ComposePanelRoot$Abi.smali": "816b62fba0b045e02b37fe7e0cfee98dbeebc4054cf1b1454916094eb2525fb0",
     "com/gmhub/qs/ComposePanelRoot$Callback.smali": "92be26d3102364aa72d778b065326db6318c7cd2f66ffa2b2a109eff03e714fb",
     "com/gmhub/qs/ComposePanelRoot$Session$$ExternalSyntheticLambda0.smali": "f0f25307c6c1d446f2b493772575f852b1f26dfa2719b07157af663b50c3b1b3",
     "com/gmhub/qs/ComposePanelRoot$Session$$ExternalSyntheticLambda1.smali": "a0a1578ddb0b700baf8cf899c7322903cc750dd8df8f4c8a9c12bc4c0684640a",
     "com/gmhub/qs/ComposePanelRoot$Session$1.smali": "8a0d9e51b31a65fcb93a2c9902061b1ae7d14b0481c83552285ee7937781c445",
     "com/gmhub/qs/ComposePanelRoot$Session.smali": "59ce0af8fc1aeb1d8abe64fc26eb32fcf853a845e0d602f5448d94b31d46fc2c",
-    "com/gmhub/qs/ComposePanelRoot.smali": "4220ed0985e3ad2b8607eeb532ae1fcb4ff4c085d933d3704320139323ec3c63"
+    "com/gmhub/qs/ComposePanelRoot.smali": "c7231bee08bae776a85af979283652e9dc1428e4bb768ffa6fe9ba8a016fd11d",
+    "com/gmhub/qs/IosHeader$Callback.smali": "c0b03829b3bc820322e84450bc2b3561377736e633c10c57fe4f2a79f9c7e2ac",
+    "com/gmhub/qs/IosHeader$HeaderView$$ExternalSyntheticLambda0.smali": "7c3f85919d9f2e5546b941c00fdc8abdbe18c65d584fc7a9f16b5f098bfb1a3f",
+    "com/gmhub/qs/IosHeader$HeaderView$$ExternalSyntheticLambda1.smali": "88ea019fb80dd9c3443fc2dc013af39dcc05e369fcb5b3c0705115b7541b1b41",
+    "com/gmhub/qs/IosHeader$HeaderView$$ExternalSyntheticLambda2.smali": "119134c587ed10535b1e51a2290d9bec0cac60d219828e6925e1a244cf14a4ea",
+    "com/gmhub/qs/IosHeader$HeaderView.smali": "adfb67d5b4c57d6f643ea5d7f38e9f452c5e544ee0f427c1120e0e677183dc10",
+    "com/gmhub/qs/IosHeader$Runtime$$ExternalSyntheticLambda0.smali": "38301a83725edd926514b927b1c8187d37be2150003e6a1afb65fac1ad9899da",
+    "com/gmhub/qs/IosHeader$Runtime$$ExternalSyntheticLambda1.smali": "912c42361bf4dd6b9f76cac16796396792dff63e86b9d94a7070c06eed595d63",
+    "com/gmhub/qs/IosHeader$Runtime.smali": "8473ac8e90d96af54bd0c77cc275f7766674eeaa0930d1854397ef40895b786d",
+    "com/gmhub/qs/IosHeader$Session$$ExternalSyntheticLambda0.smali": "8a4727dbabbe2eb6ba2869d8c5879fc248f8d37c8d010ae5c75106d6e1d37bb2",
+    "com/gmhub/qs/IosHeader$Session$$ExternalSyntheticLambda1.smali": "e955a381126f9152c9d798de2e8364fee41843daf6f60ab24c65c6f4ea60466b",
+    "com/gmhub/qs/IosHeader$Session$$ExternalSyntheticLambda2.smali": "73b8743149c76780be41678dc929c370f2b38163e062797c32981ef6c7f7fda4",
+    "com/gmhub/qs/IosHeader$Session.smali": "be8422def96645bbd1d9106356a78128390b9aac0ff4ed6cac4489d823106c91",
+    "com/gmhub/qs/IosHeader.smali": "f595da679534947c085f4386f17b367f3f35fd88b1903adc965958a54bb81da8",
+    "com/gmhub/qs/NativeHeaderActions$State.smali": "b0f55728015e104167b6d1ba293cd92fa03318dc79c17b5cbd7f6b29a8a9ae7b",
+    "com/gmhub/qs/NativeHeaderActions.smali": "aec35ce037a6b3d22ab458af8b51998cca8e374fb803b76639a84e7156d81497"
   },
   "resources": {
+    "drawable/gmhub_qs_plus.xml": "813c7c08661d3d87f5617bb1b7156202a653933492b8545dc878dc8d934cc0d8",
+    "drawable/gmhub_qs_power.xml": "2a885e06445c70b3c03ea0e5acd570e74ce50ddd9b9fd271372fed0e81d45c55",
     "drawable/gmhub_qs_remove.xml": "3781d7741d00039b0e26c7a73bf6bd58aa9fa676440f692008d93f386e2789b4",
-    "drawable/gmhub_qs_resize.xml": "477a0a6e3a902e9df3fde29c5049e8e2952f150c37093ee732e2b365684d6859"
+    "drawable/gmhub_qs_resize.xml": "477a0a6e3a902e9df3fde29c5049e8e2952f150c37093ee732e2b365684d6859",
+    "values/gmhub_qs_header.xml": "c9353865cb2370ce5d8a0a442dcaff5fe500be1d8bdb6851d9d2d6555b565a76",
+    "values-pt/gmhub_qs_header.xml": "4a90b23f4ec13a4cadf63938b5259d2140b590e69851e550735dae93b3d70787"
   },
   "sdk_api": 37,
   "min_api": 33

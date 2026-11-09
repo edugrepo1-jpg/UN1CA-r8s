@@ -562,6 +562,53 @@
     throw p0
 .end method
 
+.method public static header(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;I)V
+    .locals 0
+
+    invoke-static {p0, p1, p2, p3}, Lcom/gmhub/qs/IosHeader;->content(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;I)V
+
+    return-void
+.end method
+
+.method static ios(Ljava/lang/Object;)Z
+    .locals 4
+
+    sget-object v0, Lcom/gmhub/qs/ComposePanelRoot;->abi:Lcom/gmhub/qs/ComposePanelRoot$Abi;
+
+    if-eqz v0, :cond_0
+
+    const/4 v1, 0x1
+
+    invoke-static {v1}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+
+    move-result-object v2
+
+    iget-object v3, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->consume:Ljava/lang/reflect/Method;
+
+    iget-object v0, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->localStyle:Ljava/lang/Object;
+
+    filled-new-array {v0}, [Ljava/lang/Object;
+
+    move-result-object v0
+
+    invoke-static {v3, p0, v0}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object p0
+
+    invoke-virtual {v2, p0}, Ljava/lang/Integer;->equals(Ljava/lang/Object;)Z
+
+    move-result p0
+
+    if-eqz p0, :cond_0
+
+    return v1
+
+    :cond_0
+    const/4 p0, 0x0
+
+    return p0
+.end method
+
 .method private static varargs method(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
     .locals 0
     .annotation system Ldalvik/annotation/Signature;
@@ -644,7 +691,7 @@
 
     move-result v2
 
-    if-nez v2, :cond_7
+    if-nez v2, :cond_8
 
     iget-object v2, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->legacyMedia:Ljava/lang/Class;
 
@@ -663,14 +710,6 @@
 
     move-result-object p0
 
-    iget-object p2, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->inAvailableGrid:Ljava/lang/reflect/Field;
-
-    invoke-virtual {p2, p0}, Ljava/lang/reflect/Field;->getBoolean(Ljava/lang/Object;)Z
-
-    move-result p2
-
-    if-nez p2, :cond_7
-
     iget-object p2, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->expanded:Ljava/lang/reflect/Field;
 
     invoke-virtual {p2, p0}, Ljava/lang/reflect/Field;->getBoolean(Ljava/lang/Object;)Z
@@ -688,33 +727,46 @@
 
     move-result-wide v2
 
-    const/16 p0, 0x20
+    const/16 p2, 0x20
 
-    shr-long v4, v2, p0
+    shr-long v4, v2, p2
 
-    long-to-int p0, v4
+    long-to-int p2, v4
 
-    long-to-int p2, v2
+    long-to-int v2, v2
 
-    if-lt p0, v1, :cond_7
+    if-lt p2, v1, :cond_8
 
-    if-ge p2, v1, :cond_4
+    if-ge v2, v1, :cond_4
 
     goto :goto_1
 
     :cond_4
-    if-eq p0, v1, :cond_6
+    if-eq p2, v1, :cond_7
 
-    if-ne p2, v1, :cond_5
+    if-ne v2, v1, :cond_5
 
     goto :goto_0
 
     :cond_5
-    iget-object p0, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->card:Ljava/lang/Object;
+    iget-object p2, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->inAvailableGrid:Ljava/lang/reflect/Field;
+
+    invoke-virtual {p2, p0}, Ljava/lang/reflect/Field;->getBoolean(Ljava/lang/Object;)Z
+
+    move-result p0
+
+    if-eqz p0, :cond_6
+
+    iget-object p0, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->galleryCard:Ljava/lang/Object;
 
     return-object p0
 
     :cond_6
+    iget-object p0, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->card:Ljava/lang/Object;
+
+    return-object p0
+
+    :cond_7
     :goto_0
     iget-object p0, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->capsule:Ljava/lang/Object;
     :try_end_0
@@ -723,7 +775,7 @@
     return-object p0
 
     :catch_0
-    :cond_7
+    :cond_8
     :goto_1
     return-object p1
 .end method

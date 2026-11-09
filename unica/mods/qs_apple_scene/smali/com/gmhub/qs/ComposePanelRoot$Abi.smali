@@ -73,6 +73,8 @@
     .end annotation
 .end field
 
+.field final galleryCard:Ljava/lang/Object;
+
 .field final host:Ljava/lang/reflect/Field;
 
 .field final inAvailableGrid:Ljava/lang/reflect/Field;
@@ -693,7 +695,33 @@
 
     move-result-object v0
 
-    const/16 v1, 0x32
+    const/16 v2, 0x32
+
+    invoke-static {v2}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+
+    move-result-object v2
+
+    filled-new-array {v2}, [Ljava/lang/Object;
+
+    move-result-object v2
+
+    invoke-virtual {v0, v7, v2}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v0
+
+    iput-object v0, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->capsule:Ljava/lang/Object;
+
+    sget-object v0, Ljava/lang/Integer;->TYPE:Ljava/lang/Class;
+
+    filled-new-array {v0}, [Ljava/lang/Class;
+
+    move-result-object v0
+
+    invoke-static {p1, v1, v0}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+    move-result-object v0
+
+    const/16 v1, 0x10
 
     invoke-static {v1}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
 
@@ -707,7 +735,7 @@
 
     move-result-object v0
 
-    iput-object v0, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->capsule:Ljava/lang/Object;
+    iput-object v0, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->galleryCard:Ljava/lang/Object;
 
     sget-object v0, Ljava/lang/Float;->TYPE:Ljava/lang/Class;
 

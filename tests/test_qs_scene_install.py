@@ -4,6 +4,7 @@ import copy
 import hashlib
 import importlib.util
 import json
+import re
 import shutil
 import tempfile
 import unittest
@@ -36,8 +37,12 @@ def fixture(decoded, module):
             body = (hook['signature'] + '\n    .locals 50\n' + installer.COMPOSER_ANCHOR
                     + '\n' + installer.REMOVE_ANCHOR
                     + '\n    return-object v0\n.end method')
-        else:
+        elif hook['kind'] == 'resize_icon':
             body = (hook['signature'] + '\n    .locals 30\n' + installer.RESIZE_ANCHOR
+                    + '\n    return-object v0\n.end method')
+        else:
+            body = (hook['signature'] + '\n    .locals 16\n'
+                    '    invoke-static {v1, v0, v12, v13}, ' + installer.NATIVE_HEADER
                     + '\n    return-object v0\n.end method')
         hook['method_sha256'] = hashlib.sha256(body.encode()).hexdigest()
         path = decoded / 'smali_classes3' / (hook['class'] + '.smali')
@@ -45,6 +50,17 @@ def fixture(decoded, module):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text('.class public final L' + hook['class'] + ';\n', encoding='utf-8')
         path.write_text(path.read_text(encoding='utf-8') + body + '\n', encoding='utf-8')
+    for check in contract.get('support_methods', []):
+        path = decoded / 'smali_classes3' / (check['class'] + '.smali')
+        if not path.exists():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text('.class public final L' + check['class'] + ';\n', encoding='utf-8')
+        text = path.read_text(encoding='utf-8')
+        signature = check['signature'].split()[-1]
+        text = re.sub(r'(?ms)^\.method [^\n]*' + re.escape(signature) + r'\n.*?^\.end method\n?', '', text)
+        body = check['signature'] + '\n    .locals 1\n    return-void\n.end method'
+        check['method_sha256'] = hashlib.sha256(body.encode()).hexdigest()
+        path.write_text(text + body + '\n', encoding='utf-8')
     (module / 'native-contracts.json').write_text(json.dumps(contract), encoding='utf-8')
     return contract
 
@@ -67,7 +83,7 @@ class SceneInstallTests(unittest.TestCase):
             installer.install(decoded, module)
             self.assertEqual(first, snapshot(decoded))
             changed = [name for name in before if before[name] != first[name]]
-            self.assertEqual(len(changed), 3)
+            self.assertEqual(len(changed), 4)
             self.assertTrue(all(any(h['class'] + '.smali' in name for h in contract['hooks']) for name in changed))
             for hook in contract['hooks']:
                 text = (decoded / 'smali_classes3' / (hook['class'] + '.smali')).read_text()
@@ -145,6 +161,21 @@ class SceneInstallTests(unittest.TestCase):
             icon.write_text('<vector />', encoding='utf-8')
             before = snapshot(decoded)
             with self.assertRaisesRegex(ValueError, 'Conflicting owned QS icon'):
+                installer.install(decoded, module)
+            self.assertEqual(before, snapshot(decoded))
+
+    def test_changed_native_done_semantics_are_rejected_before_writes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            module = root / 'module'
+            shutil.copytree(MODULE, module)
+            decoded = root / 'decoded'
+            contract = fixture(decoded, module)
+            check = next(c for c in contract['support_methods'] if c['class'].endswith('ExternalSyntheticLambda35'))
+            path = decoded / 'smali_classes3' / (check['class'] + '.smali')
+            path.write_text(path.read_text(encoding='utf-8').replace('return-void', 'return-object v0'), encoding='utf-8')
+            before = snapshot(decoded)
+            with self.assertRaisesRegex(ValueError, 'action semantics changed'):
                 installer.install(decoded, module)
             self.assertEqual(before, snapshot(decoded))
 

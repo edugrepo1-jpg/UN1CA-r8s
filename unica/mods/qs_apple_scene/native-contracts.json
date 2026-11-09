@@ -113,9 +113,18 @@
     },
     "com/android/systemui/samsung/quicksetting/ui/panel/QuickSettingSceneViewModel": {
       "fields": [
+        "$$delegate_0:Lcom/android/systemui/samsung/quicksetting/ui/panel/EditModeViewModelImpl;",
+        "$$delegate_3:Lcom/android/systemui/samsung/quicksetting/ui/panel/AvailableGridTilesViewModelImpl;",
+        "keyguardStateController:Lcom/android/systemui/statusbar/policy/KeyguardStateController;",
         "qsHost:Lcom/android/systemui/qs/QSHost;"
       ],
-      "methods": []
+      "methods": [
+        "isPopOverEnabled()Z",
+        "isPortraitPanel(Landroid/content/res/Configuration;)Z",
+        "isTablet()Z",
+        "launchEditMode()V",
+        "launchPowerMenu()V"
+      ]
     },
     "com/android/systemui/qs/QSHost": {
       "fields": [],
@@ -154,6 +163,86 @@
     "com/android/systemui/samsung/quicksetting/domain/model/items/LegacyMediaPlayer": {
       "fields": [],
       "methods": []
+    },
+    "com/android/systemui/samsung/quicksetting/ui/panel/EditModeViewModelImpl": {
+      "fields": [
+        "editMode:Lkotlinx/coroutines/flow/ReadonlyStateFlow;"
+      ],
+      "methods": []
+    },
+    "com/android/systemui/samsung/quicksetting/ui/panel/AvailableGridTilesViewModelImpl": {
+      "fields": [
+        "_availableTilesSource:Lkotlinx/coroutines/flow/StateFlowImpl;",
+        "_showAvailableTiles:Lkotlinx/coroutines/flow/StateFlowImpl;",
+        "hasAvailableTiles:Lkotlinx/coroutines/flow/ReadonlyStateFlow;"
+      ],
+      "methods": []
+    },
+    "com/android/systemui/samsung/quicksetting/ui/panel/AvailableTilesSource": {
+      "fields": [
+        "QUICK_PANEL:Lcom/android/systemui/samsung/quicksetting/ui/panel/AvailableTilesSource;"
+      ],
+      "methods": []
+    },
+    "com/android/systemui/samsung/quicksetting/ui/panel/SecQuickSettingHeaderKt": {
+      "fields": [],
+      "methods": [
+        "HeaderContainer(Landroidx/compose/ui/Modifier;Landroidx/compose/ui/focus/FocusRequester;Landroidx/compose/runtime/Composer;I)V"
+      ]
+    },
+    "com/android/systemui/samsung/quicksetting/ui/panel/SecQuickSettingHeaderKt$$ExternalSyntheticLambda35": {
+      "fields": [
+        "f$0:Ljava/lang/Object;"
+      ],
+      "methods": [
+        "<init>(I)V",
+        "invoke()Ljava/lang/Object;"
+      ]
+    },
+    "com/android/systemui/statusbar/policy/KeyguardStateController": {
+      "fields": [],
+      "methods": [
+        "isUnlocked()Z",
+        "isVisible()Z"
+      ]
+    },
+    "kotlinx/coroutines/flow/ReadonlyStateFlow": {
+      "fields": [],
+      "methods": [
+        "getValue()Ljava/lang/Object;"
+      ]
+    },
+    "kotlinx/coroutines/flow/StateFlowImpl": {
+      "fields": [],
+      "methods": [
+        "getValue()Ljava/lang/Object;",
+        "setValue(Ljava/lang/Object;)V"
+      ]
+    },
+    "androidx/lifecycle/compose/FlowExtKt": {
+      "fields": [],
+      "methods": [
+        "collectAsStateWithLifecycle(Lkotlinx/coroutines/flow/StateFlow;Landroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/MutableState;"
+      ]
+    },
+    "androidx/compose/ui/viewinterop/AndroidView_androidKt": {
+      "fields": [],
+      "methods": [
+        "AndroidView(Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V"
+      ]
+    },
+    "androidx/compose/foundation/layout/SizeKt": {
+      "fields": [],
+      "methods": [
+        "fillMaxWidth(Landroidx/compose/ui/Modifier;F)Landroidx/compose/ui/Modifier;",
+        "height-3ABfNKs(Landroidx/compose/ui/Modifier;F)Landroidx/compose/ui/Modifier;"
+      ]
+    },
+    "androidx/compose/ui/focus/FocusRequesterModifierKt": {
+      "fields": [],
+      "methods": [
+        "focusRequester(Landroidx/compose/ui/Modifier;Landroidx/compose/ui/focus/FocusRequester;)Landroidx/compose/ui/Modifier;"
+      ]
     }
   },
   "hooks": [
@@ -174,6 +263,34 @@
       "class": "com/android/systemui/samsung/quicksetting/ui/base/spannablegrid/ResizeHandleKt",
       "signature": ".method public static final ResizeHandle-HfmGiiY(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;JLcom/android/systemui/samsung/quicksetting/ui/base/editable/ResizeContentInsets;Lkotlin/jvm/functions/Function0;Lcom/android/systemui/samsung/quicksetting/ui/base/editable/ResizingState$HandleType;Ljava/lang/String;ZLandroidx/compose/runtime/Composer;I)V",
       "method_sha256": "15504ca94ce23ea480800f09081a54cd82989147fdf38b65e2152e52cb20f412"
+    },
+    {
+      "kind": "header",
+      "class": "com/android/systemui/samsung/quicksetting/ui/panel/SecQuickSettingHeaderKt$$ExternalSyntheticLambda4",
+      "signature": ".method public final invoke(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+      "method_sha256": "8c6b5e20a9c0595e6389df14de70211e4bd721db868c0391636d464c8d3c21d2"
+    }
+  ],
+  "support_methods": [
+    {
+      "class": "com/android/systemui/samsung/quicksetting/ui/panel/SecQuickSettingHeaderKt",
+      "signature": ".method public static final HeaderContainer(Landroidx/compose/ui/Modifier;Landroidx/compose/ui/focus/FocusRequester;Landroidx/compose/runtime/Composer;I)V",
+      "method_sha256": "315eaf6ea47e97329b4446fc99f50b757354909dec82dada0154063c41a25b1c"
+    },
+    {
+      "class": "com/android/systemui/samsung/quicksetting/ui/panel/SecQuickSettingHeaderKt$$ExternalSyntheticLambda35",
+      "signature": ".method public final invoke()Ljava/lang/Object;",
+      "method_sha256": "e41033f8785e46b564e7445c2189e2e69d4794103dcc919013c30b5f3381c157"
+    },
+    {
+      "class": "com/android/systemui/samsung/quicksetting/ui/panel/QuickSettingSceneViewModel",
+      "signature": ".method public final launchEditMode()V",
+      "method_sha256": "6b2b3c681a15f1b44fecd672f63950cfb037c71808efdca4640509038f5ec06a"
+    },
+    {
+      "class": "com/android/systemui/samsung/quicksetting/ui/available/AvailableTileTrayButtonKt$$ExternalSyntheticLambda4",
+      "signature": ".method public final invoke()Ljava/lang/Object;",
+      "method_sha256": "8dd39cfc9b6d37ca4ebe1d13ce2ce416ed0f9bbcde3e33df3b087f9c8ccb48cd"
     }
   ]
 }

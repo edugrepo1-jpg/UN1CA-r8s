@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gmhub_qs_edit">Edit controls</string>
+    <string name="gmhub_qs_add">Add a control</string>
+    <string name="gmhub_qs_done">Done</string>
+    <string name="gmhub_qs_power">Open power menu</string>
+    <string name="gmhub_qs_action_failed">The control could not be changed. Return to One UI controls to continue.</string>
+</resources>

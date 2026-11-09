@@ -33,6 +33,15 @@ public final class ComposePanelRoot {
 
     private ComposePanelRoot() { }
 
+    public static void header(Object modifier, Object focus, Object composer, int flags) {
+        IosHeader.content(modifier, focus, composer, flags);
+    }
+
+    static boolean ios(Object composer) {
+        Abi api = abi;
+        return api != null && Integer.valueOf(1).equals(call(api.consume, composer, api.localStyle));
+    }
+
     /** Change only editor artwork at the original painter lookup. Native hit
      * targets, drag/resize handlers, permissions and save callbacks stay owned
      * by Samsung. No replacement editor is installed over the native one. */
@@ -84,14 +93,15 @@ public final class ComposePanelRoot {
             Object item = api.tileItem.get(holder);
             if (api.media.isInstance(item) || api.legacyMedia.isInstance(item)) return nativeShape;
             Object tileScope = api.tileScope.get(holder);
-            // Available-gallery previews and expansion transitions retain their
-            // native geometry. Their coordinate systems are not the main grid.
-            if (api.inAvailableGrid.getBoolean(tileScope) || api.expanded.getBoolean(tileScope))
+            // Gallery previews keep native spans/content, with the same frame
+            // treatment as placed controls. Expanded detail geometry stays native.
+            if (api.expanded.getBoolean(tileScope))
                 return nativeShape;
             long span = api.spanSize.getLong(tileScope);
             int width = (int)(span >> 32), height = (int)span;
             if (width < 1 || height < 1) return nativeShape;
-            return width == 1 || height == 1 ? api.capsule : api.card;
+            if(width == 1 || height == 1)return api.capsule;
+            return api.inAvailableGrid.getBoolean(tileScope) ? api.galleryCard : api.card;
         } catch (IllegalAccessException changedContract) {
             // All these fields were checked before composition. A shape can
             // fall back locally; never rerun a partially emitted whole scene.
@@ -145,7 +155,7 @@ public final class ComposePanelRoot {
         final Method remembered, remember, consume, state, value, setValue, disposableEffect;
         final Method provide, provider, composable, updateScope, userId, userContext;
         final Field host, tileItem, tileScope, spanSize, inAvailableGrid, expanded;
-        final Object empty, unit, localModel, localStyle, capsule, card;
+        final Object empty, unit, localModel, localStyle, capsule, card, galleryCard;
 
         Abi(ClassLoader loader) throws ReflectiveOperationException {
             this.loader = loader;
@@ -195,6 +205,7 @@ public final class ComposePanelRoot {
             media = type(loader, items + "MediaPlayer"); legacyMedia = type(loader, items + "LegacyMediaPlayer");
             Class<?> shapes = type(loader, "androidx.compose.foundation.shape.RoundedCornerShapeKt");
             capsule = method(shapes, "RoundedCornerShape", int.class).invoke(null, 50);
+            galleryCard = method(shapes, "RoundedCornerShape", int.class).invoke(null, 16);
             card = method(shapes, "RoundedCornerShape-0680j_4", float.class).invoke(null, 32f);
         }
 

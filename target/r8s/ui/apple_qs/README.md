@@ -8,14 +8,22 @@ authoritative. This is an installed scene binding in the build source, not yet
 a complete iOS 26 panel or an installed/validated change on the physical phone.
 
 The current iOS choice changes the generic frames to circles/capsules and large
-rounded cards. It explicitly excludes both native media item types, expanded
-details and gallery previews. Returning to One UI returns the original frame
+rounded cards. Gallery previews use the same circles/capsules and proportional
+corners for scaled larger cards. Both native media item types and expanded
+details keep their original appearance. Returning to One UI returns the original frame
 object; no native lambda field is modified. Native editor painter lookups now
 select an owned minus badge and curved corner grip for the iOS style. Original
 remove/resize callbacks, hit areas, labels, media content and save actions are
 retained. Height-only and width-only handles retain their native direction cues.
 Missing resources and One UI selection return the original icon IDs.
-iOS header/group navigation, gallery presentation, final edit placement and
+The iOS header now provides plus, localized Done and power controls inside the
+native portrait-phone scene. Plus enters Samsung's editor or opens its existing
+gallery; Done dispatches the original save callback. User, keyguard and native
+policy checks remain authoritative. Landscape, tablet, popover and unavailable
+contracts use Samsung's header. Touch targets are 48dp with 8dp separation;
+density and large-font changes update their measurements.
+
+Group navigation, complete gallery presentation, final edit placement and
 independent per-style geometry remain unfinished.
 The pre-existing `NativeGridEditor` is still staged; it is not mounted as a
 second editor over Samsung's functioning editor.
@@ -171,13 +179,24 @@ describes control formats; it does not advertise completed full-panel parity.
 
 ## Installed scene binding
 
-The installer checks 23 exact donor class contracts and pins the bodies of the
-three modified methods. It redirects only the outer main call in
+The installer checks 35 exact donor class contracts and pins the bodies of the
+four modified methods. Four additional read-only body hashes guard native
+header, Done, edit entry and gallery-open semantics. It redirects only the outer main call in
 `SecQuickSettingScene$$ExternalSyntheticLambda7`, leaving the native main,
 its restart lambda and `MediaPlayerKt` byte-identical. The frame hook replaces
 a local frame value and the native editor's remove-badge painter ID. The third
-hook selects the corner-grip painter ID at the native resize handle. Neither
-hook mutates captured fields, replaces controls or captures a media view model.
+hook selects the corner-grip painter ID at the native resize handle. The fourth
+hook redirects the outer HeaderContainer call to the style-aware header adapter;
+the original HeaderContainer body and restart callback remain unchanged. These
+hooks do not mutate captured fields, replace controls or capture a media view model.
+
+The header collects Samsung's edit and available-control flows with its native
+lifecycle-aware Compose collector. It uses AndroidView factory/update/release
+for its own view, without a polling loop or additional window. Native action
+bindings reject stale users and wrong-thread calls. A failed gallery opening
+restores only the still-owned source when no sheet was displayed. A native save
+dispatch is never retried merely because its completion is unknown, and is not
+reported as completed persistence.
 
 `ComposePanelRoot` provides one Compose-local selection through a native
 `rememberComposableLambda` slot. Its remembered session follows the native QS

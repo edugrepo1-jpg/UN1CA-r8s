@@ -21,6 +21,9 @@ NATIVE_MAIN = ('Lcom/android/systemui/samsung/quicksetting/ui/SecQuickSettingSce
                'Lcom/android/systemui/samsung/quicksetting/ui/panel/QuickTileBoxViewModel;'
                'Landroidx/compose/runtime/Composer;I)V')
 BRIDGE = ROOT + '->content(Ljava/lang/Object;Ljava/lang/Object;Ljava/util/List;Ljava/lang/Object;Ljava/lang/Object;I)V'
+NATIVE_HEADER = ('Lcom/android/systemui/samsung/quicksetting/ui/panel/SecQuickSettingHeaderKt;'
+    '->HeaderContainer(Landroidx/compose/ui/Modifier;Landroidx/compose/ui/focus/FocusRequester;Landroidx/compose/runtime/Composer;I)V')
+HEADER_BRIDGE = ROOT + '->header(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;I)V'
 COMPOSER_ANCHOR = '    check-cast v13, Landroidx/compose/runtime/Composer;'
 SHAPE_CODE = '''
 
@@ -71,6 +74,11 @@ def patch(text, hook):
         if original.count(NATIVE_MAIN) != 1 or original.count('    .locals 16') != 1:
             raise ValueError('Changed native QS scene entry allocation')
         changed = original.replace(NATIVE_MAIN, BRIDGE)
+    elif hook['kind'] == 'header':
+        original = body.replace(HEADER_BRIDGE, NATIVE_HEADER)
+        if original.count(NATIVE_HEADER) != 1:
+            raise ValueError('Changed native QS header call')
+        changed = original.replace(NATIVE_HEADER, HEADER_BRIDGE)
     elif hook['kind'] == 'shape':
         original = body
         if ROOT + '->editResource(' in original:
@@ -119,15 +127,19 @@ def verify_generated(module=MODULE, source=SOURCE):
                  for p in sorted((module / 'smali').rglob('*.smali'))}
     if not sources or sources != compiled['sources'] or not generated or generated != compiled['smali']:
         raise ValueError('QS scene source and generated DEX are out of sync')
-    if set(generated) - {p for p in generated if p.startswith('com/gmhub/qs/ComposePanelRoot')}:
+    owners = ('com/gmhub/qs/ComposePanelRoot', 'com/gmhub/qs/IosHeader', 'com/gmhub/qs/NativeHeaderActions')
+    if set(generated) - {p for p in generated if p.startswith(owners)}:
         raise ValueError('Unexpected classes in QS scene adapter')
     resources = {p.relative_to(module / 'res').as_posix(): digest(p)
                  for p in sorted((module / 'res').rglob('*.xml'))}
-    if set(resources) != {'drawable/gmhub_qs_remove.xml', 'drawable/gmhub_qs_resize.xml'} or resources != compiled.get('resources'):
+    expected_resources = {'drawable/gmhub_qs_' + n + '.xml' for n in ['remove', 'resize', 'plus', 'power']}
+    expected_resources |= {'values/gmhub_qs_header.xml', 'values-pt/gmhub_qs_header.xml'}
+    if set(resources) != expected_resources or resources != compiled.get('resources'):
         raise ValueError('QS editor resources are out of sync')
     for path in (module / 'res').rglob('*.xml'):
-        if ET.parse(path).getroot().tag != 'vector':
-            raise ValueError('Expected a vector editor icon: ' + path.name)
+        expected_tag = 'vector' if path.parent.name == 'drawable' else 'resources'
+        if ET.parse(path).getroot().tag != expected_tag:
+            raise ValueError('Changed QS resource type: ' + path.name)
 
 
 def install(decoded, module=MODULE, source=SOURCE):
@@ -137,6 +149,13 @@ def install(decoded, module=MODULE, source=SOURCE):
     spec.loader.exec_module(checker)
     contract = json.loads((module / 'native-contracts.json').read_text(encoding='utf-8'))
     checker.verify(decoded, contract)
+    for check in contract.get('support_methods', []):
+        files = list(decoded.glob('smali*/' + check['class'] + '.smali'))
+        if len(files) != 1:
+            raise ValueError('Missing native header support class: ' + check['class'])
+        _, _, body = method_body(files[0].read_text(encoding='utf-8'), check['signature'])
+        if hashlib.sha256(body.encode()).hexdigest() != check['method_sha256']:
+            raise ValueError('Native header action semantics changed: ' + check['class'])
     changes = []
     for hook in contract['hooks']:
         files = list(decoded.glob('smali*/' + hook['class'] + '.smali'))
@@ -148,8 +167,8 @@ def install(decoded, module=MODULE, source=SOURCE):
     if len(existing) > 1:
         raise ValueError('Duplicate QS scene definitions')
     generated = list((module / 'smali').rglob('*.smali'))
-    for icon in (module / 'res/drawable').glob('*.xml'):
-        existing_icon = decoded / 'res/drawable' / icon.name
+    for icon in (module / 'res').rglob('*.xml'):
+        existing_icon = decoded / 'res' / icon.relative_to(module / 'res')
         if existing_icon.exists() and existing_icon.read_bytes() != icon.read_bytes():
             raise ValueError('Conflicting owned QS icon: ' + icon.name)
     for candidate in generated:

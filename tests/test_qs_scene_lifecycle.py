@@ -15,6 +15,7 @@ R = 'androidx/compose/runtime/'
 S = 'com/android/systemui/samsung/quicksetting/ui/'
 
 FIXTURES = {
+    'com/gmhub/qs/IosHeader.java': 'package com.gmhub.qs; public class IosHeader {public static void content(Object m,Object f,Object c,int flags){}}',
     'android/net/Uri.java': 'package android.net; public class Uri {public final String key; public Uri(String key){this.key=key;}}',
     'android/os/Looper.java': 'package android.os; public class Looper {public static Looper getMainLooper(){return new Looper();}}',
     'android/os/Handler.java': 'package android.os; public class Handler {public Handler(Looper looper){}}',
@@ -187,7 +188,10 @@ public class Support {
   span(2,2);render(c);check("dp/32.0".equals(lastShape));
   holder.f$1=new com.android.systemui.samsung.quicksetting.domain.model.items.MediaPlayer();render(c);check(lastShape==nativeShape);
   holder.f$1=new com.android.systemui.samsung.quicksetting.domain.model.items.LegacyMediaPlayer();render(c);check(lastShape==nativeShape);
-  holder.f$1=new Object();holder.f$22.inAvailableGrid=true;render(c);check(lastShape==nativeShape);
+  holder.f$1=new Object();holder.f$22.inAvailableGrid=true;render(c);check("percent/16".equals(lastShape));
+  span(1,1);render(c);check("percent/50".equals(lastShape));
+  holder.f$1=new com.android.systemui.samsung.quicksetting.domain.model.items.MediaPlayer();render(c);check(lastShape==nativeShape);
+  holder.f$1=new Object();span(2,2);
   holder.f$22.inAvailableGrid=false;holder.f$22.expanded=true;render(c);check(lastShape==nativeShape);holder.f$22.expanded=false;
   android.provider.Settings.Secure.putInt(zero.resolver,KEY,0);render(c);check(lastShape==nativeShape);
   check(lastRemove==0x7e080fe4 && lastResize==0x7e080820);
