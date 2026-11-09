@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="gmhub_qs_page_number">Page %1$d of %2$d</string>
     <string name="gmhub_qs_edit">Edit controls</string>
     <string name="gmhub_qs_add">Add a control</string>
     <string name="gmhub_qs_done">Done</string>

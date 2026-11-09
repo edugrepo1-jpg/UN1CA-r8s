@@ -24,6 +24,14 @@ BRIDGE = ROOT + '->content(Ljava/lang/Object;Ljava/lang/Object;Ljava/util/List;L
 NATIVE_HEADER = ('Lcom/android/systemui/samsung/quicksetting/ui/panel/SecQuickSettingHeaderKt;'
     '->HeaderContainer(Landroidx/compose/ui/Modifier;Landroidx/compose/ui/focus/FocusRequester;Landroidx/compose/runtime/Composer;I)V')
 HEADER_BRIDGE = ROOT + '->header(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;I)V'
+NATIVE_GRID = ('Lcom/android/systemui/samsung/quicksetting/ui/panel/QuickSettingTileGridKt;'
+    '->QuickSettingTileGrid-RLNbq1o(Lcom/android/compose/animation/scene/ContentScope;JJLandroidx/compose/runtime/State;'
+    'Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridState;'
+    'Landroidx/compose/foundation/ScrollState;Lkotlin/jvm/functions/Function0;'
+    'Lcom/android/systemui/samsung/quicksetting/ui/panel/ContextMenuScope;I'
+    'Lcom/android/systemui/samsung/quicksetting/ui/banner/TopBannerViewModel;'
+    'Lcom/android/systemui/samsung/quicksetting/ui/banner/BottomBannerViewModel;Landroidx/compose/runtime/Composer;I)V')
+GRID_BRIDGE = ROOT + '->grid(Ljava/lang/Object;JJ' + 'Ljava/lang/Object;'*5 + 'I' + 'Ljava/lang/Object;'*3 + 'I)V'
 GRID_ANCHOR = ('    invoke-static/range {v0 .. v27}, '
     'Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridKt;'
     '->SpannableGrid-I6XV8Ug(')
@@ -34,6 +42,16 @@ ASPECT_CODE = '''    move/from16 v35, v8
     invoke-static/range {v35 .. v36}, Lcom/gmhub/qs/ComposePanelRoot;->cellAspect(FLjava/lang/Object;)F
 
     move-result v8
+
+    move-object/from16 v35, v1
+
+    move-object/from16 v36, v23
+
+    invoke-static/range {v35 .. v36}, Lcom/gmhub/qs/ComposePanelRoot;->gridModifier(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v1
+
+    check-cast v1, Landroidx/compose/ui/Modifier;
 
 '''
 COMPOSER_ANCHOR = '    check-cast v13, Landroidx/compose/runtime/Composer;'
@@ -91,6 +109,11 @@ def patch(text, hook):
         if original.count(NATIVE_HEADER) != 1:
             raise ValueError('Changed native QS header call')
         changed = original.replace(NATIVE_HEADER, HEADER_BRIDGE)
+    elif hook['kind'] == 'grid':
+        original = body.replace(GRID_BRIDGE, NATIVE_GRID)
+        if original.count(NATIVE_GRID) != 1:
+            raise ValueError('Changed native QS grid content call')
+        changed = original.replace(NATIVE_GRID, GRID_BRIDGE)
     elif hook['kind'] == 'cell_aspect':
         original = body
         if ROOT + '->cellAspect(' in original:
@@ -151,12 +174,13 @@ def verify_generated(module=MODULE, source=SOURCE):
                  for p in sorted((module / 'smali').rglob('*.smali'))}
     if not sources or sources != compiled['sources'] or not generated or generated != compiled['smali']:
         raise ValueError('QS scene source and generated DEX are out of sync')
-    owners = ('com/gmhub/qs/ComposePanelRoot', 'com/gmhub/qs/IosHeader', 'com/gmhub/qs/NativeHeaderActions')
+    owners = ('com/gmhub/qs/ComposePanelRoot', 'com/gmhub/qs/IosHeader', 'com/gmhub/qs/NativeHeaderActions',
+              'com/gmhub/qs/IosGridPanel', 'com/gmhub/qs/NativePageNavigation')
     if set(generated) - {p for p in generated if p.startswith(owners)}:
         raise ValueError('Unexpected classes in QS scene adapter')
     resources = {p.relative_to(module / 'res').as_posix(): digest(p)
                  for p in sorted((module / 'res').rglob('*.xml'))}
-    expected_resources = {'drawable/gmhub_qs_' + n + '.xml' for n in ['remove', 'resize', 'plus', 'power']}
+    expected_resources = {'drawable/gmhub_qs_' + n + '.xml' for n in ['remove', 'resize', 'plus', 'power', 'favorite', 'page']}
     expected_resources |= {'values/gmhub_qs_header.xml', 'values-pt/gmhub_qs_header.xml'}
     if set(resources) != expected_resources or resources != compiled.get('resources'):
         raise ValueError('QS editor resources are out of sync')
@@ -180,13 +204,13 @@ def install(decoded, module=MODULE, source=SOURCE):
         _, _, body = method_body(files[0].read_text(encoding='utf-8'), check['signature'])
         if hashlib.sha256(body.encode()).hexdigest() != check['method_sha256']:
             raise ValueError('Native header action semantics changed: ' + check['class'])
-    changes = []
+    changes = {}
     for hook in contract['hooks']:
         files = list(decoded.glob('smali*/' + hook['class'] + '.smali'))
         if len(files) != 1:
             raise ValueError('Expected one QS hook owner: ' + hook['class'])
         path = files[0]
-        changes.append((path, patch(path.read_text(encoding='utf-8'), hook)))
+        changes[path] = patch(changes.get(path, path.read_text(encoding='utf-8')), hook)
     existing = list(decoded.glob('smali*/com/gmhub/qs/ComposePanelRoot.smali'))
     if len(existing) > 1:
         raise ValueError('Duplicate QS scene definitions')
@@ -209,7 +233,7 @@ def install(decoded, module=MODULE, source=SOURCE):
         dest = decoded / ('smali_classes' + str(max(indices, default=1) + 1))
     shutil.copytree(module / 'smali', dest, dirs_exist_ok=True)
     shutil.copytree(module / 'res', decoded / 'res', dirs_exist_ok=True)
-    for path, text in changes:
+    for path, text in changes.items():
         path.write_text(text, encoding='utf-8', newline='\n')
     print('Connected native Samsung QS scene and per-user appearance; original player/editor retained')
 

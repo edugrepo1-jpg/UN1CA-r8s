@@ -103,6 +103,10 @@
     .end annotation
 .end field
 
+.field final modifier:Ljava/lang/Object;
+
+.field final padding:Ljava/lang/reflect/Method;
+
 .field final popover:Ljava/lang/reflect/Method;
 
 .field final portrait:Ljava/lang/reflect/Method;
@@ -127,6 +131,8 @@
 
 .field final tablet:Ljava/lang/reflect/Method;
 
+.field final then:Ljava/lang/reflect/Method;
+
 .field final tileItem:Ljava/lang/reflect/Field;
 
 .field final tileScope:Ljava/lang/reflect/Field;
@@ -144,7 +150,7 @@
 
 # direct methods
 .method constructor <init>(Ljava/lang/ClassLoader;)V
-    .locals 11
+    .locals 12
     .annotation system Ldalvik/annotation/Throws;
         value = {
             Ljava/lang/ReflectiveOperationException;
@@ -315,131 +321,131 @@
 
     invoke-static {v3, v4}, Lcom/gmhub/qs/ComposePanelRoot;->access$200(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/reflect/Field;
 
-    move-result-object v4
+    move-result-object v7
 
-    const/4 v7, 0x0
+    const/4 v8, 0x0
 
-    invoke-virtual {v4, v7}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-virtual {v7, v8}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
 
-    move-result-object v4
+    move-result-object v7
 
-    const-string v8, "androidx.compose.runtime.Composer$Companion"
+    const-string v9, "androidx.compose.runtime.Composer$Companion"
 
-    invoke-static {p1, v8}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
+    invoke-static {p1, v9}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
 
-    move-result-object v8
+    move-result-object v9
 
-    const-string v9, "getEmpty"
+    const-string v10, "getEmpty"
+
+    new-array v11, v6, [Ljava/lang/Class;
+
+    invoke-static {v9, v10, v11}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+    move-result-object v9
+
+    invoke-virtual {v9, v7, v8}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v7
+
+    iput-object v7, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->empty:Ljava/lang/Object;
+
+    const-string v7, "kotlin.Unit"
+
+    invoke-static {p1, v7}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
+
+    move-result-object v7
+
+    const-string v9, "INSTANCE"
+
+    invoke-static {v7, v9}, Lcom/gmhub/qs/ComposePanelRoot;->access$200(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/reflect/Field;
+
+    move-result-object v7
+
+    invoke-virtual {v7, v8}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v7
+
+    iput-object v7, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->unit:Ljava/lang/Object;
+
+    const-string v7, "androidx.compose.runtime.SnapshotStateKt"
+
+    invoke-static {p1, v7}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
+
+    move-result-object v7
+
+    const-class v9, Ljava/lang/Object;
+
+    filled-new-array {v9}, [Ljava/lang/Class;
+
+    move-result-object v9
+
+    const-string v10, "mutableStateOf$default"
+
+    invoke-static {v7, v10, v9}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+    move-result-object v7
+
+    iput-object v7, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->state:Ljava/lang/reflect/Method;
+
+    const-string v7, "androidx.compose.runtime.State"
+
+    invoke-static {p1, v7}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
+
+    move-result-object v7
+
+    const-string v9, "getValue"
 
     new-array v10, v6, [Ljava/lang/Class;
 
-    invoke-static {v8, v9, v10}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+    invoke-static {v7, v9, v10}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
 
-    move-result-object v8
+    move-result-object v7
 
-    invoke-virtual {v8, v4, v7}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    iput-object v7, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->value:Ljava/lang/reflect/Method;
 
-    move-result-object v4
+    const-string v7, "androidx.compose.runtime.MutableState"
 
-    iput-object v4, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->empty:Ljava/lang/Object;
+    invoke-static {p1, v7}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
 
-    const-string v4, "kotlin.Unit"
+    move-result-object v7
 
-    invoke-static {p1, v4}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
+    const-class v9, Ljava/lang/Object;
 
-    move-result-object v4
+    filled-new-array {v9}, [Ljava/lang/Class;
 
-    const-string v8, "INSTANCE"
+    move-result-object v9
 
-    invoke-static {v4, v8}, Lcom/gmhub/qs/ComposePanelRoot;->access$200(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/reflect/Field;
+    const-string v10, "setValue"
 
-    move-result-object v4
+    invoke-static {v7, v10, v9}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
 
-    invoke-virtual {v4, v7}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
+    move-result-object v7
 
-    move-result-object v4
+    iput-object v7, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->setValue:Ljava/lang/reflect/Method;
 
-    iput-object v4, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->unit:Ljava/lang/Object;
+    const-string v7, "androidx.compose.runtime.DisposableEffectResult"
 
-    const-string v4, "androidx.compose.runtime.SnapshotStateKt"
+    invoke-static {p1, v7}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
 
-    invoke-static {p1, v4}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
+    move-result-object v7
 
-    move-result-object v4
+    iput-object v7, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->disposable:Ljava/lang/Class;
 
-    const-class v8, Ljava/lang/Object;
+    const-string v7, "androidx.compose.runtime.EffectsKt"
 
-    filled-new-array {v8}, [Ljava/lang/Class;
+    invoke-static {p1, v7}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
 
-    move-result-object v8
+    move-result-object v7
 
-    const-string v9, "mutableStateOf$default"
+    const-class v9, Ljava/lang/Object;
 
-    invoke-static {v4, v9, v8}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-
-    move-result-object v4
-
-    iput-object v4, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->state:Ljava/lang/reflect/Method;
-
-    const-string v4, "androidx.compose.runtime.State"
-
-    invoke-static {p1, v4}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
-
-    move-result-object v4
-
-    const-string v8, "getValue"
-
-    new-array v9, v6, [Ljava/lang/Class;
-
-    invoke-static {v4, v8, v9}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-
-    move-result-object v4
-
-    iput-object v4, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->value:Ljava/lang/reflect/Method;
-
-    const-string v4, "androidx.compose.runtime.MutableState"
-
-    invoke-static {p1, v4}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
-
-    move-result-object v4
-
-    const-class v8, Ljava/lang/Object;
-
-    filled-new-array {v8}, [Ljava/lang/Class;
-
-    move-result-object v8
-
-    const-string v9, "setValue"
-
-    invoke-static {v4, v9, v8}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-
-    move-result-object v4
-
-    iput-object v4, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->setValue:Ljava/lang/reflect/Method;
-
-    const-string v4, "androidx.compose.runtime.DisposableEffectResult"
-
-    invoke-static {p1, v4}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
-
-    move-result-object v4
-
-    iput-object v4, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->disposable:Ljava/lang/Class;
-
-    const-string v4, "androidx.compose.runtime.EffectsKt"
-
-    invoke-static {p1, v4}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
-
-    move-result-object v4
-
-    const-class v8, Ljava/lang/Object;
-
-    filled-new-array {v8, v1, v3}, [Ljava/lang/Class;
+    filled-new-array {v9, v1, v3}, [Ljava/lang/Class;
 
     move-result-object v1
 
-    const-string v8, "DisposableEffect"
+    const-string v9, "DisposableEffect"
 
-    invoke-static {v4, v8, v1}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+    invoke-static {v7, v9, v1}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
 
     move-result-object v1
 
@@ -451,13 +457,13 @@
 
     move-result-object v1
 
-    const-string v4, "updateScope"
+    const-string v7, "updateScope"
 
     filled-new-array {v2}, [Ljava/lang/Class;
 
-    move-result-object v8
+    move-result-object v9
 
-    invoke-static {v1, v4, v8}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+    invoke-static {v1, v7, v9}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
 
     move-result-object v1
 
@@ -469,9 +475,9 @@
 
     move-result-object v1
 
-    sget-object v4, Ljava/lang/Integer;->TYPE:Ljava/lang/Class;
+    sget-object v7, Ljava/lang/Integer;->TYPE:Ljava/lang/Class;
 
-    filled-new-array {v1, v2, v3, v4}, [Ljava/lang/Class;
+    filled-new-array {v1, v2, v3, v7}, [Ljava/lang/Class;
 
     move-result-object v1
 
@@ -495,9 +501,9 @@
 
     move-result-object v2
 
-    const-string v4, "provides"
+    const-string v7, "provides"
 
-    invoke-static {v1, v4, v2}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+    invoke-static {v1, v7, v2}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
 
     move-result-object v1
 
@@ -511,13 +517,13 @@
 
     sget-object v2, Ljava/lang/Integer;->TYPE:Ljava/lang/Class;
 
-    sget-object v4, Ljava/lang/Boolean;->TYPE:Ljava/lang/Class;
+    sget-object v7, Ljava/lang/Boolean;->TYPE:Ljava/lang/Class;
 
-    const-class v8, Ljava/lang/Object;
+    const-class v9, Ljava/lang/Object;
 
-    sget-object v9, Ljava/lang/Integer;->TYPE:Ljava/lang/Class;
+    sget-object v10, Ljava/lang/Integer;->TYPE:Ljava/lang/Class;
 
-    filled-new-array {v2, v4, v8, v3, v9}, [Ljava/lang/Class;
+    filled-new-array {v2, v7, v9, v3, v10}, [Ljava/lang/Class;
 
     move-result-object v2
 
@@ -541,7 +547,7 @@
 
     move-result-object v1
 
-    invoke-virtual {v1, v7}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-virtual {v1, v8}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v1
 
@@ -569,7 +575,7 @@
 
     move-result-object v0
 
-    invoke-virtual {v1, v7, v0}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-virtual {v1, v8, v0}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v0
 
@@ -622,6 +628,60 @@
     move-result-object v0
 
     iput-object v0, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->popover:Ljava/lang/reflect/Method;
+
+    const-string v0, "androidx.compose.ui.Modifier"
+
+    invoke-static {p1, v0}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
+
+    move-result-object v0
+
+    invoke-static {v0, v4}, Lcom/gmhub/qs/ComposePanelRoot;->access$200(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/reflect/Field;
+
+    move-result-object v1
+
+    invoke-virtual {v1, v8}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v1
+
+    iput-object v1, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->modifier:Ljava/lang/Object;
+
+    const-string v1, "androidx.compose.foundation.layout.PaddingKt"
+
+    invoke-static {p1, v1}, Lcom/gmhub/qs/ComposePanelRoot;->access$000(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;
+
+    move-result-object v1
+
+    sget-object v2, Ljava/lang/Float;->TYPE:Ljava/lang/Class;
+
+    sget-object v3, Ljava/lang/Float;->TYPE:Ljava/lang/Class;
+
+    sget-object v4, Ljava/lang/Float;->TYPE:Ljava/lang/Class;
+
+    sget-object v5, Ljava/lang/Float;->TYPE:Ljava/lang/Class;
+
+    filled-new-array {v0, v2, v3, v4, v5}, [Ljava/lang/Class;
+
+    move-result-object v2
+
+    const-string v3, "padding-qDBjuR0"
+
+    invoke-static {v1, v3, v2}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+    move-result-object v1
+
+    iput-object v1, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->padding:Ljava/lang/reflect/Method;
+
+    const-string v1, "then"
+
+    filled-new-array {v0}, [Ljava/lang/Class;
+
+    move-result-object v2
+
+    invoke-static {v0, v1, v2}, Lcom/gmhub/qs/ComposePanelRoot;->access$100(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+    move-result-object v0
+
+    iput-object v0, p0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->then:Ljava/lang/reflect/Method;
 
     const-string v0, "com.android.systemui.qs.QSHost"
 
@@ -745,7 +805,7 @@
 
     move-result-object v2
 
-    invoke-virtual {v0, v7, v2}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-virtual {v0, v8, v2}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v0
 
@@ -771,7 +831,7 @@
 
     move-result-object v1
 
-    invoke-virtual {v0, v7, v1}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-virtual {v0, v8, v1}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v0
 
@@ -799,7 +859,7 @@
 
     move-result-object v0
 
-    invoke-virtual {p1, v7, v0}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-virtual {p1, v8, v0}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object p1
 

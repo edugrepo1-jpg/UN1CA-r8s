@@ -43,6 +43,10 @@ def fixture(decoded, module):
         elif hook['kind'] == 'cell_aspect':
             body = (hook['signature'] + '\n    .locals 35\n' + installer.GRID_ANCHOR
                     + 'native-descriptor)V\n    return-object v0\n.end method')
+        elif hook['kind'] == 'grid':
+            body = (hook['signature'] + '\n    .locals 64\n'
+                    '    invoke-static/range {v0 .. v14}, ' + installer.NATIVE_GRID
+                    + '\n    return-object v0\n.end method')
         else:
             body = (hook['signature'] + '\n    .locals 16\n'
                     '    invoke-static {v1, v0, v12, v13}, ' + installer.NATIVE_HEADER
@@ -86,14 +90,30 @@ class SceneInstallTests(unittest.TestCase):
             installer.install(decoded, module)
             self.assertEqual(first, snapshot(decoded))
             changed = [name for name in before if before[name] != first[name]]
-            self.assertEqual(len(changed), 5)
+            self.assertEqual(len(changed), 6)
             self.assertTrue(all(any(h['class'] + '.smali' in name for h in contract['hooks']) for name in changed))
             for hook in contract['hooks']:
                 text = (decoded / 'smali_classes3' / (hook['class'] + '.smali')).read_text()
-                self.assertEqual(text.count(installer.ROOT + '->'), 2 if hook['kind'] == 'shape' else 1)
+                # Every hook for an owner must survive atomic staging.
+                owned=[h for h in contract['hooks'] if h['class']==hook['class']]
+                expected=sum(2 if h['kind'] in ('shape','cell_aspect') else 1 for h in owned)
+                self.assertEqual(text.count(installer.ROOT + '->'), expected)
             # Re-installation must reuse one DEX directory, never duplicate the
             # root or the generated nested classes into a second class loader.
             self.assertEqual(len(list(decoded.glob('smali*/com/gmhub/qs/ComposePanelRoot.smali'))), 1)
+
+    def test_multiple_methods_in_one_native_owner_are_staged_together(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);module=root/'module';shutil.copytree(MODULE,module)
+            path=module/'native-contracts.json';contract=json.loads(path.read_text())
+            cell=next(h for h in contract['hooks'] if h['kind']=='cell_aspect')
+            rail=next(h for h in contract['hooks'] if h['kind']=='grid')
+            rail['class']=cell['class'];path.write_text(json.dumps(contract))
+            decoded=root/'decoded';fixture(decoded,module);installer.install(decoded,module)
+            target=decoded/'smali_classes3'/(cell['class']+'.smali');first=target.read_bytes()
+            text=first.decode();self.assertIn(installer.GRID_BRIDGE,text)
+            self.assertIn(installer.ASPECT_CODE,text)
+            installer.install(decoded,module);self.assertEqual(first,target.read_bytes())
 
     def test_changed_native_member_rejected_before_any_writes(self):
         with tempfile.TemporaryDirectory() as directory:

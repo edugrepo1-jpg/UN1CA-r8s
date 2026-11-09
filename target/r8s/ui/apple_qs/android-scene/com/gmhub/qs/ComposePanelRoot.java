@@ -37,6 +37,11 @@ public final class ComposePanelRoot {
         IosHeader.content(modifier, focus, composer, flags);
     }
 
+    public static void grid(Object scope,long size,long parent,Object state,Object grid,Object scroll,
+            Object before,Object menu,int mode,Object top,Object bottom,Object composer,int changed) {
+        IosGridPanel.content(new Object[]{scope,size,parent,state,grid,scroll,before,menu,mode,top,bottom,composer,changed});
+    }
+
     static boolean ios(Object composer) {
         Abi api = abi;
         return api != null && Integer.valueOf(1).equals(call(api.consume, composer, api.localStyle));
@@ -46,20 +51,33 @@ public final class ComposePanelRoot {
      * GridLayoutInfo and the native drag/resize hit tests receive the same
      * square cell pitch. Do not repack or write a different tile list here. */
     public static float cellAspect(float nativeAspect, Object composer) {
-        Abi api = abi;
-        if (api == null || !ios(composer) || !Float.isFinite(nativeAspect) || nativeAspect <= 0f)
+        if (!Float.isFinite(nativeAspect) || nativeAspect <= 0f || !iosPhone(composer))
             return nativeAspect;
+        return 1f;
+    }
+
+    static boolean iosPhone(Object composer) {
+        Abi api=abi;if(api==null || !ios(composer))return false;
         try {
             Object model = call(api.consume, composer, api.localModel);
             Context context = (Context)call(api.userContext, api.host.get(model));
             if (context == null || !Boolean.TRUE.equals(call(api.portrait, model,
                     context.getResources().getConfiguration()))
                     || Boolean.TRUE.equals(call(api.tablet, model))
-                    || Boolean.TRUE.equals(call(api.popover, model))) return nativeAspect;
-            return 1f;
+                    || Boolean.TRUE.equals(call(api.popover, model))) return false;
+            return true;
         } catch (IllegalAccessException unavailable) {
-            return nativeAspect;
+            return false;
         }
+    }
+
+    /** Reserve the actual trailing rail width in the same native measure pass.
+     * It cannot cover a tile or consume its pointer target. RTL follows Compose. */
+    public static Object gridModifier(Object nativeModifier,Object composer) {
+        Abi api=abi;
+        if(api==null || !iosPhone(composer) || !IosGridPanel.active(composer))return nativeModifier;
+        Object padding=call(api.padding,null,api.modifier,0f,0f,48f,0f);
+        return call(api.then,padding,nativeModifier);
     }
 
     /** Change only editor artwork at the original painter lookup. Native hit
@@ -173,9 +191,9 @@ public final class ComposePanelRoot {
         final Class<?> function0, function1, function2, disposable, media, legacyMedia;
         final Method start, end, startReplace, endReplace, changedObject, changedInt;
         final Method remembered, remember, consume, state, value, setValue, disposableEffect;
-        final Method provide, provider, composable, updateScope, userId, userContext, portrait, tablet, popover;
+        final Method provide, provider, composable, updateScope, userId, userContext, portrait, tablet, popover, padding, then;
         final Field host, tileItem, tileScope, spanSize, inAvailableGrid, expanded;
-        final Object empty, unit, localModel, localStyle, capsule, card, galleryCard;
+        final Object empty, unit, localModel, localStyle, capsule, card, galleryCard, modifier;
 
         Abi(ClassLoader loader) throws ReflectiveOperationException {
             this.loader = loader;
@@ -216,6 +234,11 @@ public final class ComposePanelRoot {
             host = field(model, "qsHost");
             portrait = method(model, "isPortraitPanel", android.content.res.Configuration.class);
             tablet = method(model, "isTablet"); popover = method(model, "isPopOverEnabled");
+            Class<?> modifierType=type(loader,"androidx.compose.ui.Modifier");
+            modifier=field(modifierType,"Companion").get(null);
+            padding=method(type(loader,"androidx.compose.foundation.layout.PaddingKt"),"padding-qDBjuR0",
+                modifierType,float.class,float.class,float.class,float.class);
+            then=method(modifierType,"then",modifierType);
             Class<?> qsHost = type(loader, "com.android.systemui.qs.QSHost");
             userId = method(qsHost, "getUserId"); userContext = method(qsHost, "getUserContext");
             Class<?> tile = type(loader, GRID + "SpannableGridTileKt$$ExternalSyntheticLambda6");

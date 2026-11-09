@@ -174,133 +174,32 @@
 .end method
 
 .method public static cellAspect(FLjava/lang/Object;)F
-    .locals 5
-
-    sget-object v0, Lcom/gmhub/qs/ComposePanelRoot;->abi:Lcom/gmhub/qs/ComposePanelRoot$Abi;
-
-    if-eqz v0, :cond_2
-
-    invoke-static {p1}, Lcom/gmhub/qs/ComposePanelRoot;->ios(Ljava/lang/Object;)Z
-
-    move-result v1
-
-    if-eqz v1, :cond_2
+    .locals 1
 
     invoke-static {p0}, Ljava/lang/Float;->isFinite(F)Z
 
-    move-result v1
+    move-result v0
 
-    if-eqz v1, :cond_2
+    if-eqz v0, :cond_1
 
-    const/4 v1, 0x0
+    const/4 v0, 0x0
 
-    cmpg-float v1, p0, v1
+    cmpg-float v0, p0, v0
 
-    if-gtz v1, :cond_0
+    if-lez v0, :cond_1
+
+    invoke-static {p1}, Lcom/gmhub/qs/ComposePanelRoot;->iosPhone(Ljava/lang/Object;)Z
+
+    move-result p1
+
+    if-nez p1, :cond_0
 
     goto :goto_0
 
     :cond_0
-    :try_start_0
-    iget-object v1, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->consume:Ljava/lang/reflect/Method;
-
-    iget-object v2, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->localModel:Ljava/lang/Object;
-
-    filled-new-array {v2}, [Ljava/lang/Object;
-
-    move-result-object v2
-
-    invoke-static {v1, p1, v2}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-
-    move-result-object p1
-
-    iget-object v1, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->userContext:Ljava/lang/reflect/Method;
-
-    iget-object v2, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->host:Ljava/lang/reflect/Field;
-
-    invoke-virtual {v2, p1}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
-
-    move-result-object v2
-
-    const/4 v3, 0x0
-
-    new-array v4, v3, [Ljava/lang/Object;
-
-    invoke-static {v1, v2, v4}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-
-    move-result-object v1
-
-    check-cast v1, Landroid/content/Context;
-
-    if-eqz v1, :cond_2
-
-    sget-object v2, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
-
-    iget-object v4, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->portrait:Ljava/lang/reflect/Method;
-
-    invoke-virtual {v1}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
-
-    move-result-object v1
-
-    invoke-virtual {v1}, Landroid/content/res/Resources;->getConfiguration()Landroid/content/res/Configuration;
-
-    move-result-object v1
-
-    filled-new-array {v1}, [Ljava/lang/Object;
-
-    move-result-object v1
-
-    invoke-static {v4, p1, v1}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-
-    move-result-object v1
-
-    invoke-virtual {v2, v1}, Ljava/lang/Boolean;->equals(Ljava/lang/Object;)Z
-
-    move-result v1
-
-    if-eqz v1, :cond_2
-
-    sget-object v1, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
-
-    iget-object v2, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->tablet:Ljava/lang/reflect/Method;
-
-    new-array v4, v3, [Ljava/lang/Object;
-
-    invoke-static {v2, p1, v4}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-
-    move-result-object v2
-
-    invoke-virtual {v1, v2}, Ljava/lang/Boolean;->equals(Ljava/lang/Object;)Z
-
-    move-result v1
-
-    if-nez v1, :cond_2
-
-    sget-object v1, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
-
-    iget-object v0, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->popover:Ljava/lang/reflect/Method;
-
-    new-array v2, v3, [Ljava/lang/Object;
-
-    invoke-static {v0, p1, v2}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-
-    move-result-object p1
-
-    invoke-virtual {v1, p1}, Ljava/lang/Boolean;->equals(Ljava/lang/Object;)Z
-
-    move-result p1
-    :try_end_0
-    .catch Ljava/lang/IllegalAccessException; {:try_start_0 .. :try_end_0} :catch_0
-
-    if-eqz p1, :cond_1
-
-    goto :goto_0
-
-    :cond_1
     const/high16 p0, 0x3f800000    # 1.0f
 
-    :catch_0
-    :cond_2
+    :cond_1
     :goto_0
     return p0
 .end method
@@ -694,6 +593,125 @@
     throw p0
 .end method
 
+.method public static grid(Ljava/lang/Object;JJLjava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;I)V
+    .locals 0
+
+    invoke-static {p1, p2}, Ljava/lang/Long;->valueOf(J)Ljava/lang/Long;
+
+    move-result-object p1
+
+    invoke-static {p3, p4}, Ljava/lang/Long;->valueOf(J)Ljava/lang/Long;
+
+    move-result-object p2
+
+    invoke-static {p10}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+
+    move-result-object p3
+
+    invoke-static {p14}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+
+    move-result-object p4
+
+    move-object p10, p12
+
+    move-object p12, p4
+
+    move-object p4, p6
+
+    move-object p6, p8
+
+    move-object p8, p3
+
+    move-object p3, p5
+
+    move-object p5, p7
+
+    move-object p7, p9
+
+    move-object p9, p11
+
+    move-object p11, p13
+
+    filled-new-array/range {p0 .. p12}, [Ljava/lang/Object;
+
+    move-result-object p0
+
+    invoke-static {p0}, Lcom/gmhub/qs/IosGridPanel;->content([Ljava/lang/Object;)V
+
+    return-void
+.end method
+
+.method public static gridModifier(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+    .locals 6
+
+    sget-object v0, Lcom/gmhub/qs/ComposePanelRoot;->abi:Lcom/gmhub/qs/ComposePanelRoot$Abi;
+
+    if-eqz v0, :cond_1
+
+    invoke-static {p1}, Lcom/gmhub/qs/ComposePanelRoot;->iosPhone(Ljava/lang/Object;)Z
+
+    move-result v1
+
+    if-eqz v1, :cond_1
+
+    invoke-static {p1}, Lcom/gmhub/qs/IosGridPanel;->active(Ljava/lang/Object;)Z
+
+    move-result p1
+
+    if-nez p1, :cond_0
+
+    goto :goto_0
+
+    :cond_0
+    iget-object p1, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->padding:Ljava/lang/reflect/Method;
+
+    iget-object v1, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->modifier:Ljava/lang/Object;
+
+    const/4 v2, 0x0
+
+    invoke-static {v2}, Ljava/lang/Float;->valueOf(F)Ljava/lang/Float;
+
+    move-result-object v3
+
+    invoke-static {v2}, Ljava/lang/Float;->valueOf(F)Ljava/lang/Float;
+
+    move-result-object v4
+
+    const/high16 v5, 0x42400000    # 48.0f
+
+    invoke-static {v5}, Ljava/lang/Float;->valueOf(F)Ljava/lang/Float;
+
+    move-result-object v5
+
+    invoke-static {v2}, Ljava/lang/Float;->valueOf(F)Ljava/lang/Float;
+
+    move-result-object v2
+
+    filled-new-array {v1, v3, v4, v5, v2}, [Ljava/lang/Object;
+
+    move-result-object v1
+
+    const/4 v2, 0x0
+
+    invoke-static {p1, v2, v1}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object p1
+
+    iget-object v0, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->then:Ljava/lang/reflect/Method;
+
+    filled-new-array {p0}, [Ljava/lang/Object;
+
+    move-result-object p0
+
+    invoke-static {v0, p1, p0}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object p0
+
+    :cond_1
+    :goto_0
+    return-object p0
+.end method
+
 .method public static header(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;I)V
     .locals 0
 
@@ -739,6 +757,128 @@
     const/4 p0, 0x0
 
     return p0
+.end method
+
+.method static iosPhone(Ljava/lang/Object;)Z
+    .locals 5
+
+    sget-object v0, Lcom/gmhub/qs/ComposePanelRoot;->abi:Lcom/gmhub/qs/ComposePanelRoot$Abi;
+
+    const/4 v1, 0x0
+
+    if-eqz v0, :cond_2
+
+    invoke-static {p0}, Lcom/gmhub/qs/ComposePanelRoot;->ios(Ljava/lang/Object;)Z
+
+    move-result v2
+
+    if-nez v2, :cond_0
+
+    goto :goto_0
+
+    :cond_0
+    :try_start_0
+    iget-object v2, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->consume:Ljava/lang/reflect/Method;
+
+    iget-object v3, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->localModel:Ljava/lang/Object;
+
+    filled-new-array {v3}, [Ljava/lang/Object;
+
+    move-result-object v3
+
+    invoke-static {v2, p0, v3}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object p0
+
+    iget-object v2, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->userContext:Ljava/lang/reflect/Method;
+
+    iget-object v3, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->host:Ljava/lang/reflect/Field;
+
+    invoke-virtual {v3, p0}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v3
+
+    new-array v4, v1, [Ljava/lang/Object;
+
+    invoke-static {v2, v3, v4}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v2
+
+    check-cast v2, Landroid/content/Context;
+
+    if-eqz v2, :cond_2
+
+    sget-object v3, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
+
+    iget-object v4, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->portrait:Ljava/lang/reflect/Method;
+
+    invoke-virtual {v2}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
+
+    move-result-object v2
+
+    invoke-virtual {v2}, Landroid/content/res/Resources;->getConfiguration()Landroid/content/res/Configuration;
+
+    move-result-object v2
+
+    filled-new-array {v2}, [Ljava/lang/Object;
+
+    move-result-object v2
+
+    invoke-static {v4, p0, v2}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v2
+
+    invoke-virtual {v3, v2}, Ljava/lang/Boolean;->equals(Ljava/lang/Object;)Z
+
+    move-result v2
+
+    if-eqz v2, :cond_2
+
+    sget-object v2, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
+
+    iget-object v3, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->tablet:Ljava/lang/reflect/Method;
+
+    new-array v4, v1, [Ljava/lang/Object;
+
+    invoke-static {v3, p0, v4}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object v3
+
+    invoke-virtual {v2, v3}, Ljava/lang/Boolean;->equals(Ljava/lang/Object;)Z
+
+    move-result v2
+
+    if-nez v2, :cond_2
+
+    sget-object v2, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
+
+    iget-object v0, v0, Lcom/gmhub/qs/ComposePanelRoot$Abi;->popover:Ljava/lang/reflect/Method;
+
+    new-array v3, v1, [Ljava/lang/Object;
+
+    invoke-static {v0, p0, v3}, Lcom/gmhub/qs/ComposePanelRoot;->call(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object p0
+
+    invoke-virtual {v2, p0}, Ljava/lang/Boolean;->equals(Ljava/lang/Object;)Z
+
+    move-result p0
+    :try_end_0
+    .catch Ljava/lang/IllegalAccessException; {:try_start_0 .. :try_end_0} :catch_0
+
+    if-eqz p0, :cond_1
+
+    goto :goto_0
+
+    :cond_1
+    const/4 p0, 0x1
+
+    return p0
+
+    :catch_0
+    :cond_2
+    :goto_0
+    return v1
 .end method
 
 .method private static varargs method(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;

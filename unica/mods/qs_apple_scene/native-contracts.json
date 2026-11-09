@@ -40,7 +40,9 @@
     "androidx/compose/runtime/SnapshotStateKt": {
       "fields": [],
       "methods": [
-        "mutableStateOf$default(Ljava/lang/Object;)Landroidx/compose/runtime/MutableState;"
+        "mutableStateOf$default(Ljava/lang/Object;)Landroidx/compose/runtime/MutableState;",
+        "structuralEqualityPolicy()Landroidx/compose/runtime/SnapshotMutationPolicy;",
+        "derivedStateOf(Landroidx/compose/runtime/SnapshotMutationPolicy;Lkotlin/jvm/functions/Function0;)Landroidx/compose/runtime/State;"
       ]
     },
     "androidx/compose/runtime/State": {
@@ -58,7 +60,8 @@
     "androidx/compose/runtime/EffectsKt": {
       "fields": [],
       "methods": [
-        "DisposableEffect(Ljava/lang/Object;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;)V"
+        "DisposableEffect(Ljava/lang/Object;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;)V",
+        "LaunchedEffect(Landroidx/compose/runtime/Composer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V"
       ]
     },
     "androidx/compose/runtime/DisposableEffectResult": {
@@ -235,13 +238,71 @@
       "fields": [],
       "methods": [
         "fillMaxWidth(Landroidx/compose/ui/Modifier;F)Landroidx/compose/ui/Modifier;",
-        "height-3ABfNKs(Landroidx/compose/ui/Modifier;F)Landroidx/compose/ui/Modifier;"
+        "height-3ABfNKs(Landroidx/compose/ui/Modifier;F)Landroidx/compose/ui/Modifier;",
+        "width-3ABfNKs(Landroidx/compose/ui/Modifier;F)Landroidx/compose/ui/Modifier;"
       ]
     },
     "androidx/compose/ui/focus/FocusRequesterModifierKt": {
       "fields": [],
       "methods": [
         "focusRequester(Landroidx/compose/ui/Modifier;Landroidx/compose/ui/focus/FocusRequester;)Landroidx/compose/ui/Modifier;"
+      ]
+    },
+    "androidx/compose/ui/Modifier": {
+      "fields": [
+        "Companion:Landroidx/compose/ui/Modifier$Companion;"
+      ],
+      "methods": [
+        "then(Landroidx/compose/ui/Modifier;)Landroidx/compose/ui/Modifier;"
+      ]
+    },
+    "androidx/compose/foundation/layout/PaddingKt": {
+      "fields": [],
+      "methods": [
+        "padding-qDBjuR0(Landroidx/compose/ui/Modifier;FFFF)Landroidx/compose/ui/Modifier;"
+      ]
+    },
+    "androidx/compose/foundation/layout/BoxWithConstraintsKt": {
+      "fields": [],
+      "methods": [
+        "BoxWithConstraints(Landroidx/compose/ui/Modifier;Landroidx/compose/ui/Alignment;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V"
+      ]
+    },
+    "androidx/compose/foundation/layout/BoxScopeInstance": {
+      "fields": [
+        "INSTANCE:Landroidx/compose/foundation/layout/BoxScopeInstance;"
+      ],
+      "methods": [
+        "align(Landroidx/compose/ui/Modifier;Landroidx/compose/ui/Alignment;)Landroidx/compose/ui/Modifier;"
+      ]
+    },
+    "androidx/compose/ui/Alignment$Companion": {
+      "fields": [
+        "CenterEnd:Landroidx/compose/ui/BiasAlignment;",
+        "TopStart:Landroidx/compose/ui/BiasAlignment;"
+      ],
+      "methods": []
+    },
+    "androidx/compose/foundation/ScrollState": {
+      "fields": [
+        "viewportSize$delegate:Landroidx/compose/runtime/MutableIntState;"
+      ],
+      "methods": [
+        "getValue()I",
+        "getMaxValue()I",
+        "animateScrollTo$default(Landroidx/compose/foundation/ScrollState;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;"
+      ]
+    },
+    "androidx/compose/runtime/SnapshotMutableIntStateImpl": {
+      "fields": [],
+      "methods": [
+        "getIntValue()I"
+      ]
+    },
+    "com/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridState": {
+      "fields": [],
+      "methods": [
+        "isDragging()Z"
       ]
     }
   },
@@ -275,6 +336,12 @@
       "class": "com/android/systemui/samsung/quicksetting/ui/panel/QuickSettingTileGridKt",
       "signature": ".method public static final QuickSettingSpannableGridWithOverscroll-eWkJ3H8(Lcom/android/compose/animation/scene/ContentScope;Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridState;Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/GridCellFocusState;JFJZZLcom/android/systemui/samsung/quicksetting/ui/base/editable/ResizingInfo;Lcom/android/systemui/samsung/quicksetting/ui/panel/ContextMenuScope;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/State;Landroidx/compose/foundation/ScrollState;Landroidx/compose/runtime/MutableState;Lcom/android/systemui/samsung/quicksetting/ui/banner/BottomBannerViewModel;Landroidx/compose/runtime/Composer;II)V",
       "method_sha256": "3bf714d8f0260496cd1acb31b52254b257d6c91874239d3a0fbfea4ee8573eb8"
+    },
+    {
+      "kind": "grid",
+      "class": "com/android/systemui/samsung/quicksetting/ui/panel/QuickSettingTilePanelKt$$ExternalSyntheticLambda8",
+      "signature": ".method public final invoke(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+      "method_sha256": "6df0a8378d20af27c9456c4107960826089599f568012e16a79254ec5f4133a0"
     }
   ],
   "support_methods": [
@@ -307,6 +374,16 @@
       "class": "com/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridKt$SpannableGrid$18$1",
       "signature": ".method public constructor <init>(Ljava/lang/String;IFFLandroidx/compose/runtime/State;Lcom/android/systemui/samsung/quicksetting/ui/base/editable/ResizingInfo;Landroidx/compose/runtime/MutableState;IZJLandroidx/compose/runtime/MutableState;Landroidx/compose/runtime/MutableState;Landroidx/compose/runtime/MutableIntState;Lkotlin/jvm/functions/Function1;Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridState;Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/GridCellFocusState;)V",
       "method_sha256": "d59560427dbecd89e4a86e2f92bd167955f4040990889f72a4998965be08fc48"
+    },
+    {
+      "class": "androidx/compose/foundation/ScrollState",
+      "signature": ".method public static synthetic animateScrollTo$default(Landroidx/compose/foundation/ScrollState;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;",
+      "method_sha256": "8ab14773a55573d872d94e180c115735c4d3e54cb108b065fdf7a87f2678ab8e"
+    },
+    {
+      "class": "com/android/systemui/samsung/quicksetting/ui/panel/QuickSettingTileGridKt",
+      "signature": ".method public static final QuickSettingTileGrid-RLNbq1o(Lcom/android/compose/animation/scene/ContentScope;JJLandroidx/compose/runtime/State;Lcom/android/systemui/samsung/quicksetting/ui/base/spannablegrid/SpannableGridState;Landroidx/compose/foundation/ScrollState;Lkotlin/jvm/functions/Function0;Lcom/android/systemui/samsung/quicksetting/ui/panel/ContextMenuScope;ILcom/android/systemui/samsung/quicksetting/ui/banner/TopBannerViewModel;Lcom/android/systemui/samsung/quicksetting/ui/banner/BottomBannerViewModel;Landroidx/compose/runtime/Composer;I)V",
+      "method_sha256": "7faac7eb98433de84f66178e9b8d6a8a9a8de94ca79d34f9ca0fada6e6f06939"
     }
   ]
 }

@@ -15,6 +15,10 @@ R = 'androidx/compose/runtime/'
 S = 'com/android/systemui/samsung/quicksetting/ui/'
 
 FIXTURES = {
+    'com/gmhub/qs/IosGridPanel.java': 'package com.gmhub.qs; public class IosGridPanel {static void content(Object[] args){}static boolean active(Object c){return false;}}',
+    'androidx/compose/foundation/layout/PaddingKt.java': '''package androidx.compose.foundation.layout; public class PaddingKt {
+ public static androidx.compose.ui.Modifier padding_qDBjuR0(androidx.compose.ui.Modifier m,float a,float b,float c,float d){return m;}
+}''',
     'android/content/res/Configuration.java': 'package android.content.res; public class Configuration {}',
     'com/gmhub/qs/IosHeader.java': 'package com.gmhub.qs; public class IosHeader {public static void content(Object m,Object f,Object c,int flags){}}',
     'android/net/Uri.java': 'package android.net; public class Uri {public final String key; public Uri(String key){this.key=key;}}',
@@ -101,7 +105,7 @@ public class ContentResolver {
   kotlin.jvm.functions.Function2 f=(kotlin.jvm.functions.Function2)block;return (a,b)->f.invoke(a,b);
  }
 }''',
-    'androidx/compose/ui/Modifier.java': 'package androidx.compose.ui; public interface Modifier {}',
+    'androidx/compose/ui/Modifier.java': 'package androidx.compose.ui; public interface Modifier {Modifier Companion=new Modifier(){};default Modifier then(Modifier other){return other;}}',
     'com/android/compose/animation/scene/ContentScope.java': 'package com.android.compose.animation.scene; public interface ContentScope {}',
     'com/android/systemui/qs/QSHost.java': 'package com.android.systemui.qs; public interface QSHost {int getUserId();android.content.Context getUserContext();}',
     S + 'panel/QuickSettingSceneViewModel.java': '''package com.android.systemui.samsung.quicksetting.ui.panel; public class QuickSettingSceneViewModel {
@@ -271,6 +275,9 @@ class SceneLifecycleTests(unittest.TestCase):
             data = shape.read_bytes()
             self.assertEqual(data.count(b'RoundedCornerShape_0680j_4'), 1)
             shape.write_bytes(data.replace(b'RoundedCornerShape_0680j_4', b'RoundedCornerShape-0680j_4'))
+            padding=classes/'androidx/compose/foundation/layout/PaddingKt.class'
+            data=padding.read_bytes();self.assertEqual(data.count(b'padding_qDBjuR0'),1)
+            padding.write_bytes(data.replace(b'padding_qDBjuR0',b'padding-qDBjuR0'))
             result = subprocess.run([java, '-Xverify:all', '-cp', str(classes), 'gmhubtest.Support'],
                                     capture_output=True, text=True, timeout=30)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

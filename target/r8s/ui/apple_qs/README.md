@@ -34,7 +34,21 @@ policy checks remain authoritative. Landscape, tablet, popover and unavailable
 contracts use Samsung's header. Touch targets are 48dp with 8dp separation;
 density and large-font changes update their measurements.
 
-Group navigation, complete gallery presentation, final edit placement and
+The trailing page rail is now mounted beside the native scrollable viewport,
+outside its scrolling content. It reserves 48dp through the original measure
+modifier, with matching trailing alignment in RTL, rather than covering tiles.
+Targets use the actual `ScrollState` viewport and maximum, including the final
+partial page. The first icon is a heart and later viewports use page dots;
+these are viewport shortcuts, not invented music/connectivity groups.
+
+Navigation forwards the real LaunchedEffect continuation to Samsung's native
+scroll animation. Its MutatorMutex keeps gesture cancellation authoritative.
+Dragging, user changes, disposal or changed bounds invalidate old requests;
+ending a drag cannot restart an old click. Structural derived state updates the
+indicator only when the selected page or its bounds change, rather than causing
+whole-grid recomposition per pixel. No item list or repository is written.
+
+Named groups, complete gallery presentation, final edit placement and
 independent per-style geometry remain unfinished.
 The pre-existing `NativeGridEditor` is still staged; it is not mounted as a
 second editor over Samsung's functioning editor.
@@ -190,9 +204,9 @@ describes control formats; it does not advertise completed full-panel parity.
 
 ## Installed scene binding
 
-The installer checks 35 exact donor class contracts and pins the bodies of the
-five modified methods. Six additional read-only body hashes guard native
-header, Done, edit entry, gallery-open and cell-measure semantics. It redirects only the outer main call in
+The installer checks 43 exact donor class contracts and pins the bodies of the
+six modified methods. Eight additional read-only body hashes guard native
+header, Done, edit entry, gallery-open, cell-measure and scrolling semantics. It redirects only the outer main call in
 `SecQuickSettingScene$$ExternalSyntheticLambda7`, leaving the native main,
 its restart lambda and `MediaPlayerKt` byte-identical. The frame hook replaces
 a local frame value and the native editor's remove-badge painter ID. The third
@@ -202,6 +216,9 @@ the original HeaderContainer body and restart callback remain unchanged. These
 hooks do not mutate captured fields, replace controls or capture a media view model.
 The fifth hook supplies the portrait iOS cell aspect to Samsung's existing
 measure function; it leaves the measure body and item renderers unchanged.
+The sixth wraps the outer grid call so the page rail remains outside Samsung's
+vertical scroll modifier. Multiple method edits in one owner are staged
+together and written only after all checks succeed.
 
 The header collects Samsung's edit and available-control flows with its native
 lifecycle-aware Compose collector. It uses AndroidView factory/update/release
